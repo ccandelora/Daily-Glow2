@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "scheme": "acme",
+    "plugins": [
+      "expo-router"
+    ],
+    "name": "Daily-Glow2",
+    "slug": "Daily-Glow2"
+  }
+}
