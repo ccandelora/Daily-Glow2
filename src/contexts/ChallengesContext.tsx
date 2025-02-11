@@ -70,69 +70,9 @@ export function ChallengesProvider({ children }: { children: React.ReactNode }) 
   const initializeChallenges = async () => {
     try {
       setLoading(true);
-      console.log('Checking for existing challenges...');
+      console.log('Initializing challenges for user:', session?.user?.id);
       
-      // First check if we have any challenges
-      const { data: existingChallenges, error: checkError } = await supabase
-        .from('challenges')
-        .select('count')
-        .eq('active', true)
-        .single();
-
-      if (checkError) {
-        console.error('Error checking challenges:', checkError);
-        return;
-      }
-
-      console.log('Existing challenges count:', existingChallenges?.count);
-
-      // If no challenges exist, create initial ones
-      if (!existingChallenges?.count) {
-        console.log('No challenges found, creating initial challenges...');
-        const initialChallenges = [
-          {
-            title: 'Morning Reflection',
-            description: 'Start your day by reflecting on what you\'re looking forward to',
-            type: 'mood',
-            points: 10,
-            active: true
-          },
-          {
-            title: 'Gratitude Chain',
-            description: 'List three things you\'re grateful for that are connected to each other',
-            type: 'gratitude',
-            points: 15,
-            active: true
-          },
-          {
-            title: 'Mindful Moment',
-            description: 'Take a 5-minute break to practice mindfulness and record your feelings',
-            type: 'mindfulness',
-            points: 20,
-            active: true
-          },
-          {
-            title: 'Creative Expression',
-            description: 'Write a short poem or story about your current emotional state',
-            type: 'creative',
-            points: 25,
-            active: true
-          }
-        ];
-
-        const { error: insertError } = await supabase
-          .from('challenges')
-          .insert(initialChallenges);
-
-        if (insertError) {
-          console.error('Error creating initial challenges:', insertError);
-          return;
-        }
-        console.log('Initial challenges created successfully');
-      }
-
-      // Get daily challenge using the correct function
-      console.log('Fetching daily challenge...');
+      // Get daily challenge using the function
       const { data: challengeData, error: challengeError } = await supabase.rpc('get_daily_challenge', {
         p_user_id: session?.user?.id
       });
@@ -142,11 +82,15 @@ export function ChallengesProvider({ children }: { children: React.ReactNode }) 
         return;
       }
 
+      console.log('Daily challenge response:', {
+        hasData: !!challengeData,
+        dataLength: challengeData?.length,
+        firstChallenge: challengeData?.[0]
+      });
+
       if (challengeData && challengeData.length > 0) {
-        console.log('Daily challenge loaded:', challengeData[0]);
         setDailyChallenge(challengeData[0]);
       } else {
-        console.log('No daily challenge available');
         setDailyChallenge(null);
       }
 
@@ -158,38 +102,27 @@ export function ChallengesProvider({ children }: { children: React.ReactNode }) 
   };
 
   const loadUserData = async () => {
-    if (!session?.user?.id) {
-      console.log('No active session, skipping data load');
-      return;
-    }
+    if (!session?.user?.id) return;
 
     try {
       setLoading(true);
       
-      // Load achievements first
-      console.log('Loading achievements...');
+      // Load achievements
       const { data: achievementsData, error: achievementsError } = await supabase
         .from('user_achievements')
         .select('*')
         .eq('user_id', session.user.id)
         .order('achieved_at', { ascending: false });
 
-      if (achievementsError) {
-        console.error('Error loading achievements:', achievementsError);
-        throw achievementsError;
-      }
-      
-      console.log('Successfully loaded achievements:', achievementsData);
+      if (achievementsError) throw achievementsError;
       setAchievements(achievementsData || []);
 
       // Calculate total points from achievements
       const totalPoints = achievementsData 
         ? achievementsData.reduce((sum, achievement) => sum + achievement.points, 0)
         : 0;
-      
-      console.log('Calculated total points from achievements:', totalPoints);
 
-      // Update user stats with the calculated points
+      // Update user stats
       const { data: updateResult, error: updateError } = await supabase
         .from('user_stats')
         .upsert({
@@ -200,41 +133,17 @@ export function ChallengesProvider({ children }: { children: React.ReactNode }) 
         .select()
         .single();
 
-      if (updateError) {
-        console.error('Error updating user stats:', updateError);
-        throw updateError;
-      }
-
-      console.log('Updated user stats:', updateResult);
+      if (updateError) throw updateError;
       setUserStats(updateResult);
 
-      // Get daily challenge using the correct function
-      const { data: challengeData, error: challengeError } = await supabase.rpc('get_daily_challenge', {
-        p_user_id: session.user.id
-      });
-
-      if (challengeError) throw challengeError;
-      if (challengeData && challengeData.length > 0) {
-        console.log('Daily challenge loaded:', challengeData[0]);
-        setDailyChallenge(challengeData[0]);
-      } else {
-        console.log('No daily challenge available');
-        setDailyChallenge(null);
-      }
-
       // Load user challenges
-      console.log('Loading user challenges...');
       const { data: challengesData, error: challengesError } = await supabase
         .from('user_challenges')
         .select('*')
         .eq('user_id', session.user.id)
         .order('created_at', { ascending: false });
 
-      if (challengesError) {
-        console.error('Error loading user challenges:', challengesError);
-        throw challengesError;
-      }
-      console.log('Successfully loaded user challenges:', challengesData);
+      if (challengesError) throw challengesError;
       setUserChallenges(challengesData || []);
 
     } catch (error) {
@@ -246,13 +155,36 @@ export function ChallengesProvider({ children }: { children: React.ReactNode }) 
   };
 
   const refreshDailyChallenge = async () => {
-    if (!session?.user?.id) {
-      console.log('No active session, skipping refresh');
-      return;
+    if (!session?.user?.id) return;
+    
+    try {
+      // Get daily challenge using the function
+      const { data: challengeData, error: challengeError } = await supabase.rpc('get_daily_challenge', {
+        p_user_id: session.user.id
+      });
+
+      if (challengeError) throw challengeError;
+      
+      if (challengeData && challengeData.length > 0) {
+        setDailyChallenge(challengeData[0]);
+      } else {
+        setDailyChallenge(null);
+      }
+
+      // Refresh user stats
+      const { data: statsData, error: statsError } = await supabase
+        .from('user_stats')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (statsError) throw statsError;
+      setUserStats(statsData);
+      
+    } catch (error) {
+      console.error('Error in refreshDailyChallenge:', error);
+      showError(error instanceof Error ? error.message : 'Failed to refresh daily challenge');
     }
-    console.log('Refreshing daily challenge and user stats...');
-    await loadUserData();
-    console.log('Refresh complete');
   };
 
   const completeChallenge = async (challengeId: string, response: string) => {

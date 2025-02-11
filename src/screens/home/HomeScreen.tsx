@@ -88,7 +88,6 @@ export const HomeScreen = () => {
         transform: [{ translateY: checkInAnim }],
         opacity: headerAnim,
       }}>
-        <DailyChallenge />
         <Card style={styles.checkInCard}>
           <Typography variant="h2" style={styles.cardTitle}>
             Daily Check-in
@@ -136,6 +135,7 @@ export const HomeScreen = () => {
             </>
           )}
         </Card>
+        <DailyChallenge />
       </Animated.View>
 
       <Animated.View style={{

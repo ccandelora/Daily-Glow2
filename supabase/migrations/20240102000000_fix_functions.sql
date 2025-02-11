@@ -9,7 +9,7 @@ DROP FUNCTION IF EXISTS check_and_award_badges();
 DROP FUNCTION IF EXISTS get_daily_challenge(UUID);
 DROP FUNCTION IF EXISTS complete_challenge(UUID, UUID, TEXT);
 
--- Recreate get_daily_challenge with daily limit check
+-- Recreate get_daily_challenge with proper date handling
 CREATE OR REPLACE FUNCTION get_daily_challenge(p_user_id UUID)
 RETURNS TABLE (
     id UUID,
@@ -21,17 +21,33 @@ RETURNS TABLE (
 ) AS $$
 DECLARE
     v_completed_today INTEGER;
+    v_today DATE := CURRENT_DATE;
+    v_challenge_count INTEGER;
 BEGIN
+    -- Check if we have any challenges at all
+    SELECT COUNT(*) INTO v_challenge_count FROM challenges;
+    RAISE NOTICE 'Total challenges in database: %', v_challenge_count;
+
+    -- First, mark old in_progress challenges as failed
+    UPDATE user_challenges
+    SET status = 'failed'
+    WHERE user_id = p_user_id
+    AND status = 'in_progress'
+    AND DATE(created_at) < v_today;
+
     -- Get count of completed challenges for today
     SELECT COUNT(*)
     INTO v_completed_today
-    FROM user_challenges
-    WHERE user_id = p_user_id
-    AND status = 'completed'
-    AND DATE(completed_at) = CURRENT_DATE;
+    FROM user_challenges uc
+    WHERE uc.user_id = p_user_id
+    AND uc.status = 'completed'
+    AND DATE(uc.completed_at) = v_today;
+
+    RAISE NOTICE 'Completed challenges today: %', v_completed_today;
 
     -- Check if user has already completed 2 challenges today
     IF v_completed_today >= 2 THEN
+        RAISE NOTICE 'User has completed maximum challenges for today';
         -- Return empty result if daily limit reached
         RETURN;
     END IF;
@@ -39,10 +55,11 @@ BEGIN
     -- Get a random challenge that hasn't been completed today
     RETURN QUERY
     WITH today_challenges AS (
-        SELECT challenge_id
-        FROM user_challenges
-        WHERE user_id = p_user_id
-        AND DATE(created_at) = CURRENT_DATE
+        SELECT uc.challenge_id
+        FROM user_challenges uc
+        WHERE uc.user_id = p_user_id
+        AND DATE(uc.created_at) = v_today
+        AND uc.status = 'completed'
     )
     SELECT 
         c.id,
@@ -55,11 +72,16 @@ BEGIN
     LEFT JOIN user_challenges uc ON 
         c.id = uc.challenge_id 
         AND uc.user_id = p_user_id
-        AND DATE(uc.created_at) = CURRENT_DATE
+        AND DATE(uc.created_at) = v_today
     WHERE c.active = true
     AND c.id NOT IN (SELECT challenge_id FROM today_challenges)
     ORDER BY RANDOM()
     LIMIT 1;
+
+    -- Log if no challenge was found
+    IF NOT FOUND THEN
+        RAISE NOTICE 'No eligible challenge found for user';
+    END IF;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -473,4 +495,21 @@ WITH CHECK (true);  -- Allow system functions to manage stats
 ALTER FUNCTION get_or_create_user_stats(UUID) SECURITY DEFINER;
 ALTER FUNCTION update_user_streak() SECURITY DEFINER;
 ALTER FUNCTION check_and_award_badges() SECURITY DEFINER;
-ALTER FUNCTION complete_challenge(UUID, UUID, TEXT) SECURITY DEFINER; 
+ALTER FUNCTION complete_challenge(UUID, UUID, TEXT) SECURITY DEFINER;
+
+-- Add diagnostic function
+CREATE OR REPLACE FUNCTION check_challenges_status()
+RETURNS TABLE (
+    total_challenges BIGINT,
+    active_challenges BIGINT,
+    challenge_types TEXT[]
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        COUNT(*)::BIGINT as total_challenges,
+        COUNT(*) FILTER (WHERE active = true)::BIGINT as active_challenges,
+        ARRAY_AGG(DISTINCT type) as challenge_types
+    FROM challenges;
+END;
+$$ LANGUAGE plpgsql; 

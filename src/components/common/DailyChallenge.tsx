@@ -56,6 +56,14 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete }) =>
   const rotateAnim = React.useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    console.log('DailyChallenge state:', {
+      hasDailyChallenge: !!dailyChallenge,
+      dailyChallengeId: dailyChallenge?.id,
+      completedToday,
+      showLimitMessage,
+      userChallengesCount: userChallenges.length
+    });
+    
     // Create a continuous pulsing animation
     const pulseGlow = () => {
       Animated.parallel([
@@ -85,39 +93,61 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete }) =>
   }, []);
 
   useEffect(() => {
-    refreshDailyChallenge();
-  }, []);
-
-  useEffect(() => {
-    console.log('User stats updated:', userStats);
     if (userStats?.total_points !== undefined) {
-      console.log('Setting local points to:', userStats.total_points);
       setLocalPoints(userStats.total_points);
       
-      // Count completed challenges for today
-      const today = new Date().toISOString().split('T')[0];
-      console.log('Checking completed challenges for:', today);
+      // Count completed challenges for today using local timezone
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Set to start of day in local timezone
       
       const completedCount = userChallenges.filter(challenge => {
-        const challengeDate = challenge.completed_at?.split('T')[0];
+        if (!challenge.completed_at) return false;
+        
+        // Convert UTC timestamp to local date for comparison
+        const completionDate = new Date(challenge.completed_at);
+        const localCompletionDate = new Date(
+          completionDate.getFullYear(),
+          completionDate.getMonth(),
+          completionDate.getDate()
+        );
+        
         const isCompleted = challenge.status === 'completed';
-        const isToday = challengeDate === today;
-        console.log('Challenge:', {
-          date: challengeDate,
-          isCompleted,
-          isToday,
-          status: challenge.status
-        });
+        const isToday = localCompletionDate.getTime() === today.getTime();
+        
         return isCompleted && isToday;
       }).length;
       
-      console.log('Completed challenges today:', completedCount);
       setCompletedToday(completedCount);
       setShowLimitMessage(completedCount >= 2);
     }
   }, [userStats, userChallenges]);
 
-  if (showLimitMessage || !dailyChallenge) {
+  // Single useEffect for refresh logic
+  useEffect(() => {
+    const setupMidnightRefresh = () => {
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0);
+      
+      const timeUntilMidnight = tomorrow.getTime() - now.getTime();
+      
+      // Only refresh if we don't have a challenge
+      if (!dailyChallenge) {
+        refreshDailyChallenge();
+      }
+      
+      return setTimeout(() => {
+        refreshDailyChallenge();
+        setupMidnightRefresh();
+      }, timeUntilMidnight);
+    };
+
+    const timer = setupMidnightRefresh();
+    return () => clearTimeout(timer);
+  }, [dailyChallenge]); // Only re-run if dailyChallenge changes
+
+  if (showLimitMessage) {
     return (
       <View style={styles.glowContainer}>
         <Animated.View style={[
@@ -179,7 +209,7 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete }) =>
                   Total Points
                 </Typography>
               </View>
-              {userStats?.current_streak > 0 && (
+              {userStats?.current_streak && userStats.current_streak > 0 && (
                 <View style={styles.streakDisplay}>
                   <Ionicons 
                     name="flame" 
@@ -187,7 +217,7 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete }) =>
                     color={theme.COLORS.primary.red}
                   />
                   <Typography variant="h3" style={styles.streakValue}>
-                    {userStats?.current_streak}
+                    {userStats.current_streak}
                   </Typography>
                   <Typography variant="caption" style={styles.streakLabel}>
                     Day Streak
@@ -202,6 +232,18 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete }) =>
               style={styles.achievementsButton}
             />
           </View>
+        </Card>
+      </View>
+    );
+  }
+
+  if (!dailyChallenge) {
+    return (
+      <View style={styles.glowContainer}>
+        <Card style={styles.container}>
+          <Typography variant="body" style={styles.limitMessage}>
+            No challenges available right now. Please check back later.
+          </Typography>
         </Card>
       </View>
     );
@@ -222,18 +264,10 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete }) =>
         return;
       }
 
-      console.log('Starting challenge completion with points:', localPoints);
       await completeChallenge(dailyChallenge.id, completionText.trim());
-      console.log('Challenge completed, refreshing data...');
-      
       await refreshDailyChallenge();
       setCompletionText('');
       onComplete?.();
-      
-      setTimeout(async () => {
-        console.log('Performing delayed refresh...');
-        await refreshDailyChallenge();
-      }, 1000);
     } catch (error) {
       if (error instanceof Error && error.message.includes('Daily challenge limit reached')) {
         setShowLimitMessage(true);
