@@ -3,58 +3,56 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Typography, Card, Button, Input, Header, EmotionWheel } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
+import { useAppState } from '@/contexts/AppStateContext';
 import theme from '@/constants/theme';
 import { Emotion } from '@/constants/emotions';
 
 export const CheckInScreen = () => {
   const router = useRouter();
   const { addEntry } = useJournal();
-  const [step, setStep] = useState<'initial' | 'gratitude' | 'final'>('initial');
+  const { showError } = useAppState();
+  const [step, setStep] = useState<'initial' | 'secondary' | 'gratitude'>('initial');
   const [initialEmotion, setInitialEmotion] = useState<string | undefined>();
-  const [postEmotion, setPostEmotion] = useState<string | undefined>();
+  const [secondaryEmotion, setSecondaryEmotion] = useState<string | undefined>();
   const [gratitude, setGratitude] = useState('');
   const [note, setNote] = useState('');
 
   const handleInitialEmotionSelect = (emotion: Emotion) => {
     setInitialEmotion(emotion.id);
+    setSecondaryEmotion(undefined); // Reset secondary when primary changes
+    setStep('secondary'); // Automatically advance to secondary emotions
   };
 
-  const handlePostEmotionSelect = (emotion: Emotion) => {
-    setPostEmotion(emotion.id);
+  const handleSecondaryEmotionSelect = (emotion: Emotion) => {
+    setSecondaryEmotion(emotion.id);
+    setStep('gratitude'); // Automatically advance to gratitude
   };
 
-  const handleNext = () => {
-    if (step === 'initial' && !initialEmotion) {
+  const handleSubmit = async () => {
+    if (!gratitude.trim()) {
+      showError('Please share what you are grateful for');
       return;
     }
-
-    if (step === 'gratitude' && !gratitude.trim()) {
+    
+    if (!initialEmotion || !secondaryEmotion) {
+      setStep('initial');
       return;
     }
-
-    if (step === 'initial') {
-      setStep('gratitude');
-    } else if (step === 'gratitude') {
-      setStep('final');
+    
+    try {
+      await addEntry(initialEmotion, secondaryEmotion, gratitude.trim(), note.trim() || undefined);
+      router.back();
+    } catch (error) {
+      // Error is handled in JournalContext
     }
   };
 
   const handleBack = () => {
-    if (step === 'gratitude') {
+    if (step === 'secondary') {
       setStep('initial');
-    } else if (step === 'final') {
-      setStep('gratitude');
-    }
-  };
-
-  const handleSubmit = async () => {
-    if (!initialEmotion || !postEmotion || !gratitude.trim()) return;
-    
-    try {
-      await addEntry(initialEmotion, postEmotion, gratitude.trim(), note.trim() || undefined);
-      router.back();
-    } catch (error) {
-      // Error is handled in JournalContext
+      setSecondaryEmotion(undefined);
+    } else if (step === 'gratitude') {
+      setStep('secondary');
     }
   };
 
@@ -71,13 +69,33 @@ export const CheckInScreen = () => {
             <Typography variant="h3" style={styles.sectionTitle}>
               How are you feeling right now?
             </Typography>
-            <EmotionWheel
-              onSelectEmotion={handleInitialEmotionSelect}
-              selectedEmotion={initialEmotion}
-            />
+            <View style={styles.emotionWheelContainer}>
+              <EmotionWheel
+                onSelectEmotion={handleInitialEmotionSelect}
+                selectedEmotion={initialEmotion}
+                type="primary"
+              />
+            </View>
+          </Card>
+        )}
+
+        {step === 'secondary' && (
+          <Card style={styles.card}>
+            <Typography variant="h3" style={styles.sectionTitle}>
+              More specifically...
+            </Typography>
+            <View style={styles.emotionWheelContainer}>
+              <EmotionWheel
+                onSelectEmotion={handleSecondaryEmotionSelect}
+                selectedEmotion={secondaryEmotion}
+                type="secondary"
+                primaryEmotion={initialEmotion}
+              />
+            </View>
             <Button
-              title="Next"
-              onPress={handleNext}
+              title="Back"
+              onPress={handleBack}
+              variant="secondary"
               style={styles.button}
             />
           </Card>
@@ -119,34 +137,6 @@ export const CheckInScreen = () => {
                 style={styles.button}
               />
               <Button
-                title="Next"
-                onPress={handleNext}
-                style={styles.button}
-              />
-            </View>
-          </>
-        )}
-
-        {step === 'final' && (
-          <>
-            <Card style={styles.card}>
-              <Typography variant="h3" style={styles.sectionTitle}>
-                After reflecting, how do you feel now?
-              </Typography>
-              <EmotionWheel
-                onSelectEmotion={handlePostEmotionSelect}
-                selectedEmotion={postEmotion}
-              />
-            </Card>
-
-            <View style={styles.buttonRow}>
-              <Button
-                title="Back"
-                onPress={handleBack}
-                variant="secondary"
-                style={styles.button}
-              />
-              <Button
                 title="Save Entry"
                 onPress={handleSubmit}
                 style={styles.button}
@@ -173,13 +163,16 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     marginBottom: theme.SPACING.lg,
+    textAlign: 'center',
+  },
+  emotionWheelContainer: {
+    marginVertical: theme.SPACING.xl,
   },
   input: {
     height: 120,
   },
   button: {
-    flex: 1,
-    marginHorizontal: theme.SPACING.xs,
+    marginTop: theme.SPACING.lg,
   },
   buttonRow: {
     flexDirection: 'row',

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Typography, Card, Button, Input, EmotionWheel } from '@/components/common';
+import { Typography, Card, Button, Input, EmotionWheel, Header } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
 import { useAppState } from '@/contexts/AppStateContext';
 import theme from '@/constants/theme';
@@ -17,6 +17,16 @@ export const CheckInScreen = () => {
   const [postEmotion, setPostEmotion] = useState<string | undefined>();
   const [gratitude, setGratitude] = useState('');
   const [note, setNote] = useState('');
+
+  const transitionAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(transitionAnim, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [step]);
 
   const handleInitialEmotionSelect = (emotion: Emotion) => {
     setInitialEmotion(emotion.id);
@@ -68,14 +78,10 @@ export const CheckInScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Typography variant="h2" style={styles.title}>
-          Daily Check-in
-        </Typography>
-        <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
-          Take a moment to reflect on your day
-        </Typography>
-      </View>
+      <Header
+        title="Daily Check-in"
+        onBack={() => router.back()}
+      />
 
       <View style={styles.content}>
         {step === 'initial' && (
@@ -86,6 +92,10 @@ export const CheckInScreen = () => {
             <EmotionWheel
               onSelectEmotion={handleInitialEmotionSelect}
               selectedEmotion={initialEmotion}
+              style={{
+                opacity: transitionAnim,
+                transform: [{ scale: transitionAnim }],
+              }}
             />
             <Button
               title="Next"
@@ -138,6 +148,10 @@ export const CheckInScreen = () => {
             <EmotionWheel
               onSelectEmotion={handlePostEmotionSelect}
               selectedEmotion={postEmotion}
+              style={{
+                opacity: transitionAnim,
+                transform: [{ scale: transitionAnim }],
+              }}
             />
             <View style={styles.buttonRow}>
               <Button

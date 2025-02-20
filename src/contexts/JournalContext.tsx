@@ -3,13 +3,15 @@ import { useAppState } from './AppStateContext';
 import { useAuth } from './AuthContext';
 import { supabase } from '@/lib/supabase';
 import { getAllEmotions, Emotion } from '@/constants/emotions';
+import { TimePeriod, getCurrentTimePeriod, isSameDay } from '@/utils/dateTime';
 
 interface JournalEntry {
   id: string;
   date: Date;
-  initialEmotion: string;
-  postGratitudeEmotion: string;
-  emotionalShift: number; // -1 to 1, representing negative to positive shift
+  time_period: TimePeriod;
+  initial_emotion: string;
+  secondary_emotion: string;
+  emotional_shift: number;
   gratitude: string;
   note?: string;
   user_id?: string;
@@ -22,9 +24,10 @@ interface DatabaseEntry extends Omit<JournalEntry, 'date'> {
 
 interface JournalContextType {
   entries: JournalEntry[];
-  addEntry: (initialEmotion: string, postEmotion: string, gratitude: string, note?: string) => Promise<void>;
+  addEntry: (initialEmotion: string, secondaryEmotion: string, gratitude: string, note?: string) => Promise<void>;
   getRecentEntries: (count: number) => JournalEntry[];
-  getTodayEntry: () => JournalEntry | null;
+  getTodayEntries: () => JournalEntry[];
+  getLatestEntryForPeriod: (period: TimePeriod) => JournalEntry | null;
   deleteAllEntries: () => Promise<void>;
   deleteEntry: (id: string) => Promise<void>;
   deleteEntries: (ids: string[]) => Promise<void>;
@@ -71,25 +74,26 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
   };
 
   // Calculate emotional shift between -1 and 1
-  const calculateEmotionalShift = (initialEmotion: string, postEmotion: string): number => {
+  const calculateEmotionalShift = (initialEmotion: string, secondaryEmotion: string): number => {
     const emotions = getAllEmotions();
     const initialIndex = emotions.findIndex((e: Emotion) => e.id === initialEmotion);
-    const postIndex = emotions.findIndex((e: Emotion) => e.id === postEmotion);
+    const secondaryIndex = emotions.findIndex((e: Emotion) => e.id === secondaryEmotion);
     
-    if (initialIndex === -1 || postIndex === -1) return 0;
+    if (initialIndex === -1 || secondaryIndex === -1) return 0;
     
     // Calculate shift based on position in emotions array
-    const shift = (postIndex - initialIndex) / emotions.length;
+    const shift = (secondaryIndex - initialIndex) / emotions.length;
     return Math.max(-1, Math.min(1, shift)); // Clamp between -1 and 1
   };
 
-  const addEntry = async (initialEmotion: string, postEmotion: string, gratitude: string, note?: string) => {
+  const addEntry = async (initialEmotion: string, secondaryEmotion: string, gratitude: string, note?: string) => {
     if (!session?.user) {
       showError('You must be logged in to add entries');
       return;
     }
 
-    const emotionalShift = calculateEmotionalShift(initialEmotion, postEmotion);
+    const emotionalShift = calculateEmotionalShift(initialEmotion, secondaryEmotion);
+    const timePeriod = getCurrentTimePeriod();
     
     try {
       const { data, error } = await supabase
@@ -98,8 +102,9 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
           {
             user_id: session.user.id,
             created_at: new Date().toISOString(),
+            time_period: timePeriod,
             initial_emotion: initialEmotion,
-            post_gratitude_emotion: postEmotion,
+            secondary_emotion: secondaryEmotion,
             emotional_shift: emotionalShift,
             gratitude,
             note,
@@ -113,9 +118,10 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
       const newEntry: JournalEntry = {
         id: data.id,
         date: new Date(data.created_at),
-        initialEmotion: data.initial_emotion,
-        postGratitudeEmotion: data.post_gratitude_emotion,
-        emotionalShift: data.emotional_shift,
+        time_period: data.time_period,
+        initial_emotion: data.initial_emotion,
+        secondary_emotion: data.secondary_emotion,
+        emotional_shift: data.emotional_shift,
         gratitude: data.gratitude,
         note: data.note,
         user_id: data.user_id,
@@ -133,10 +139,16 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
     return entries.slice(0, count);
   };
 
-  const getTodayEntry = () => {
+  const getTodayEntries = () => {
+    const today = new Date();
+    return entries.filter(entry => isSameDay(entry.date, today));
+  };
+
+  const getLatestEntryForPeriod = (period: TimePeriod) => {
     const today = new Date();
     return entries.find(entry => 
-      entry.date.toDateString() === today.toDateString()
+      isSameDay(entry.date, today) && 
+      entry.time_period === period
     ) || null;
   };
 
@@ -227,7 +239,8 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
     entries,
     addEntry,
     getRecentEntries,
-    getTodayEntry,
+    getTodayEntries,
+    getLatestEntryForPeriod,
     deleteAllEntries,
     deleteEntry,
     deleteEntries,

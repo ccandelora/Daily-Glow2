@@ -1,127 +1,99 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React from 'react';
+import { View, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
 import { Typography } from './Typography';
-import { Card } from './Card';
-import { primaryEmotions, EmotionCategory, Emotion } from '@/constants/emotions';
 import theme from '@/constants/theme';
+import { Emotion, primaryEmotions, getAllEmotions } from '@/constants/emotions';
 
-const emotionEmojis: Record<string, string> = {
-  // Primary emotions
-  happy: '🥰',
-  sad: '😢',
-  angry: '😠',
-  scared: '😨',
-
-  // Happy secondary emotions
-  optimistic: '✨',
-  peaceful: '😌',
-  powerful: '💪',
-  proud: '🦋',
-
-  // Sad secondary emotions
-  lonely: '🫂',
-  vulnerable: '🥺',
-  despair: '💔',
-  guilty: '😣',
-
-  // Angry secondary emotions
-  frustrated: '😤',
-  critical: '🤨',
-  distant: '🫥',
-  irritated: '😒',
-
-  // Scared secondary emotions
-  confused: '😕',
-  rejected: '😞',
-  helpless: '😰',
-  anxious: '😥',
-};
+const windowWidth = Dimensions.get('window').width;
 
 interface EmotionWheelProps {
   onSelectEmotion: (emotion: Emotion) => void;
-  selectedEmotion?: string;
+  selectedEmotion: string | undefined;
+  type?: 'primary' | 'secondary';
+  primaryEmotion?: string;
 }
 
 export const EmotionWheel: React.FC<EmotionWheelProps> = ({
   onSelectEmotion,
   selectedEmotion,
+  type = 'primary',
+  primaryEmotion,
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState<EmotionCategory | null>(null);
-
-  const handleCategorySelect = (category: EmotionCategory) => {
-    setSelectedCategory(category);
-    onSelectEmotion({ id: category.id, label: category.label, color: category.color });
+  const getEmotionsToShow = () => {
+    if (type === 'primary') {
+      return primaryEmotions.map(category => ({
+        id: category.id,
+        label: `${getEmojiForEmotion(category.id)} ${category.label}`,
+        color: category.color
+      }));
+    }
+    
+    if (primaryEmotion) {
+      const category = primaryEmotions.find(c => c.id === primaryEmotion);
+      return category?.emotions.map(emotion => ({
+        ...emotion,
+        label: `${getEmojiForEmotion(emotion.id)} ${emotion.label}`
+      })) || [];
+    }
+    
+    return [];
   };
 
-  const handleSecondaryEmotionSelect = (emotion: Emotion) => {
-    onSelectEmotion(emotion);
+  const getEmojiForEmotion = (id: string): string => {
+    switch (id) {
+      // Primary emotions
+      case 'happy': return '😊';
+      case 'sad': return '😢';
+      case 'angry': return '😠';
+      case 'scared': return '😨';
+      
+      // Happy secondary emotions
+      case 'optimistic': return '✨';
+      case 'peaceful': return '😌';
+      case 'powerful': return '💪';
+      case 'proud': return '🦋';
+      
+      // Sad secondary emotions
+      case 'lonely': return '🫂';
+      case 'vulnerable': return '🥺';
+      case 'despair': return '💔';
+      case 'guilty': return '😣';
+      
+      // Angry secondary emotions
+      case 'frustrated': return '😤';
+      case 'critical': return '🤨';
+      case 'distant': return '🫥';
+      case 'irritated': return '😒';
+      
+      // Scared secondary emotions
+      case 'confused': return '😕';
+      case 'rejected': return '😞';
+      case 'helpless': return '😰';
+      case 'anxious': return '😥';
+      
+      default: return '😐';
+    }
   };
+
+  const emotions = getEmotionsToShow();
 
   return (
     <View style={styles.container}>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-        <View style={styles.primaryEmotions}>
-          {primaryEmotions.map((category) => (
-            <TouchableOpacity
-              key={category.id}
-              onPress={() => handleCategorySelect(category)}
-              style={[
-                styles.categoryButton,
-                selectedCategory?.id === category.id && styles.selectedCategory,
-                selectedEmotion === category.id && styles.selectedEmotion,
-                { backgroundColor: category.color + '20' }, // 20% opacity
-                { borderColor: category.color },
-              ]}
-            >
-              <Typography style={styles.emoji}>
-                {emotionEmojis[category.id]}
-              </Typography>
-              <Typography
-                variant="h3"
-                color={selectedCategory?.id === category.id ? category.color : theme.COLORS.ui.text}
-                style={styles.categoryLabel}
-              >
-                {category.label}
-              </Typography>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </ScrollView>
-
-      {selectedCategory && (
-        <Card style={styles.secondaryEmotions}>
-          <Typography variant="h3" style={styles.sectionTitle}>
-            More specifically...
+      {emotions.map((emotion) => (
+        <TouchableOpacity
+          key={emotion.id}
+          onPress={() => onSelectEmotion(emotion)}
+          style={[
+            styles.emotionButton,
+            selectedEmotion === emotion.id && styles.selectedEmotion,
+            { backgroundColor: emotion.color }
+          ]}
+        >
+          <Typography style={styles.emotionText}>
+            {emotion.label}
           </Typography>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            <View style={styles.emotionGrid}>
-              {selectedCategory.emotions.map((emotion) => (
-                <TouchableOpacity
-                  key={emotion.id}
-                  onPress={() => handleSecondaryEmotionSelect(emotion)}
-                  style={[
-                    styles.emotionButton,
-                    selectedEmotion === emotion.id && styles.selectedEmotion,
-                    { backgroundColor: emotion.color + '20' }, // 20% opacity
-                    { borderColor: emotion.color },
-                  ]}
-                >
-                  <Typography style={styles.emoji}>
-                    {emotionEmojis[emotion.id]}
-                  </Typography>
-                  <Typography
-                    variant="h3"
-                    color={selectedEmotion === emotion.id ? emotion.color : theme.COLORS.ui.text}
-                    style={styles.emotionLabel}
-                  >
-                    {emotion.label}
-                  </Typography>
-                </TouchableOpacity>
-              ))}
-            </View>
-          </ScrollView>
-        </Card>
-      )}
+        </TouchableOpacity>
+      ))}
     </View>
   );
 };
@@ -129,80 +101,25 @@ export const EmotionWheel: React.FC<EmotionWheelProps> = ({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-  },
-  primaryEmotions: {
-    flexDirection: 'row',
-    paddingHorizontal: theme.SPACING.md,
-    paddingVertical: theme.SPACING.lg,
-    gap: theme.SPACING.md,
-  },
-  categoryButton: {
-    padding: theme.SPACING.md,
-    borderRadius: theme.BORDER_RADIUS.lg,
-    width: 120,
-    height: 90,
     alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    shadowColor: theme.COLORS.ui.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  selectedCategory: {
-    borderWidth: 3,
-    transform: [{ scale: 1.05 }],
-  },
-  selectedEmotion: {
-    borderWidth: 3,
-    transform: [{ scale: 1.05 }],
-  },
-  emoji: {
-    fontSize: 32,
-    lineHeight: 36,
-    marginBottom: theme.SPACING.xs,
-    textAlign: 'center',
-  },
-  categoryLabel: {
-    textAlign: 'center',
-    width: '100%',
-    fontSize: 16,
-  },
-  secondaryEmotions: {
-    marginTop: theme.SPACING.md,
-    padding: theme.SPACING.lg,
-    shadowColor: theme.COLORS.ui.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  sectionTitle: {
-    marginBottom: theme.SPACING.lg,
-  },
-  emotionGrid: {
-    flexDirection: 'row',
-    paddingHorizontal: theme.SPACING.md,
     gap: theme.SPACING.md,
   },
   emotionButton: {
-    padding: theme.SPACING.md,
+    width: windowWidth - theme.SPACING.md * 8,
+    height: 56,
     borderRadius: theme.BORDER_RADIUS.lg,
-    width: 120,
-    height: 90,
-    alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    shadowColor: theme.COLORS.ui.text,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    alignItems: 'center',
+    backgroundColor: theme.COLORS.ui.card,
+    padding: theme.SPACING.sm,
   },
-  emotionLabel: {
-    textAlign: 'center',
-    width: '100%',
-    fontSize: 16,
+  selectedEmotion: {
+    borderWidth: 3,
+    borderColor: theme.COLORS.primary.green,
+  },
+  emotionText: {
+    color: theme.COLORS.ui.background,
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 }); 

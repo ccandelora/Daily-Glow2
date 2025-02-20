@@ -68,9 +68,31 @@ export const BORDER_RADIUS = {
   circle: 999,
 };
 
+export const TIME_PERIODS = {
+  MORNING: {
+    label: 'Morning',
+    range: { start: 5, end: 11 }, // 5:00 AM - 11:59 AM
+    greeting: 'Good morning',
+    icon: '🌅'
+  },
+  AFTERNOON: {
+    label: 'Afternoon',
+    range: { start: 12, end: 16 }, // 12:00 PM - 4:59 PM
+    greeting: 'Good afternoon',
+    icon: '☀️'
+  },
+  EVENING: {
+    label: 'Evening',
+    range: { start: 17, end: 4 }, // 5:00 PM - 4:59 AM
+    greeting: 'Good evening',
+    icon: '��'
+  }
+} as const;
+
 export default {
   COLORS,
   FONTS,
   SPACING,
   BORDER_RADIUS,
+  TIME_PERIODS,
 }; 

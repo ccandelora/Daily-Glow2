@@ -3,8 +3,9 @@ import { View, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-
 import { useRouter } from 'expo-router';
 import { Typography, Card, Button, AnimatedMoodIcon, DailyChallenge } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
-import theme from '@/constants/theme';
+import theme, { TIME_PERIODS } from '@/constants/theme';
 import { getEmotionById } from '@/constants/emotions';
+import { getCurrentTimePeriod } from '@/utils/dateTime';
 
 const getEmotionDisplay = (entry: any) => {
   const emotion = entry.initial_emotion ? getEmotionById(entry.initial_emotion) : null;
@@ -45,8 +46,10 @@ const getEmotionEmoji = (entry: any) => {
 
 export const HomeScreen = () => {
   const router = useRouter();
-  const { getRecentEntries, getTodayEntry } = useJournal();
-  const todayEntry = getTodayEntry();
+  const { getRecentEntries, getLatestEntryForPeriod } = useJournal();
+  const currentPeriod = getCurrentTimePeriod();
+  const periodDetails = TIME_PERIODS[currentPeriod];
+  const todayEntry = getLatestEntryForPeriod(currentPeriod);
   const recentEntries = getRecentEntries(3);
 
   // Animation values
@@ -93,8 +96,11 @@ export const HomeScreen = () => {
       contentContainerStyle={styles.contentContainer}
     >
       <Animated.View style={[styles.header, { opacity: headerAnim }]}>
-        <Typography variant="h1" style={styles.title}>
+        <Typography variant="h1" style={styles.appTitle}>
           Daily Glow
+        </Typography>
+        <Typography variant="h2" style={styles.greeting}>
+          {periodDetails.greeting} {periodDetails.icon}
         </Typography>
         <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
           {new Date().toLocaleDateString('en-US', { 
@@ -111,7 +117,7 @@ export const HomeScreen = () => {
       }}>
         <Card style={styles.checkInCard}>
           <Typography variant="h2" style={styles.cardTitle}>
-            Daily Check-in
+            {periodDetails.label} Check-in
           </Typography>
           {todayEntry ? (
             <>
@@ -137,8 +143,8 @@ export const HomeScreen = () => {
                 </View>
               </View>
               <Button
-                title="View Today's Entry"
-                onPress={() => router.push('/(app)/journal')}
+                title="View Entry"
+                onPress={() => router.push(`/(app)/journal/${todayEntry.id}`)}
                 variant="secondary"
                 style={styles.checkInButton}
               />
@@ -146,10 +152,10 @@ export const HomeScreen = () => {
           ) : (
             <>
               <Typography variant="body" color={theme.COLORS.ui.textSecondary} style={styles.cardSubtitle}>
-                Take a moment to reflect on your day
+                How are you feeling this {periodDetails.label.toLowerCase()}?
               </Typography>
               <Button
-                title="Start Check-in"
+                title={`Start ${periodDetails.label} Check-in`}
                 onPress={() => router.push('/(app)/check-in')}
                 style={styles.checkInButton}
               />
@@ -258,6 +264,18 @@ const styles = StyleSheet.create({
     padding: theme.SPACING.lg,
     paddingBottom: theme.SPACING.md,
     paddingTop: theme.SPACING.xxl + theme.SPACING.xl,
+  },
+  appTitle: {
+    fontSize: 38,
+    fontWeight: theme.FONTS.weights.bold,
+    color: theme.COLORS.primary.green,
+    marginBottom: theme.SPACING.xs,
+  },
+  greeting: {
+    fontSize: 28,
+    fontWeight: theme.FONTS.weights.semibold,
+    color: theme.COLORS.ui.text,
+    marginBottom: theme.SPACING.xs,
   },
   title: {
     marginBottom: theme.SPACING.xs,
