@@ -4,6 +4,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Typography, Card, Button, AnimatedMoodIcon } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
 import theme from '@/constants/theme';
+import { getEmotionById } from '@/constants/emotions';
 
 export const EntryDetailScreen = () => {
   const router = useRouter();
@@ -27,25 +28,23 @@ export const EntryDetailScreen = () => {
     );
   }
 
-  const getMoodColor = (mood: string) => {
-    switch (mood) {
-      case 'great': return theme.COLORS.primary.green;
-      case 'good': return theme.COLORS.primary.blue;
-      case 'okay': return theme.COLORS.primary.yellow;
-      case 'bad': return theme.COLORS.primary.red;
-      default: return theme.COLORS.primary.blue;
-    }
-  };
+  const initialEmotion = getEmotionById(entry.initialEmotion);
+  const postEmotion = getEmotionById(entry.postGratitudeEmotion);
 
-  const getMoodEmoji = (mood: string) => {
-    switch (mood) {
-      case 'great': return '😊';
-      case 'good': return '🙂';
-      case 'okay': return '😐';
-      case 'bad': return '😕';
-      default: return '🙂';
-    }
-  };
+  if (!initialEmotion || !postEmotion) {
+    return (
+      <View style={styles.container}>
+        <Typography variant="h2" style={styles.errorText}>
+          Invalid emotion data
+        </Typography>
+        <Button
+          title="Go Back"
+          onPress={() => router.back()}
+          style={styles.button}
+        />
+      </View>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
@@ -69,24 +68,24 @@ export const EntryDetailScreen = () => {
       <View style={styles.content}>
         <Card style={styles.moodCard}>
           <Typography variant="h3" style={styles.sectionTitle}>
-            Mood
+            Initial Feeling
           </Typography>
           <View style={styles.moodContainer}>
             <AnimatedMoodIcon
-              color={getMoodColor(entry.mood)}
+              color={initialEmotion.color}
               size={64}
               active
             >
               <Typography style={styles.moodEmoji}>
-                {getMoodEmoji(entry.mood)}
+                {initialEmotion.icon || '😊'}
               </Typography>
             </AnimatedMoodIcon>
             <Typography
               variant="h3"
-              color={getMoodColor(entry.mood)}
+              color={initialEmotion.color}
               style={styles.moodText}
             >
-              {entry.mood.charAt(0).toUpperCase() + entry.mood.slice(1)}
+              {initialEmotion.label}
             </Typography>
           </View>
         </Card>
@@ -98,6 +97,30 @@ export const EntryDetailScreen = () => {
           <Typography variant="body" style={styles.text}>
             {entry.gratitude}
           </Typography>
+        </Card>
+
+        <Card style={styles.moodCard}>
+          <Typography variant="h3" style={styles.sectionTitle}>
+            After Reflection
+          </Typography>
+          <View style={styles.moodContainer}>
+            <AnimatedMoodIcon
+              color={postEmotion.color}
+              size={64}
+              active
+            >
+              <Typography style={styles.moodEmoji}>
+                {postEmotion.icon || '😊'}
+              </Typography>
+            </AnimatedMoodIcon>
+            <Typography
+              variant="h3"
+              color={postEmotion.color}
+              style={styles.moodText}
+            >
+              {postEmotion.label}
+            </Typography>
+          </View>
         </Card>
 
         {entry.note && (

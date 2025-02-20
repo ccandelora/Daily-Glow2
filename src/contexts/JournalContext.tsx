@@ -2,11 +2,14 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAppState } from './AppStateContext';
 import { useAuth } from './AuthContext';
 import { supabase } from '@/lib/supabase';
+import { getAllEmotions, Emotion } from '@/constants/emotions';
 
 interface JournalEntry {
   id: string;
   date: Date;
-  mood: 'great' | 'good' | 'okay' | 'bad';
+  initialEmotion: string;
+  postGratitudeEmotion: string;
+  emotionalShift: number; // -1 to 1, representing negative to positive shift
   gratitude: string;
   note?: string;
   user_id?: string;
@@ -19,7 +22,7 @@ interface DatabaseEntry extends Omit<JournalEntry, 'date'> {
 
 interface JournalContextType {
   entries: JournalEntry[];
-  addEntry: (mood: JournalEntry['mood'], gratitude: string, note?: string) => Promise<JournalEntry>;
+  addEntry: (initialEmotion: string, postEmotion: string, gratitude: string, note?: string) => Promise<void>;
   getRecentEntries: (count: number) => JournalEntry[];
   getTodayEntry: () => JournalEntry | null;
   deleteAllEntries: () => Promise<void>;
@@ -67,48 +70,62 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const addEntry = async (mood: JournalEntry['mood'], gratitude: string, note?: string) => {
-    if (!session?.user?.id) {
-      throw new Error('You must be logged in to add entries');
+  // Calculate emotional shift between -1 and 1
+  const calculateEmotionalShift = (initialEmotion: string, postEmotion: string): number => {
+    const emotions = getAllEmotions();
+    const initialIndex = emotions.findIndex((e: Emotion) => e.id === initialEmotion);
+    const postIndex = emotions.findIndex((e: Emotion) => e.id === postEmotion);
+    
+    if (initialIndex === -1 || postIndex === -1) return 0;
+    
+    // Calculate shift based on position in emotions array
+    const shift = (postIndex - initialIndex) / emotions.length;
+    return Math.max(-1, Math.min(1, shift)); // Clamp between -1 and 1
+  };
+
+  const addEntry = async (initialEmotion: string, postEmotion: string, gratitude: string, note?: string) => {
+    if (!session?.user) {
+      showError('You must be logged in to add entries');
+      return;
     }
 
+    const emotionalShift = calculateEmotionalShift(initialEmotion, postEmotion);
+    
     try {
-      setLoading(true);
-      const newEntry = {
-        mood,
-        gratitude,
-        note,
-        user_id: session.user.id,
-        created_at: new Date().toISOString(),
-      };
-
       const { data, error } = await supabase
         .from('journal_entries')
-        .insert(newEntry)
-        .select('id, created_at, user_id, mood, gratitude, note')
+        .insert([
+          {
+            user_id: session.user.id,
+            created_at: new Date().toISOString(),
+            initial_emotion: initialEmotion,
+            post_gratitude_emotion: postEmotion,
+            emotional_shift: emotionalShift,
+            gratitude,
+            note,
+          },
+        ])
+        .select()
         .single();
 
-      if (error) {
-        console.error('Error adding entry:', error);
-        throw new Error('Failed to add journal entry');
-      }
+      if (error) throw error;
 
-      if (!data) {
-        throw new Error('No data returned after inserting entry');
-      }
-
-      const formattedEntry: JournalEntry = {
-        ...data,
+      const newEntry: JournalEntry = {
+        id: data.id,
         date: new Date(data.created_at),
+        initialEmotion: data.initial_emotion,
+        postGratitudeEmotion: data.post_gratitude_emotion,
+        emotionalShift: data.emotional_shift,
+        gratitude: data.gratitude,
+        note: data.note,
+        user_id: data.user_id,
+        created_at: data.created_at,
       };
 
-      setEntries(prev => [formattedEntry, ...prev]);
-      return formattedEntry;
+      setEntries(prev => [newEntry, ...prev]);
     } catch (error) {
-      showError(error instanceof Error ? error.message : 'Failed to add journal entry');
-      throw error;
-    } finally {
-      setLoading(false);
+      showError('Failed to save journal entry');
+      console.error('Error adding entry:', error);
     }
   };
 

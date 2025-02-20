@@ -1,45 +1,68 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Typography, Card, Button, Input, AnimatedMoodIcon } from '@/components/common';
+import { Typography, Card, Button, Input, EmotionWheel } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
 import { useAppState } from '@/contexts/AppStateContext';
 import theme from '@/constants/theme';
-
-const moods = [
-  { id: 'great' as const, label: 'Great', icon: '😊', color: theme.COLORS.primary.green },
-  { id: 'good' as const, label: 'Good', icon: '🙂', color: theme.COLORS.primary.blue },
-  { id: 'okay' as const, label: 'Okay', icon: '😐', color: theme.COLORS.primary.yellow },
-  { id: 'bad' as const, label: 'Bad', icon: '😕', color: theme.COLORS.primary.red },
-] as const;
-
-type Mood = typeof moods[number]['id'];
+import { Emotion } from '@/constants/emotions';
 
 export const CheckInScreen = () => {
   const router = useRouter();
   const { addEntry } = useJournal();
   const { showError } = useAppState();
-  const [selectedMood, setSelectedMood] = useState<Mood | null>(null);
+  
+  const [step, setStep] = useState<'initial' | 'gratitude' | 'final'>('initial');
+  const [initialEmotion, setInitialEmotion] = useState<string | undefined>();
+  const [postEmotion, setPostEmotion] = useState<string | undefined>();
   const [gratitude, setGratitude] = useState('');
   const [note, setNote] = useState('');
 
-  const handleSave = async () => {
-    if (!selectedMood) {
-      showError('Please select a mood before saving');
+  const handleInitialEmotionSelect = (emotion: Emotion) => {
+    setInitialEmotion(emotion.id);
+  };
+
+  const handlePostEmotionSelect = (emotion: Emotion) => {
+    setPostEmotion(emotion.id);
+  };
+
+  const handleNext = () => {
+    if (step === 'initial' && !initialEmotion) {
+      showError("Please select how you're feeling");
       return;
     }
 
-    if (!gratitude.trim()) {
-      showError('Please enter what you\'re grateful for');
+    if (step === 'gratitude' && !gratitude.trim()) {
+      showError("Please share what you're grateful for");
+      return;
+    }
+
+    if (step === 'initial') {
+      setStep('gratitude');
+    } else if (step === 'gratitude') {
+      setStep('final');
+    }
+  };
+
+  const handleBack = () => {
+    if (step === 'gratitude') {
+      setStep('initial');
+    } else if (step === 'final') {
+      setStep('gratitude');
+    }
+  };
+
+  const handleSave = async () => {
+    if (!initialEmotion || !postEmotion || !gratitude.trim()) {
+      showError('Please complete all fields before saving');
       return;
     }
 
     try {
-      await addEntry(selectedMood, gratitude, note);
+      await addEntry(initialEmotion, postEmotion, gratitude, note);
       router.back();
     } catch (error) {
       // Error is already handled in JournalContext
-      // We can add additional UI handling here if needed
     }
   };
 
@@ -55,67 +78,82 @@ export const CheckInScreen = () => {
       </View>
 
       <View style={styles.content}>
-        <Card style={styles.moodCard}>
-          <Typography variant="h3" style={styles.sectionTitle}>
-            How are you feeling?
-          </Typography>
-          <View style={styles.moodGrid}>
-            {moods.map((mood) => (
-              <TouchableOpacity
-                key={mood.id}
-                onPress={() => setSelectedMood(mood.id)}
-                style={styles.moodButton}
-              >
-                <AnimatedMoodIcon
-                  color={mood.color}
-                  active={selectedMood === mood.id}
-                >
-                  <Typography style={styles.moodIcon}>{mood.icon}</Typography>
-                </AnimatedMoodIcon>
-                <Typography
-                  variant="caption"
-                  color={selectedMood === mood.id ? mood.color : theme.COLORS.ui.textSecondary}
-                >
-                  {mood.label}
-                </Typography>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </Card>
+        {step === 'initial' && (
+          <Card style={styles.card}>
+            <Typography variant="h3" style={styles.sectionTitle}>
+              How are you feeling right now?
+            </Typography>
+            <EmotionWheel
+              onSelectEmotion={handleInitialEmotionSelect}
+              selectedEmotion={initialEmotion}
+            />
+            <Button
+              title="Next"
+              onPress={handleNext}
+              style={styles.button}
+            />
+          </Card>
+        )}
 
-        <Card style={styles.gratitudeCard}>
-          <Typography variant="h3" style={styles.sectionTitle}>
-            What are you grateful for today?
-          </Typography>
-          <Input
-            multiline
-            value={gratitude}
-            onChangeText={setGratitude}
-            placeholder="Take a moment to reflect on something positive..."
-            style={styles.gratitudeInput}
-          />
-        </Card>
+        {step === 'gratitude' && (
+          <Card style={styles.card}>
+            <Typography variant="h3" style={styles.sectionTitle}>
+              What are you grateful for today?
+            </Typography>
+            <Input
+              multiline
+              value={gratitude}
+              onChangeText={setGratitude}
+              placeholder="Take a moment to reflect on something positive..."
+              style={styles.gratitudeInput}
+            />
+            <Input
+              multiline
+              value={note}
+              onChangeText={setNote}
+              placeholder="Any additional thoughts? (Optional)"
+              style={styles.noteInput}
+            />
+            <View style={styles.buttonRow}>
+              <Button
+                title="Back"
+                onPress={handleBack}
+                variant="secondary"
+                style={styles.button}
+              />
+              <Button
+                title="Next"
+                onPress={handleNext}
+                style={styles.button}
+              />
+            </View>
+          </Card>
+        )}
 
-        <Card style={styles.noteCard}>
-          <Typography variant="h3" style={styles.sectionTitle}>
-            Any additional thoughts?
-          </Typography>
-          <Input
-            multiline
-            value={note}
-            onChangeText={setNote}
-            placeholder="Write any additional thoughts or feelings..."
-            style={styles.noteInput}
-          />
-        </Card>
-      </View>
-
-      <View style={styles.footer}>
-        <Button
-          title="Save Check-in"
-          onPress={handleSave}
-          style={styles.button}
-        />
+        {step === 'final' && (
+          <Card style={styles.card}>
+            <Typography variant="h3" style={styles.sectionTitle}>
+              After reflecting, how do you feel now?
+            </Typography>
+            <EmotionWheel
+              onSelectEmotion={handlePostEmotionSelect}
+              selectedEmotion={postEmotion}
+            />
+            <View style={styles.buttonRow}>
+              <Button
+                title="Back"
+                onPress={handleBack}
+                variant="secondary"
+                style={styles.button}
+              />
+              <Button
+                title="Save Entry"
+                onPress={handleSave}
+                style={styles.button}
+              />
+            </View>
+          </Card>
+        )}
       </View>
     </ScrollView>
   );
@@ -136,40 +174,27 @@ const styles = StyleSheet.create({
     padding: theme.SPACING.lg,
     paddingTop: 0,
   },
+  card: {
+    padding: theme.SPACING.lg,
+    marginBottom: theme.SPACING.lg,
+  },
   sectionTitle: {
-    marginBottom: theme.SPACING.lg,
-  },
-  moodCard: {
-    marginBottom: theme.SPACING.lg,
-  },
-  moodGrid: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    flexWrap: 'wrap',
-  },
-  moodButton: {
-    alignItems: 'center',
-    marginBottom: theme.SPACING.md,
-  },
-  moodIcon: {
-    fontSize: theme.FONTS.sizes.xl,
-  },
-  gratitudeCard: {
     marginBottom: theme.SPACING.lg,
   },
   gratitudeInput: {
     height: 100,
-  },
-  noteCard: {
-    marginBottom: theme.SPACING.lg,
+    marginBottom: theme.SPACING.md,
   },
   noteInput: {
     height: 100,
-  },
-  footer: {
-    padding: theme.SPACING.lg,
+    marginBottom: theme.SPACING.lg,
   },
   button: {
     marginBottom: theme.SPACING.md,
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: theme.SPACING.md,
   },
 }); 

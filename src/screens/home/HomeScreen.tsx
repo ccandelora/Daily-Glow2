@@ -4,19 +4,43 @@ import { useRouter } from 'expo-router';
 import { Typography, Card, Button, AnimatedMoodIcon, DailyChallenge } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
 import theme from '@/constants/theme';
+import { getEmotionById } from '@/constants/emotions';
 
-const moodColors = {
-  great: theme.COLORS.primary.green,
-  good: theme.COLORS.primary.blue,
-  okay: theme.COLORS.primary.yellow,
-  bad: theme.COLORS.primary.red,
+const getEmotionDisplay = (entry: any) => {
+  const emotion = entry.initial_emotion ? getEmotionById(entry.initial_emotion) : null;
+  
+  if (emotion) {
+    return {
+      label: emotion.label,
+      color: emotion.color
+    };
+  }
+  
+  // Fallback for old data
+  return {
+    label: 'Neutral',
+    color: theme.COLORS.ui.textSecondary
+  };
 };
 
-const moodIcons = {
-  great: '😊',
-  good: '🙂',
-  okay: '😐',
-  bad: '😕',
+const getEmotionEmoji = (entry: any) => {
+  if (entry.initial_emotion) {
+    const emotion = getEmotionById(entry.initial_emotion);
+    if (emotion) {
+      switch (emotion.id) {
+        case 'happy': return '😊';
+        case 'sad': return '😢';
+        case 'angry': return '😠';
+        case 'scared': return '😨';
+        case 'optimistic': return '🌟';
+        case 'peaceful': return '😌';
+        case 'powerful': return '💪';
+        case 'proud': return '🦁';
+        default: return '😐';
+      }
+    }
+  }
+  return '😐';
 };
 
 export const HomeScreen = () => {
@@ -63,9 +87,6 @@ export const HomeScreen = () => {
     ]).start();
   }, []);
 
-  const getMoodColor = (mood: string) => moodColors[mood as keyof typeof moodColors] || theme.COLORS.ui.textSecondary;
-  const getMoodIcon = (mood: string) => moodIcons[mood as keyof typeof moodIcons] || '🤔';
-
   return (
     <ScrollView 
       style={styles.container}
@@ -96,17 +117,17 @@ export const HomeScreen = () => {
             <>
               <View style={styles.todayMood}>
                 <AnimatedMoodIcon
-                  color={getMoodColor(todayEntry.mood)}
+                  color={getEmotionDisplay(todayEntry).color}
                   active={true}
                   size={48}
                 >
                   <Typography style={styles.moodIcon}>
-                    {getMoodIcon(todayEntry.mood)}
+                    {getEmotionEmoji(todayEntry)}
                   </Typography>
                 </AnimatedMoodIcon>
                 <View style={styles.todayMoodText}>
-                  <Typography variant="h3" color={getMoodColor(todayEntry.mood)}>
-                    {todayEntry.mood.charAt(0).toUpperCase() + todayEntry.mood.slice(1)}
+                  <Typography variant="h3" color={getEmotionDisplay(todayEntry).color}>
+                    {getEmotionDisplay(todayEntry).label}
                   </Typography>
                   <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
                     {todayEntry.gratitude.length > 50 
@@ -160,11 +181,11 @@ export const HomeScreen = () => {
               >
                 <View style={styles.entryItemLeft}>
                   <Typography style={styles.entryIcon}>
-                    {getMoodIcon(entry.mood)}
+                    {getEmotionEmoji(entry)}
                   </Typography>
                   <View>
-                    <Typography variant="body" color={getMoodColor(entry.mood)}>
-                      {entry.mood.charAt(0).toUpperCase() + entry.mood.slice(1)}
+                    <Typography variant="body" color={getEmotionDisplay(entry).color}>
+                      {getEmotionDisplay(entry).label}
                     </Typography>
                     <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
                       {entry.date.toLocaleDateString('en-US', { 
@@ -235,9 +256,16 @@ const styles = StyleSheet.create({
   },
   header: {
     padding: theme.SPACING.lg,
+    paddingBottom: theme.SPACING.md,
+    paddingTop: theme.SPACING.xxl + theme.SPACING.xl,
   },
   title: {
     marginBottom: theme.SPACING.xs,
+    fontSize: theme.FONTS.sizes.xxl,
+    fontWeight: theme.FONTS.weights.bold,
+    color: theme.COLORS.ui.text,
+    flexWrap: 'wrap',
+    width: '100%',
   },
   checkInCard: {
     margin: theme.SPACING.lg,

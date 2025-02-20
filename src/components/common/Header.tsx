@@ -1,46 +1,52 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { Typography } from './Typography';
-import theme from '../../constants/theme';
+import theme from '@/constants/theme';
 
 interface HeaderProps {
   title: string;
   onBack?: () => void;
-  rightAction?: {
-    label: string;
-    onPress: () => void;
-  };
+  rightElement?: React.ReactNode;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   title,
   onBack,
-  rightAction,
+  rightElement,
 }) => {
-  return (
-    <View style={styles.container}>
-      <View style={styles.leftContainer}>
-        {onBack && (
-          <TouchableOpacity onPress={onBack} style={styles.backButton}>
-            <Typography>←</Typography>
-          </TouchableOpacity>
-        )}
-      </View>
-      
-      <View style={styles.titleContainer}>
-        <Typography variant="h2" style={styles.title}>
-          {title}
-        </Typography>
-      </View>
+  const insets = useSafeAreaInsets();
 
-      <View style={styles.rightContainer}>
-        {rightAction && (
-          <TouchableOpacity onPress={rightAction.onPress}>
-            <Typography color={theme.COLORS.primary.green}>
-              {rightAction.label}
-            </Typography>
+  return (
+    <View style={[
+      styles.container,
+      { paddingTop: Math.max(insets.top, theme.SPACING.lg) }
+    ]}>
+      <View style={styles.content}>
+        {onBack && (
+          <TouchableOpacity
+            onPress={onBack}
+            style={styles.backButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons
+              name="chevron-back"
+              size={28}
+              color={theme.COLORS.ui.text}
+            />
           </TouchableOpacity>
         )}
+        
+        <View style={styles.titleContainer}>
+          <Typography variant="h2" style={styles.title} numberOfLines={2}>
+            {title}
+          </Typography>
+        </View>
+
+        <View style={styles.rightElement}>
+          {rightElement}
+        </View>
       </View>
     </View>
   );
@@ -48,30 +54,30 @@ export const Header: React.FC<HeaderProps> = ({
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: theme.COLORS.ui.background,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.COLORS.ui.border,
+  },
+  content: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: theme.SPACING.md,
-    paddingVertical: theme.SPACING.lg,
-    backgroundColor: theme.COLORS.ui.background,
-  },
-  leftContainer: {
-    flex: 1,
-    alignItems: 'flex-start',
-  },
-  titleContainer: {
-    flex: 2,
-    alignItems: 'center',
-  },
-  rightContainer: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
-  title: {
-    textAlign: 'center',
+    paddingHorizontal: theme.SPACING.lg,
+    paddingBottom: theme.SPACING.md,
+    minHeight: 44,
   },
   backButton: {
-    padding: theme.SPACING.sm,
+    marginRight: theme.SPACING.sm,
     marginLeft: -theme.SPACING.sm,
+  },
+  titleContainer: {
+    flex: 1,
+    marginHorizontal: theme.SPACING.sm,
+  },
+  title: {
+    textAlign: 'left',
+    paddingRight: theme.SPACING.xl,
+  },
+  rightElement: {
+    marginLeft: 'auto',
   },
 }); 

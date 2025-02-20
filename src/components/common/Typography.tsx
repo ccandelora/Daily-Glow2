@@ -1,55 +1,60 @@
 import React from 'react';
-import { Text, TextStyle, StyleProp } from 'react-native';
+import { Text, TextStyle, TextProps } from 'react-native';
 import theme from '@/constants/theme';
 
-interface TypographyProps {
-  children: React.ReactNode;
-  variant?: 'h1' | 'h2' | 'h3' | 'body' | 'caption';
-  style?: StyleProp<TextStyle>;
+type TypographyVariant = 'h1' | 'h2' | 'h3' | 'body' | 'caption';
+
+export interface TypographyProps extends Omit<TextProps, 'style'> {
+  variant?: TypographyVariant;
   color?: string;
+  style?: TextStyle | TextStyle[];
+  children: React.ReactNode;
 }
 
 export const Typography: React.FC<TypographyProps> = ({
-  children,
   variant = 'body',
+  color = theme.COLORS.ui.text,
   style,
-  color,
+  children,
+  ...props
 }) => {
-  const getVariantStyle = (): TextStyle => {
-    switch (variant) {
-      case 'h1':
-        return {
-          fontSize: theme.FONTS.sizes.xxl,
-          fontWeight: theme.FONTS.weights.bold,
-        };
-      case 'h2':
-        return {
-          fontSize: theme.FONTS.sizes.xl,
-          fontWeight: theme.FONTS.weights.bold,
-        };
-      case 'h3':
-        return {
-          fontSize: theme.FONTS.sizes.lg,
-          fontWeight: theme.FONTS.weights.semibold,
-        };
-      case 'caption':
-        return {
-          fontSize: theme.FONTS.sizes.sm,
-          color: theme.COLORS.ui.textSecondary,
-        };
-      default:
-        return {
-          fontSize: theme.FONTS.sizes.md,
-        };
-    }
+  const variantStyles: Record<TypographyVariant, TextStyle> = {
+    h1: {
+      fontSize: theme.FONTS.sizes.xxl,
+      fontWeight: theme.FONTS.weights.bold,
+      lineHeight: theme.FONTS.sizes.xxl * 1.2,
+    },
+    h2: {
+      fontSize: theme.FONTS.sizes.xl,
+      fontWeight: theme.FONTS.weights.bold,
+      lineHeight: theme.FONTS.sizes.xl * 1.2,
+    },
+    h3: {
+      fontSize: theme.FONTS.sizes.lg,
+      fontWeight: theme.FONTS.weights.semibold,
+      lineHeight: theme.FONTS.sizes.lg * 1.2,
+    },
+    body: {
+      fontSize: theme.FONTS.sizes.md,
+      fontWeight: theme.FONTS.weights.regular,
+      lineHeight: theme.FONTS.sizes.md * 1.5,
+    },
+    caption: {
+      fontSize: theme.FONTS.sizes.sm,
+      fontWeight: theme.FONTS.weights.regular,
+      lineHeight: theme.FONTS.sizes.sm * 1.5,
+    },
   };
 
   return (
-    <Text style={[
-      { color: color || theme.COLORS.ui.text },
-      getVariantStyle(),
-      style
-    ]}>
+    <Text
+      style={[
+        variantStyles[variant],
+        { color },
+        style,
+      ]}
+      {...props}
+    >
       {children}
     </Text>
   );

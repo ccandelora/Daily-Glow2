@@ -150,86 +150,52 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete }) =>
   if (showLimitMessage) {
     return (
       <View style={styles.glowContainer}>
-        <Animated.View style={[
-          styles.glowEffect,
-          {
-            opacity: glowAnim.interpolate({
+        <Animated.View style={[styles.glowEffect, {
+          opacity: glowAnim.interpolate({
+            inputRange: [0, 0.5, 1],
+            outputRange: [0.3, 0.5, 0.3],
+          }),
+          transform: [{
+            scale: glowAnim.interpolate({
               inputRange: [0, 0.5, 1],
-              outputRange: [0.3, 0.5, 0.3],
+              outputRange: [1, 1.1, 1],
             }),
-            transform: [
-              {
-                scale: glowAnim.interpolate({
-                  inputRange: [0, 0.5, 1],
-                  outputRange: [1, 1.1, 1],
-                }),
-              },
-              {
-                rotate: rotateAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ['0deg', '360deg'],
-                }),
-              },
-            ],
-          }
-        ]}>
+          }],
+        }]}>
           <LinearGradient
-            colors={[
-              theme.COLORS.primary.green,
-              theme.COLORS.primary.blue,
-              theme.COLORS.primary.yellow,
-              theme.COLORS.primary.green,
-            ]}
+            colors={[theme.COLORS.primary.green, theme.COLORS.primary.blue]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.gradient}
           />
         </Animated.View>
-        <Card style={styles.container}>
-          <View style={styles.limitContainer}>
-            <View style={styles.limitHeader}>
-              <Ionicons 
-                name="checkmark-circle-outline" 
-                size={48} 
-                color={theme.COLORS.primary.green}
-              />
-              <Typography variant="h2" style={styles.limitTitle}>
-                Daily Challenges Complete!
-              </Typography>
-            </View>
-            <Typography variant="body" style={styles.limitMessage}>
+        <Card style={styles.completionContainer}>
+          <View style={styles.completionContent}>
+            <Ionicons 
+              name="checkmark-circle-outline" 
+              size={48} 
+              color={theme.COLORS.primary.green}
+              style={styles.completionIcon}
+            />
+            <Typography variant="h2" style={styles.completionTitle}>
+              Daily Challenges Complete!
+            </Typography>
+            <Typography style={styles.completionMessage}>
               Great job! You've completed your daily challenges. Come back tomorrow for new challenges and more opportunities to earn points.
             </Typography>
-            <View style={styles.statsContainer}>
-              <View style={styles.pointsDisplay}>
-                <Typography variant="h2" style={styles.pointsValue}>
-                  {localPoints}
-                </Typography>
-                <Typography variant="body" style={styles.pointsLabel}>
-                  Total Points
-                </Typography>
-              </View>
-              {userStats?.current_streak && userStats.current_streak > 0 && (
-                <View style={styles.streakDisplay}>
-                  <Ionicons 
-                    name="flame" 
-                    size={24} 
-                    color={theme.COLORS.primary.red}
-                  />
-                  <Typography variant="h3" style={styles.streakValue}>
-                    {userStats.current_streak}
-                  </Typography>
-                  <Typography variant="caption" style={styles.streakLabel}>
-                    Day Streak
-                  </Typography>
-                </View>
-              )}
+            <View style={styles.completionPoints}>
+              <Typography variant="h1" style={styles.completionPointsValue}>
+                {localPoints}
+              </Typography>
+              <Typography style={styles.completionPointsLabel}>
+                Total Points
+              </Typography>
             </View>
             <Button
               title="View Your Achievements"
               onPress={() => router.push('/(app)/achievements')}
               variant="secondary"
-              style={styles.achievementsButton}
+              style={styles.completionButton}
             />
           </View>
         </Card>
@@ -441,19 +407,27 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: theme.SPACING.md,
+    width: '100%',
+    flexWrap: 'wrap',
+    gap: theme.SPACING.md,
   },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: theme.SPACING.sm,
+    flex: 1,
+    minWidth: 150,
   },
   title: {
     marginLeft: theme.SPACING.xs,
+    flexShrink: 1,
   },
   challengeStats: {
     alignItems: 'flex-end',
+    minWidth: 100,
+    flexShrink: 0,
   },
   challengeTitle: {
     marginBottom: theme.SPACING.sm,
@@ -496,47 +470,68 @@ const styles = StyleSheet.create({
     fontWeight: theme.FONTS.weights.bold,
     color: theme.COLORS.primary.green,
     marginTop: theme.SPACING.xs,
+    textAlign: 'right',
+    minWidth: 100,
+    flexWrap: 'wrap',
+    flexShrink: 0,
   },
   limitContainer: {
     padding: theme.SPACING.lg,
     alignItems: 'center',
+    width: '100%',
   },
   limitHeader: {
     alignItems: 'center',
     marginBottom: theme.SPACING.xl,
+    width: '100%',
   },
   limitTitle: {
     textAlign: 'center',
     color: theme.COLORS.primary.green,
     marginTop: theme.SPACING.md,
     fontSize: theme.FONTS.sizes.xxl,
+    paddingHorizontal: theme.SPACING.md,
+    width: '100%',
+    flexWrap: 'wrap',
   },
   limitMessage: {
     textAlign: 'center',
     color: theme.COLORS.ui.textSecondary,
     marginBottom: theme.SPACING.xl,
     lineHeight: 24,
-    paddingHorizontal: theme.SPACING.md,
+    paddingHorizontal: theme.SPACING.lg,
+    width: '100%',
   },
   statsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
     marginBottom: theme.SPACING.xl,
+    paddingHorizontal: theme.SPACING.lg,
   },
   pointsDisplay: {
     alignItems: 'center',
     flex: 1,
+    paddingHorizontal: theme.SPACING.lg,
+    width: '100%',
+    maxWidth: 200,
   },
   pointsValue: {
     color: theme.COLORS.primary.green,
     fontSize: theme.FONTS.sizes.xxxl,
     fontWeight: theme.FONTS.weights.bold,
+    textAlign: 'center',
+    width: '100%',
+    flexShrink: 0,
+    minWidth: 150,
+    paddingHorizontal: theme.SPACING.md,
   },
   pointsLabel: {
     color: theme.COLORS.ui.textSecondary,
     marginTop: theme.SPACING.xs,
+    textAlign: 'center',
+    width: '100%',
   },
   streakDisplay: {
     alignItems: 'center',
@@ -558,5 +553,54 @@ const styles = StyleSheet.create({
     marginTop: 0,
     paddingVertical: theme.SPACING.md,
     width: '100%',
+  },
+  completionContainer: {
+    width: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: theme.BORDER_RADIUS.lg,
+  },
+  completionContent: {
+    padding: theme.SPACING.xl,
+    alignItems: 'center',
+    paddingVertical: theme.SPACING.xl * 1.5,
+  },
+  completionIcon: {
+    marginBottom: theme.SPACING.lg,
+  },
+  completionTitle: {
+    color: theme.COLORS.primary.green,
+    fontSize: 28,
+    fontWeight: theme.FONTS.weights.semibold,
+    textAlign: 'center',
+    marginBottom: theme.SPACING.md,
+  },
+  completionMessage: {
+    color: theme.COLORS.ui.textSecondary,
+    textAlign: 'center',
+    marginBottom: theme.SPACING.xl * 1.5,
+    lineHeight: 24,
+    fontSize: theme.FONTS.sizes.md,
+  },
+  completionPoints: {
+    alignItems: 'center',
+    marginBottom: theme.SPACING.xl * 1.5,
+  },
+  completionPointsValue: {
+    color: theme.COLORS.primary.green,
+    fontSize: 72,
+    fontWeight: theme.FONTS.weights.bold,
+    textAlign: 'center',
+    marginBottom: theme.SPACING.xs,
+    lineHeight: 80,
+  },
+  completionPointsLabel: {
+    color: theme.COLORS.ui.textSecondary,
+    textAlign: 'center',
+    fontSize: theme.FONTS.sizes.lg,
+  },
+  completionButton: {
+    width: '100%',
+    paddingVertical: theme.SPACING.md,
+    marginTop: theme.SPACING.md,
   },
 }); 
