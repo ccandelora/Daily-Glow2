@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Typography, Button } from '@/components/common';
+import { Typography, Button, VideoBackground } from '@/components/common';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import theme from '@/constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const CONFETTI_COLORS = [
   theme.COLORS.primary.green,
@@ -70,12 +71,15 @@ const Confetti = ({ delay = 0 }: { delay?: number }) => {
 
 export const CompleteScreen = () => {
   const router = useRouter();
-  const { completeOnboarding } = useOnboarding();
+  const { completeOnboarding, hasCompletedOnboarding } = useOnboarding();
   const scaleAnim = React.useRef(new Animated.Value(0.3)).current;
   const opacityAnim = React.useRef(new Animated.Value(0)).current;
-  const footerAnim = React.useRef(new Animated.Value(0)).current;
+  const buttonAnim = React.useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
+    console.log('CompleteScreen mounted');
+    console.log('Initial onboarding status:', { hasCompletedOnboarding });
+
     Animated.sequence([
       Animated.parallel([
         Animated.spring(scaleAnim, {
@@ -90,27 +94,55 @@ export const CompleteScreen = () => {
           useNativeDriver: true,
         }),
       ]),
-      Animated.timing(footerAnim, {
+      Animated.timing(buttonAnim, {
         toValue: 1,
         duration: 300,
         useNativeDriver: true,
       }),
     ]).start();
-
-    // Mark onboarding as complete
-    completeOnboarding();
   }, []);
 
-  const handleStart = () => {
-    router.replace('/(app)');
+  const handleStart = async () => {
+    try {
+      console.log('Begin Journey button pressed');
+      console.log('Current onboarding status:', { hasCompletedOnboarding });
+      
+      // First complete onboarding
+      await completeOnboarding();
+      console.log('Onboarding completed successfully');
+      console.log('Updated onboarding status:', { hasCompletedOnboarding });
+
+      // Longer delay to ensure AsyncStorage is updated
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      console.log('Attempting navigation to /(app)');
+      // Navigate to the app group
+      router.replace('/(app)');
+    } catch (error: unknown) {
+      console.error('Navigation error:', error);
+      if (error instanceof Error) {
+        console.error('Full error details:', {
+          name: error.name,
+          message: error.message,
+          stack: error.stack
+        });
+      }
+    }
   };
 
   return (
     <View style={styles.container}>
-      {/* Confetti */}
-      {Array.from({ length: 20 }).map((_, i) => (
-        <Confetti key={i} delay={i * 100} />
-      ))}
+      <VideoBackground />
+      
+      {/* Overlay gradient for better text readability */}
+      <LinearGradient
+        colors={[
+          'rgba(28, 14, 45, 0.8)',
+          'rgba(28, 14, 45, 0.6)',
+          'rgba(28, 14, 45, 0.8)',
+        ]}
+        style={StyleSheet.absoluteFill}
+      />
 
       <Animated.View
         style={[
@@ -121,21 +153,26 @@ export const CompleteScreen = () => {
           },
         ]}
       >
-        <Typography style={styles.emoji}>🎉</Typography>
-        <Typography variant="h1" style={styles.title}>
+        <View style={styles.celebrationIcon}>
+          <Typography style={styles.emoji}>🎉</Typography>
+        </View>
+
+        <Typography variant="h1" style={styles.title} glow="strong">
           You're All Set!
         </Typography>
-        <Typography variant="body" style={styles.subtitle}>
+
+        <Typography variant="body" style={styles.subtitle} glow="medium">
           Congratulations on taking the first step towards better emotional well-being! 
           Your daily check-ins will help you understand yourself better and cultivate gratitude.
         </Typography>
       </Animated.View>
 
-      <Animated.View style={[styles.footer, { opacity: footerAnim }]}>
+      <Animated.View style={[styles.footer, { opacity: buttonAnim }]}>
         <Button
           title="Begin Your Journey"
           onPress={handleStart}
           style={styles.button}
+          variant="primary"
         />
       </Animated.View>
     </View>
@@ -146,33 +183,63 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.COLORS.ui.background,
-    paddingHorizontal: theme.SPACING.lg,
-    overflow: 'hidden',
   },
   content: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: theme.SPACING.xl,
+  },
+  celebrationIcon: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(65, 105, 225, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: theme.SPACING.xl,
+    borderWidth: 2,
+    borderColor: theme.COLORS.ui.accent,
+    shadowColor: theme.COLORS.ui.accent,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 16,
+    elevation: 8,
   },
   emoji: {
     fontSize: 64,
-    marginBottom: theme.SPACING.xl,
+    textShadowColor: theme.COLORS.ui.accent,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
   },
   title: {
     textAlign: 'center',
-    marginBottom: theme.SPACING.md,
+    marginBottom: theme.SPACING.lg,
+    color: theme.COLORS.ui.text,
+    fontSize: theme.FONTS.sizes.xxxl,
+    textShadowColor: theme.COLORS.ui.accent,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
   subtitle: {
     textAlign: 'center',
     color: theme.COLORS.ui.textSecondary,
-    maxWidth: '80%',
-    lineHeight: 24,
+    maxWidth: '90%',
+    lineHeight: 28,
+    fontSize: theme.FONTS.sizes.md,
   },
   footer: {
-    paddingBottom: theme.SPACING.xl,
+    paddingHorizontal: theme.SPACING.xl,
+    paddingBottom: theme.SPACING.xl * 2,
+    paddingTop: theme.SPACING.xl,
   },
   button: {
-    marginBottom: theme.SPACING.md,
+    backgroundColor: theme.COLORS.ui.accent,
+    shadowColor: theme.COLORS.ui.accent,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    elevation: 8,
   },
   confetti: {
     position: 'absolute',

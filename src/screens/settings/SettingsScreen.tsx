@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, Switch, Alert } from 'react-native';
-import { Typography, Card, Button } from '@/components/common';
+import { Typography, Card, Button, VideoBackground } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
 import { useAppState } from '@/contexts/AppStateContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -62,6 +62,7 @@ export const SettingsScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
+      <VideoBackground />
       <View style={styles.header}>
         <Typography variant="h1" style={styles.title}>
           Settings

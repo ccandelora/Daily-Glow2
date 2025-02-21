@@ -1,79 +1,129 @@
 import React from 'react';
-import { TouchableOpacity, StyleSheet, ViewStyle, TextStyle, StyleProp } from 'react-native';
+import { TouchableOpacity, StyleSheet, ViewStyle, TextStyle, ActivityIndicator, StyleProp } from 'react-native';
 import { Typography } from './Typography';
 import theme from '@/constants/theme';
 
 interface ButtonProps {
   title: string;
   onPress: () => void;
-  variant?: 'primary' | 'secondary';
-  style?: StyleProp<ViewStyle>;
-  textStyle?: StyleProp<TextStyle>;
+  variant?: 'primary' | 'secondary' | 'outline';
+  size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
+  loading?: boolean;
+  style?: ViewStyle;
+  textStyle?: TextStyle;
 }
 
 export const Button: React.FC<ButtonProps> = ({
   title,
   onPress,
   variant = 'primary',
+  size = 'medium',
+  disabled = false,
+  loading = false,
   style,
   textStyle,
-  disabled = false,
 }) => {
-  const getButtonStyle = (): StyleProp<ViewStyle> => {
-    const baseStyle = styles.button;
-    const variantStyle = variant === 'secondary' ? styles.secondaryButton : {};
-    const disabledStyle = disabled ? styles.disabledButton : {};
-    const customStyle = style || {};
-    
-    return [baseStyle, variantStyle, disabledStyle, customStyle];
-  };
-
-  const getTextStyle = (): StyleProp<TextStyle> => {
-    const baseStyle = styles.text;
-    const variantStyle = variant === 'secondary' ? styles.secondaryText : {};
-    const disabledStyle = disabled ? styles.disabledText : {};
-    const customStyle = textStyle || {};
-    
-    return [baseStyle, variantStyle, disabledStyle, customStyle];
-  };
-
   return (
     <TouchableOpacity
-      style={getButtonStyle()}
+      style={[
+        styles.base,
+        styles[variant],
+        styles[size],
+        disabled && styles.disabled,
+        style,
+      ]}
       onPress={onPress}
-      disabled={disabled}
-      activeOpacity={disabled ? 1 : 0.8}
+      disabled={disabled || loading}
     >
-      <Typography style={getTextStyle()}>{title}</Typography>
+      {loading ? (
+        <ActivityIndicator
+          color={variant === 'outline' ? theme.COLORS.primary.green : theme.COLORS.ui.background}
+          size="small"
+        />
+      ) : (
+        <Typography
+          variant="button"
+          style={[
+            styles.text,
+            styles[`${variant}Text` as keyof typeof styles] as TextStyle,
+            disabled && styles.disabledText,
+            textStyle,
+          ].filter(Boolean) as TextStyle}
+        >
+          {title}
+        </Typography>
+      )}
     </TouchableOpacity>
   );
 };
 
 const styles = StyleSheet.create({
-  button: {
-    backgroundColor: theme.COLORS.primary.green,
-    paddingVertical: theme.SPACING.sm,
-    paddingHorizontal: theme.SPACING.md,
-    borderRadius: theme.BORDER_RADIUS.md,
+  base: {
+    borderRadius: theme.BORDER_RADIUS.lg,
     alignItems: 'center',
     justifyContent: 'center',
+    flexDirection: 'row',
+    shadowColor: theme.COLORS.ui.accent,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  secondaryButton: {
+  primary: {
+    backgroundColor: theme.COLORS.ui.accent,
+    borderWidth: 0,
+    shadowColor: theme.COLORS.ui.accent,
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+  },
+  secondary: {
+    backgroundColor: 'rgba(65, 105, 225, 0.1)',
+    borderWidth: 1,
+    borderColor: theme.COLORS.ui.accent,
+  },
+  outline: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: theme.COLORS.primary.green,
+    borderColor: theme.COLORS.ui.border,
   },
-  disabledButton: {
+  small: {
+    paddingVertical: theme.SPACING.sm,
+    paddingHorizontal: theme.SPACING.lg,
+    minWidth: 100,
+  },
+  medium: {
+    paddingVertical: theme.SPACING.md,
+    paddingHorizontal: theme.SPACING.xl,
+    minWidth: 150,
+  },
+  large: {
+    paddingVertical: theme.SPACING.lg,
+    paddingHorizontal: theme.SPACING.xl * 1.5,
+    minWidth: 200,
+  },
+  disabled: {
     backgroundColor: theme.COLORS.ui.disabled,
-    borderColor: theme.COLORS.ui.disabled,
+    borderColor: 'transparent',
+    shadowOpacity: 0,
   },
   text: {
-    color: theme.COLORS.ui.background,
-    fontWeight: '600',
+    textAlign: 'center',
+  },
+  primaryText: {
+    color: theme.COLORS.ui.text,
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   secondaryText: {
-    color: theme.COLORS.primary.green,
+    color: theme.COLORS.ui.accent,
+    textShadowColor: theme.COLORS.ui.accent,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 4,
+  },
+  outlineText: {
+    color: theme.COLORS.ui.text,
   },
   disabledText: {
     color: theme.COLORS.ui.textSecondary,

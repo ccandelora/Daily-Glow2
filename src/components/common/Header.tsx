@@ -6,15 +6,20 @@ import { Typography } from './Typography';
 import theme from '@/constants/theme';
 
 interface HeaderProps {
-  title: string;
+  title?: string;
   onBack?: () => void;
-  rightElement?: React.ReactNode;
+  rightAction?: {
+    label: string;
+    onPress: () => void | Promise<void>;
+  };
+  showBranding?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   title,
   onBack,
-  rightElement,
+  rightAction,
+  showBranding = true,
 }) => {
   const insets = useSafeAreaInsets();
 
@@ -23,6 +28,19 @@ export const Header: React.FC<HeaderProps> = ({
       styles.container,
       { paddingTop: Math.max(insets.top, theme.SPACING.lg) }
     ]}>
+      {showBranding && (
+        <View style={styles.branding}>
+          <Typography 
+            variant="h1" 
+            style={styles.brandText}
+            glow="medium"
+            color={theme.COLORS.primary.green}
+          >
+            Daily Glow
+          </Typography>
+        </View>
+      )}
+      
       <View style={styles.content}>
         {onBack && (
           <TouchableOpacity
@@ -38,14 +56,34 @@ export const Header: React.FC<HeaderProps> = ({
           </TouchableOpacity>
         )}
         
-        <View style={styles.titleContainer}>
-          <Typography variant="h2" style={styles.title} numberOfLines={2}>
-            {title}
-          </Typography>
-        </View>
+        {title && (
+          <View style={styles.titleContainer}>
+            <Typography 
+              variant="h2" 
+              style={styles.title}
+              glow="soft"
+            >
+              {title}
+            </Typography>
+          </View>
+        )}
 
         <View style={styles.rightElement}>
-          {rightElement}
+          {rightAction && (
+            <TouchableOpacity
+              onPress={rightAction.onPress}
+              style={styles.rightActionButton}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Typography 
+                variant="body" 
+                style={styles.rightActionLabel}
+                glow="soft"
+              >
+                {rightAction.label}
+              </Typography>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </View>
@@ -54,15 +92,22 @@ export const Header: React.FC<HeaderProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: theme.COLORS.ui.background,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.COLORS.ui.border,
+    backgroundColor: 'transparent',
+    paddingBottom: theme.SPACING.md,
+  },
+  branding: {
+    alignItems: 'center',
+    marginBottom: theme.SPACING.md,
+    paddingHorizontal: theme.SPACING.lg,
+  },
+  brandText: {
+    fontSize: 36,
+    textAlign: 'center',
   },
   content: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: theme.SPACING.lg,
-    paddingBottom: theme.SPACING.md,
     minHeight: 44,
   },
   backButton: {
@@ -75,9 +120,16 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: 'left',
-    paddingRight: theme.SPACING.xl,
+    color: theme.COLORS.ui.text,
   },
   rightElement: {
     marginLeft: 'auto',
+  },
+  rightActionButton: {
+    padding: theme.SPACING.sm,
+  },
+  rightActionLabel: {
+    textAlign: 'center',
+    color: theme.COLORS.ui.text,
   },
 }); 

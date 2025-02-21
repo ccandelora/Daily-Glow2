@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Typography, Card, Button, Input, EmotionWheel, Header } from '@/components/common';
+import { Typography, Card, Button, Input, EmotionWheel, Header, AnimatedBackground } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
 import { useAppState } from '@/contexts/AppStateContext';
 import theme from '@/constants/theme';
@@ -77,13 +77,14 @@ export const CheckInScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
+      <AnimatedBackground intensity="medium" />
       <Header
         title="Daily Check-in"
         onBack={() => router.back()}
       />
 
-      <View style={styles.content}>
+      <ScrollView style={styles.content}>
         {step === 'initial' && (
           <Card style={styles.card}>
             <Typography variant="h3" style={styles.sectionTitle}>
@@ -168,8 +169,8 @@ export const CheckInScreen = () => {
             </View>
           </Card>
         )}
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 

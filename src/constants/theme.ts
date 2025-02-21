@@ -1,35 +1,37 @@
 export const COLORS = {
-  // Primary colors for emotions
+  // Primary colors for emotions (keeping these for emotional context)
   primary: {
-    red: '#FF6B6B',     // For negative emotions
-    green: '#4CAF50',   // For positive emotions
-    blue: '#2196F3',    // For calm emotions
-    yellow: '#FFC107',  // For energetic emotions
+    red: '#FF6B6B',     // Warm red for negative emotions
+    green: '#00C853',   // Vibrant green for positive emotions
+    blue: '#2979FF',    // Bright blue for calm emotions
+    yellow: '#FFD600',  // Bright yellow for energetic emotions
   },
   
-  // UI colors
+  // UI colors updated for dark theme with glowing accents
   ui: {
-    background: '#FFFFFF',
-    card: '#F5F5F5',
-    text: '#212121',
-    textSecondary: '#757575',
-    border: '#E0E0E0',
-    disabled: '#BDBDBD',
+    background: 'rgba(28, 14, 45, 0.95)',  // Dark purple background
+    card: 'rgba(38, 20, 60, 0.85)',        // Slightly lighter purple for cards
+    text: '#FFFFFF',                        // White text for contrast
+    textSecondary: 'rgba(255, 255, 255, 0.7)', // Semi-transparent white
+    border: 'rgba(82, 67, 194, 0.3)',      // Subtle purple border
+    disabled: 'rgba(82, 67, 194, 0.2)',    // Dimmed purple for disabled state
+    accent: '#4169E1',                     // Royal blue for accents
+    highlight: 'rgba(65, 105, 225, 0.15)', // Soft blue highlight
   },
 
-  // Status colors
+  // Status colors with glow effects
   status: {
-    success: '#4CD964',
-    error: '#FF3B30',
-    warning: '#FF9500',
-    info: '#5856D6',
+    success: '#00E676',
+    error: '#FF5252',
+    warning: '#FFD600',
+    info: '#4169E1',
   },
 
-  // Gradient colors
+  // Gradient colors for glow effects
   gradient: {
-    start: '#FF6B6B',
-    middle: '#4CD964',
-    end: '#5856D6',
+    start: 'rgba(65, 105, 225, 0.2)',  // Royal blue glow
+    middle: 'rgba(147, 112, 219, 0.15)', // Purple glow
+    end: 'rgba(28, 14, 45, 0.9)',     // Dark purple base
   },
 };
 
@@ -38,10 +40,10 @@ export const FONTS = {
     xs: 12,
     sm: 14,
     md: 16,
-    lg: 20,
-    xl: 24,
-    xxl: 32,
-    xxxl: 40,
+    lg: 22,
+    xl: 28,
+    xxl: 36,
+    xxxl: 44,
   },
   weights: {
     regular: '400' as const,
@@ -49,6 +51,11 @@ export const FONTS = {
     semibold: '600' as const,
     bold: '700' as const,
   },
+  // Adding font families for more sophistication
+  families: {
+    heading: 'System',
+    body: 'System',
+  }
 };
 
 export const SPACING = {

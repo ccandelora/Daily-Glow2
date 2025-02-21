@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Dimensions, ActivityIndicator, ViewStyle, TouchableOpacity } from 'react-native';
-import { Typography, Card, AnimatedMoodIcon, Button } from '@/components/common';
+import { Typography, Card, AnimatedMoodIcon, Button, AnimatedBackground, Header, VideoBackground } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
 import { useAppState } from '@/contexts/AppStateContext';
 import theme from '@/constants/theme';
@@ -160,190 +160,193 @@ export const InsightsScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Typography variant="h1" style={styles.title}>
-          Your Daily Glow Journey
-        </Typography>
-      </View>
-
-      <View style={styles.content}>
-        {/* Stats Overview */}
-        <View style={styles.statsRow}>
-          <Card style={styles.streakStatsCard}>
-            <Typography variant="h1" style={styles.statNumber}>
-              {stats.currentStreak}
-            </Typography>
-            <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
-              Day Streak
-            </Typography>
-          </Card>
-          <Card style={styles.completionStatsCard}>
-            <Typography variant="h1" style={styles.statNumber}>
-              {stats.completionRate}%
-            </Typography>
-            <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
-              Check-in Rate
-            </Typography>
-          </Card>
+    <View style={styles.container}>
+      <VideoBackground />
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.header}>
+          <Typography variant="h1" style={styles.title}>
+            Your Daily Glow Journey
+          </Typography>
         </View>
 
-        {/* Emotional Journey */}
-        <Card style={styles.journeyCard}>
-          <Typography variant="h3" style={styles.cardTitle}>
-            Your Emotional Journey
-          </Typography>
-          
-          <View style={styles.timeFilterRow}>
-            <TouchableOpacity 
-              style={[styles.filterButton, timeFilter === 'week' && styles.filterButtonActive]}
-              onPress={() => setTimeFilter('week')}
-            >
-              <Typography 
-                style={styles.filterText}
-                color={timeFilter === 'week' ? theme.COLORS.ui.background : theme.COLORS.ui.textSecondary}
-              >
-                Week
+        <View style={styles.content}>
+          {/* Stats Overview */}
+          <View style={styles.statsRow}>
+            <Card style={styles.streakStatsCard}>
+              <Typography variant="h1" style={styles.statNumber}>
+                {stats.currentStreak}
               </Typography>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.filterButton, timeFilter === 'month' && styles.filterButtonActive]}
-              onPress={() => setTimeFilter('month')}
-            >
-              <Typography 
-                style={styles.filterText}
-                color={timeFilter === 'month' ? theme.COLORS.ui.background : theme.COLORS.ui.textSecondary}
-              >
-                Month
+              <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
+                Day Streak
               </Typography>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[styles.filterButton, timeFilter === 'all' && styles.filterButtonActive]}
-              onPress={() => setTimeFilter('all')}
-            >
-              <Typography 
-                style={styles.filterText}
-                color={timeFilter === 'all' ? theme.COLORS.ui.background : theme.COLORS.ui.textSecondary}
-              >
-                All Time
+            </Card>
+            <Card style={styles.completionStatsCard}>
+              <Typography variant="h1" style={styles.statNumber}>
+                {stats.completionRate}%
               </Typography>
-            </TouchableOpacity>
+              <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
+                Check-in Rate
+              </Typography>
+            </Card>
           </View>
 
-          <View style={styles.emotionStats}>
-            {stats.emotionCategories.map((category) => (
-              <View key={category.id} style={styles.categorySection}>
-                <View style={styles.categoryHeader}>
-                  <AnimatedMoodIcon color={category.color} size={24}>
-                    <Typography>{getEmotionEmoji(category.id)}</Typography>
-                  </AnimatedMoodIcon>
-                  <Typography style={[styles.categoryLabel, { color: category.color }]}>
-                    {category.label}
-                  </Typography>
-                  <Typography style={styles.categoryCount}>
-                    ({category.totalCount})
-                  </Typography>
-                </View>
-                
-                <View style={styles.categoryBar}>
-                  <View
-                    style={[
-                      styles.categoryBarFill,
-                      { width: `${category.percentage}%`, backgroundColor: category.color }
-                    ]}
-                  />
-                  <Typography style={styles.categoryPercentage}>
-                    {category.percentage}%
-                  </Typography>
-                </View>
-
-                <View style={styles.secondaryEmotions}>
-                  {category.emotions.slice(1).map((emotion) => (
-                    <View key={emotion.id} style={styles.secondaryEmotion}>
-                      <Typography style={styles.secondaryEmotionLabel}>
-                        {emotion.label} ({emotion.count})
-                      </Typography>
-                      <View style={styles.secondaryEmotionBar}>
-                        <View
-                          style={[
-                            styles.secondaryEmotionBarFill,
-                            { width: `${(emotion.count / category.totalCount) * 100}%`, backgroundColor: emotion.color }
-                          ]}
-                        />
-                      </View>
-                    </View>
-                  ))}
-                </View>
-              </View>
-            ))}
-          </View>
-
-          <Typography 
-            variant="body" 
-            color={theme.COLORS.ui.textSecondary}
-            style={styles.emotionStatsFooter}
-          >
-            Based on {stats.filteredEntries.length} journal entries
-          </Typography>
-        </Card>
-
-        {/* AI Insights */}
-        <Card style={styles.insightsCard}>
-          <Typography variant="h3" style={styles.cardTitle}>
-            Personal Insights
-          </Typography>
-          {isLoadingInsights ? (
-            <ActivityIndicator color={theme.COLORS.primary.green} />
-          ) : aiInsights.length > 0 ? (
-            <>
-              {aiInsights.map((insight, index) => (
-                <Typography 
-                  key={index} 
-                  variant="body" 
-                  style={styles.insightText}
-                  color={theme.COLORS.ui.textSecondary}
-                >
-                  • {insight}
-                </Typography>
-              ))}
-              <Button
-                title="Refresh Insights"
-                onPress={generateAIInsights}
-                variant="secondary"
-                style={styles.refreshButton}
-              />
-            </>
-          ) : (
-            <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
-              Complete more check-ins to receive personalized insights!
+          {/* Emotional Journey */}
+          <Card style={styles.journeyCard}>
+            <Typography variant="h3" style={styles.cardTitle}>
+              Your Emotional Journey
             </Typography>
-          )}
-        </Card>
+            
+            <View style={styles.timeFilterRow}>
+              <TouchableOpacity 
+                style={[styles.filterButton, timeFilter === 'week' && styles.filterButtonActive]}
+                onPress={() => setTimeFilter('week')}
+              >
+                <Typography 
+                  style={styles.filterText}
+                  color={timeFilter === 'week' ? theme.COLORS.ui.background : theme.COLORS.ui.textSecondary}
+                >
+                  Week
+                </Typography>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.filterButton, timeFilter === 'month' && styles.filterButtonActive]}
+                onPress={() => setTimeFilter('month')}
+              >
+                <Typography 
+                  style={styles.filterText}
+                  color={timeFilter === 'month' ? theme.COLORS.ui.background : theme.COLORS.ui.textSecondary}
+                >
+                  Month
+                </Typography>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.filterButton, timeFilter === 'all' && styles.filterButtonActive]}
+                onPress={() => setTimeFilter('all')}
+              >
+                <Typography 
+                  style={styles.filterText}
+                  color={timeFilter === 'all' ? theme.COLORS.ui.background : theme.COLORS.ui.textSecondary}
+                >
+                  All Time
+                </Typography>
+              </TouchableOpacity>
+            </View>
 
-        {/* Journey Summary */}
-        <Card style={styles.summaryCard}>
-          <Typography variant="h3" style={styles.cardTitle}>
-            Your Progress
-          </Typography>
-          <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
-            {stats.totalEntries === 0 ? (
-              "Start your journey by completing your first check-in!"
-            ) : (
-              `You've logged ${stats.totalEntries} entries and maintained a ${stats.currentStreak}-day streak. Your emotional awareness is growing stronger each day!`
-            )}
-          </Typography>
-          {stats.emotionalGrowth > 0 && (
+            <View style={styles.emotionStats}>
+              {stats.emotionCategories.map((category) => (
+                <View key={category.id} style={styles.categorySection}>
+                  <View style={styles.categoryHeader}>
+                    <AnimatedMoodIcon color={category.color} size={24}>
+                      <Typography>{getEmotionEmoji(category.id)}</Typography>
+                    </AnimatedMoodIcon>
+                    <Typography style={styles.categoryLabel} color={category.color}>
+                      {category.label}
+                    </Typography>
+                    <Typography style={styles.categoryCount}>
+                      ({category.totalCount})
+                    </Typography>
+                  </View>
+                  
+                  <View style={styles.categoryBar}>
+                    <View
+                      style={[
+                        styles.categoryBarFill,
+                        { width: `${category.percentage}%`, backgroundColor: category.color }
+                      ]}
+                    />
+                    <Typography style={styles.categoryPercentage}>
+                      {category.percentage}%
+                    </Typography>
+                  </View>
+
+                  <View style={styles.secondaryEmotions}>
+                    {category.emotions.slice(1).map((emotion) => (
+                      <View key={emotion.id} style={styles.secondaryEmotion}>
+                        <Typography style={styles.secondaryEmotionLabel}>
+                          {emotion.label} ({emotion.count})
+                        </Typography>
+                        <View style={styles.secondaryEmotionBar}>
+                          <View
+                            style={[
+                              styles.secondaryEmotionBarFill,
+                              { width: `${(emotion.count / category.totalCount) * 100}%`, backgroundColor: emotion.color }
+                            ]}
+                          />
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              ))}
+            </View>
+
             <Typography 
               variant="body" 
-              style={styles.growthText}
-              color={theme.COLORS.primary.green}
+              color={theme.COLORS.ui.textSecondary}
+              style={styles.emotionStatsFooter}
             >
-              🌱 Your emotional well-being has improved by {Math.round(stats.emotionalGrowth * 100)}% since you started!
+              Based on {stats.filteredEntries.length} journal entries
             </Typography>
-          )}
-        </Card>
-      </View>
-    </ScrollView>
+          </Card>
+
+          {/* AI Insights */}
+          <Card style={styles.insightsCard}>
+            <Typography variant="h3" style={styles.cardTitle}>
+              Personal Insights
+            </Typography>
+            {isLoadingInsights ? (
+              <ActivityIndicator color={theme.COLORS.primary.green} />
+            ) : aiInsights.length > 0 ? (
+              <>
+                {aiInsights.map((insight, index) => (
+                  <Typography 
+                    key={index} 
+                    variant="body" 
+                    style={styles.insightText}
+                    color={theme.COLORS.ui.textSecondary}
+                  >
+                    • {insight}
+                  </Typography>
+                ))}
+                <Button
+                  title="Refresh Insights"
+                  onPress={generateAIInsights}
+                  variant="secondary"
+                  style={styles.refreshButton}
+                />
+              </>
+            ) : (
+              <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
+                Complete more check-ins to receive personalized insights!
+              </Typography>
+            )}
+          </Card>
+
+          {/* Journey Summary */}
+          <Card style={styles.summaryCard}>
+            <Typography variant="h3" style={styles.cardTitle}>
+              Your Progress
+            </Typography>
+            <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
+              {stats.totalEntries === 0 ? (
+                "Start your journey by completing your first check-in!"
+              ) : (
+                `You've logged ${stats.totalEntries} entries and maintained a ${stats.currentStreak}-day streak. Your emotional awareness is growing stronger each day!`
+              )}
+            </Typography>
+            {stats.emotionalGrowth > 0 && (
+              <Typography 
+                variant="body" 
+                style={styles.growthText}
+                color={theme.COLORS.primary.green}
+              >
+                🌱 Your emotional well-being has improved by {Math.round(stats.emotionalGrowth * 100)}% since you started!
+              </Typography>
+            )}
+          </Card>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -366,14 +369,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.COLORS.ui.background,
   },
+  scrollView: {
+    flex: 1,
+  },
   header: {
     padding: theme.SPACING.lg,
-    paddingTop: theme.SPACING.xxl,
+    paddingTop: 100,
   },
   title: {
+    color: theme.COLORS.ui.text,
     marginBottom: theme.SPACING.md,
-    fontSize: 32,
-    fontWeight: theme.FONTS.weights.bold,
+    fontSize: 34,
+    textAlign: 'center',
   },
   content: {
     padding: theme.SPACING.lg,
@@ -388,27 +395,52 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     padding: theme.SPACING.lg,
+    backgroundColor: theme.COLORS.ui.card,
+    borderRadius: theme.BORDER_RADIUS.lg,
+    shadowColor: theme.COLORS.primary.green,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   } as ViewStyle,
   completionStatsCard: {
     flex: 1,
     alignItems: 'center',
     padding: theme.SPACING.lg,
+    backgroundColor: theme.COLORS.ui.card,
+    borderRadius: theme.BORDER_RADIUS.lg,
+    shadowColor: theme.COLORS.primary.blue,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
   } as ViewStyle,
   statNumber: {
     marginBottom: theme.SPACING.xs,
     fontSize: 36,
     fontWeight: theme.FONTS.weights.bold,
     color: theme.COLORS.primary.green,
+    textShadowColor: 'rgba(0, 200, 83, 0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   journeyCard: {
     marginBottom: theme.SPACING.lg,
     padding: theme.SPACING.lg,
+    backgroundColor: theme.COLORS.ui.card,
+    borderRadius: theme.BORDER_RADIUS.lg,
+    shadowColor: theme.COLORS.ui.accent,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
   },
   cardTitle: {
     marginBottom: theme.SPACING.xl,
     fontSize: 24,
     fontWeight: theme.FONTS.weights.semibold,
     textAlign: 'center',
+    color: theme.COLORS.ui.text,
   },
   emotionStats: {
     gap: theme.SPACING.lg,
@@ -421,6 +453,13 @@ const styles = StyleSheet.create({
   insightsCard: {
     marginBottom: theme.SPACING.lg,
     padding: theme.SPACING.lg,
+    backgroundColor: theme.COLORS.ui.card,
+    borderRadius: theme.BORDER_RADIUS.lg,
+    shadowColor: theme.COLORS.primary.blue,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
   },
   insightText: {
     marginBottom: theme.SPACING.md,
@@ -432,10 +471,21 @@ const styles = StyleSheet.create({
   summaryCard: {
     padding: theme.SPACING.lg,
     marginBottom: theme.SPACING.xl,
+    backgroundColor: theme.COLORS.ui.card,
+    borderRadius: theme.BORDER_RADIUS.lg,
+    shadowColor: theme.COLORS.ui.accent,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
   },
   growthText: {
     marginTop: theme.SPACING.md,
     fontWeight: theme.FONTS.weights.semibold,
+    color: theme.COLORS.primary.green,
+    textShadowColor: 'rgba(0, 200, 83, 0.15)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   timeFilterRow: {
     flexDirection: 'row',
@@ -448,9 +498,19 @@ const styles = StyleSheet.create({
     paddingVertical: theme.SPACING.sm,
     borderRadius: theme.BORDER_RADIUS.lg,
     backgroundColor: theme.COLORS.ui.card,
+    shadowColor: theme.COLORS.ui.text,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   filterButtonActive: {
     backgroundColor: theme.COLORS.primary.green,
+    shadowColor: theme.COLORS.primary.green,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   filterText: {
     fontSize: 14,

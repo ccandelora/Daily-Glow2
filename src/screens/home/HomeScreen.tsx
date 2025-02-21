@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Typography, Card, Button, AnimatedMoodIcon, DailyChallenge } from '@/components/common';
+import { Typography, Card, Button, AnimatedMoodIcon, DailyChallenge, VideoBackground, Header } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
 import theme, { TIME_PERIODS } from '@/constants/theme';
 import { getEmotionById } from '@/constants/emotions';
 import { getCurrentTimePeriod } from '@/utils/dateTime';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const getEmotionDisplay = (entry: any) => {
   const emotion = entry.initial_emotion ? getEmotionById(entry.initial_emotion) : null;
@@ -44,7 +45,7 @@ const getEmotionEmoji = (entry: any) => {
   return '😐';
 };
 
-export const HomeScreen = () => {
+export default function HomeScreen() {
   const router = useRouter();
   const { getRecentEntries, getLatestEntryForPeriod } = useJournal();
   const currentPeriod = getCurrentTimePeriod();
@@ -53,273 +54,300 @@ export const HomeScreen = () => {
   const recentEntries = getRecentEntries(3);
 
   // Animation values
-  const headerAnim = React.useRef(new Animated.Value(0)).current;
-  const checkInAnim = React.useRef(new Animated.Value(50)).current;
-  const recentAnim = React.useRef(new Animated.Value(50)).current;
-  const actionsAnim = React.useRef(new Animated.Value(50)).current;
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+  const rotateAnim = React.useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.sequence([
-      // Fade in header
-      Animated.timing(headerAnim, {
-        toValue: 1,
-        duration: 500,
-        useNativeDriver: true,
-      }),
-      // Stagger other elements
-      Animated.stagger(150, [
-        Animated.spring(checkInAnim, {
-          toValue: 0,
-          tension: 50,
-          friction: 7,
-          useNativeDriver: true,
-        }),
-        Animated.spring(recentAnim, {
-          toValue: 0,
-          tension: 50,
-          friction: 7,
-          useNativeDriver: true,
-        }),
-        Animated.spring(actionsAnim, {
-          toValue: 0,
-          tension: 50,
-          friction: 7,
-          useNativeDriver: true,
-        }),
-      ]),
-    ]).start();
+    console.log('HomeScreen mounted - starting animations');
+    
+    // Fade in content
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
+
+    // Continuous rotation
+    const startRotation = () => {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(rotateAnim, {
+            toValue: 1,
+            duration: 30000, // 30 seconds per rotation
+            useNativeDriver: true,
+          }),
+          Animated.timing(rotateAnim, {
+            toValue: 0,
+            duration: 0,
+            useNativeDriver: true,
+          })
+        ])
+      ).start();
+    };
+
+    startRotation();
   }, []);
 
-  return (
-    <ScrollView 
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-    >
-      <Animated.View style={[styles.header, { opacity: headerAnim }]}>
-        <Typography variant="h1" style={styles.appTitle}>
-          Daily Glow
-        </Typography>
-        <Typography variant="h2" style={styles.greeting}>
-          {periodDetails.greeting} {periodDetails.icon}
-        </Typography>
-        <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
-          {new Date().toLocaleDateString('en-US', { 
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric'
-          })}
-        </Typography>
-      </Animated.View>
+  const spin = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg']
+  });
 
-      <Animated.View style={{
-        transform: [{ translateY: checkInAnim }],
-        opacity: headerAnim,
-      }}>
-        <Card style={styles.checkInCard}>
-          <Typography variant="h2" style={styles.cardTitle}>
-            {periodDetails.label} Check-in
+  return (
+    <View style={styles.container}>
+      <VideoBackground />
+      
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.contentContainer}
+      >
+        <Header showBranding={true} />
+        
+        <View style={styles.greetingSection}>
+          <Typography 
+            variant="h2" 
+            style={styles.greeting}
+            glow="medium"
+          >
+            {periodDetails.greeting}
           </Typography>
+          <Typography 
+            variant="body" 
+            style={styles.dateText}
+            color={theme.COLORS.ui.textSecondary}
+            glow="soft"
+          >
+            {new Date().toLocaleDateString('en-US', { 
+              weekday: 'long',
+              month: 'long',
+              day: 'numeric'
+            })}
+          </Typography>
+        </View>
+
+        <Card style={styles.checkInCard} variant="glow">
+          <Typography variant="h2" style={styles.cardTitle} glow="medium">
+            {`${periodDetails.label} Check-in`}
+          </Typography>
+          <Typography variant="body" style={styles.cardDescription}>
+            Take a moment to reflect on how you're feeling
+          </Typography>
+          <Button
+            title={`Start ${periodDetails.label.toLowerCase()} check-in ✨`}
+            onPress={() => router.push('/check-in')}
+            variant="primary"
+            style={styles.checkInButton}
+          />
+        </Card>
+
+        <Card style={styles.challengeCard} variant="glow">
+          <View style={styles.challengeHeader}>
+            <Typography variant="h2" style={styles.cardTitle} glow="medium">
+              Daily Challenge
+            </Typography>
+            <Typography variant="body" style={styles.points}>
+              Level 2 • 125 pts
+            </Typography>
+          </View>
+          <Typography variant="body" style={styles.cardDescription}>
+            Create a short story about your emotional journey today
+          </Typography>
+        </Card>
+
+        <Animated.View style={{ opacity: fadeAnim }}>
           {todayEntry ? (
-            <>
+            <Card variant="elevated" style={styles.checkInCard}>
+              <Typography variant="h2" style={styles.cardTitle}>
+                {periodDetails.label} Check-in
+              </Typography>
               <View style={styles.todayMood}>
-                <AnimatedMoodIcon
-                  color={getEmotionDisplay(todayEntry).color}
-                  active={true}
-                  size={48}
-                >
+                <View style={[styles.moodIconContainer, { backgroundColor: getEmotionDisplay(todayEntry).color }]}>
                   <Typography style={styles.moodIcon}>
                     {getEmotionEmoji(todayEntry)}
                   </Typography>
-                </AnimatedMoodIcon>
+                </View>
                 <View style={styles.todayMoodText}>
-                  <Typography variant="h3" color={getEmotionDisplay(todayEntry).color}>
+                  <Typography 
+                    variant="h3" 
+                    color={getEmotionDisplay(todayEntry).color}
+                  >
                     {getEmotionDisplay(todayEntry).label}
                   </Typography>
-                  <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
+                  <Typography 
+                    variant="body" 
+                    style={styles.gratitudePreview}
+                  >
                     {todayEntry.gratitude.length > 50 
                       ? todayEntry.gratitude.substring(0, 50) + '...'
                       : todayEntry.gratitude}
                   </Typography>
                 </View>
               </View>
-              <Button
-                title="View Entry"
-                onPress={() => router.push(`/(app)/journal/${todayEntry.id}`)}
-                variant="secondary"
-                style={styles.checkInButton}
-              />
-            </>
-          ) : (
-            <>
-              <Typography variant="body" color={theme.COLORS.ui.textSecondary} style={styles.cardSubtitle}>
-                How are you feeling this {periodDetails.label.toLowerCase()}?
-              </Typography>
-              <Button
-                title={`Start ${periodDetails.label} Check-in`}
-                onPress={() => router.push('/(app)/check-in')}
-                style={styles.checkInButton}
-              />
-            </>
-          )}
-        </Card>
-        <DailyChallenge />
-      </Animated.View>
-
-      <Animated.View style={{
-        transform: [{ translateY: recentAnim }],
-        opacity: headerAnim,
-      }}>
-        <Card style={styles.recentEntriesCard}>
-          <View style={styles.cardHeader}>
-            <Typography variant="h3">Recent Entries</Typography>
-            <Button
-              title="View All"
-              variant="secondary"
-              onPress={() => router.push('/(app)/journal')}
-            />
-          </View>
-          {recentEntries.length > 0 ? (
-            recentEntries.map(entry => (
               <TouchableOpacity 
-                key={entry.id} 
-                style={styles.entryItem}
-                onPress={() => router.push(`/(app)/journal/${entry.id}`)}
+                style={styles.viewEntryButton}
+                onPress={() => router.push(`/(app)/journal/${todayEntry.id}`)}
               >
-                <View style={styles.entryItemLeft}>
-                  <Typography style={styles.entryIcon}>
-                    {getEmotionEmoji(entry)}
-                  </Typography>
-                  <View>
-                    <Typography variant="body" color={getEmotionDisplay(entry).color}>
-                      {getEmotionDisplay(entry).label}
-                    </Typography>
-                    <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
-                      {entry.date.toLocaleDateString('en-US', { 
-                        month: 'short',
-                        day: 'numeric'
-                      })}
-                    </Typography>
-                  </View>
-                </View>
-                <Typography 
-                  variant="body" 
-                  color={theme.COLORS.ui.textSecondary}
-                  style={styles.entryPreview}
-                >
-                  {entry.gratitude.length > 30 
-                    ? entry.gratitude.substring(0, 30) + '...'
-                    : entry.gratitude}
+                <Typography style={styles.viewEntryText}>
+                  View full entry →
                 </Typography>
               </TouchableOpacity>
-            ))
+            </Card>
           ) : (
-            <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
-              No entries yet. Start your journey by doing a check-in.
-            </Typography>
+            <Card variant="elevated" style={styles.checkInCard}>
+              <Typography variant="h2" style={styles.cardTitle}>
+                {periodDetails.label} Check-in
+              </Typography>
+              <Typography 
+                variant="body" 
+                style={styles.cardSubtitle}
+              >
+                Take a moment to reflect on how you're feeling
+              </Typography>
+              <TouchableOpacity 
+                style={styles.startCheckInButton}
+                onPress={() => router.push('/(app)/check-in')}
+              >
+                <View style={styles.startCheckInContent}>
+                  <Typography style={styles.startCheckInText}>
+                    Start {periodDetails.label.toLowerCase()} check-in
+                  </Typography>
+                  <Typography style={styles.startCheckInEmoji}>
+                    ✨
+                  </Typography>
+                </View>
+              </TouchableOpacity>
+            </Card>
           )}
-        </Card>
-      </Animated.View>
+          <DailyChallenge style={styles.challengeCard} />
+        </Animated.View>
 
-      <Animated.View style={[
-        styles.quickActions,
-        {
-          transform: [{ translateY: actionsAnim }],
-          opacity: headerAnim,
-        }
-      ]}>
-        <Typography variant="h3" style={styles.sectionTitle}>
-          Quick Actions
-        </Typography>
-        <View style={styles.actionButtons}>
-          <Button
-            title="New Entry"
-            onPress={() => router.push('/(app)/check-in')}
-            style={styles.actionButton}
-          />
-          <Button
-            title="Journal"
-            onPress={() => router.push('/(app)/journal')}
-            style={styles.actionButton}
-          />
-          <Button
-            title="Insights"
-            onPress={() => router.push('/(app)/insights')}
-            style={styles.actionButton}
-          />
-        </View>
-      </Animated.View>
-    </ScrollView>
+        <Animated.View style={{ opacity: fadeAnim }}>
+          <Card style={styles.recentEntriesCard}>
+            <View style={styles.cardHeader}>
+              <Typography variant="h3">Recent Entries</Typography>
+              <Button
+                title="View All"
+                variant="secondary"
+                onPress={() => router.push('/(app)/journal')}
+              />
+            </View>
+            {recentEntries.length > 0 ? (
+              recentEntries.map(entry => (
+                <TouchableOpacity 
+                  key={entry.id} 
+                  style={styles.entryItem}
+                  onPress={() => router.push(`/(app)/journal/${entry.id}`)}
+                >
+                  <View style={styles.entryItemLeft}>
+                    <Typography style={styles.entryIcon}>
+                      {getEmotionEmoji(entry)}
+                    </Typography>
+                    <View>
+                      <Typography variant="body" color={getEmotionDisplay(entry).color}>
+                        {getEmotionDisplay(entry).label}
+                      </Typography>
+                      <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
+                        {entry.date.toLocaleDateString('en-US', { 
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </Typography>
+                    </View>
+                  </View>
+                  <Typography 
+                    variant="body" 
+                    color={theme.COLORS.ui.textSecondary}
+                    style={styles.entryPreview}
+                  >
+                    {entry.gratitude.length > 30 
+                      ? entry.gratitude.substring(0, 30) + '...'
+                      : entry.gratitude}
+                  </Typography>
+                </TouchableOpacity>
+              ))
+            ) : (
+              <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
+                No entries yet. Start your journey by doing a check-in.
+              </Typography>
+            )}
+          </Card>
+        </Animated.View>
+      </ScrollView>
+    </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.COLORS.ui.background,
   },
-  contentContainer: {
-    flexGrow: 1,
-  },
-  header: {
-    padding: theme.SPACING.lg,
-    paddingBottom: theme.SPACING.md,
-    paddingTop: theme.SPACING.xxl + theme.SPACING.xl,
-  },
-  appTitle: {
-    fontSize: 38,
-    fontWeight: theme.FONTS.weights.bold,
-    color: theme.COLORS.primary.green,
-    marginBottom: theme.SPACING.xs,
-  },
-  greeting: {
-    fontSize: 28,
-    fontWeight: theme.FONTS.weights.semibold,
-    color: theme.COLORS.ui.text,
-    marginBottom: theme.SPACING.xs,
-  },
-  title: {
-    marginBottom: theme.SPACING.xs,
-    fontSize: theme.FONTS.sizes.xxl,
-    fontWeight: theme.FONTS.weights.bold,
-    color: theme.COLORS.ui.text,
-    flexWrap: 'wrap',
-    width: '100%',
-  },
-  checkInCard: {
-    margin: theme.SPACING.lg,
-    padding: theme.SPACING.lg,
-  },
-  cardTitle: {
-    marginBottom: theme.SPACING.sm,
-  },
-  cardSubtitle: {
-    marginBottom: theme.SPACING.lg,
-  },
-  todayMood: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: theme.SPACING.md,
-  },
-  todayMoodText: {
-    marginLeft: theme.SPACING.md,
+  scrollView: {
     flex: 1,
   },
-  moodIcon: {
-    fontSize: 24,
+  contentContainer: {
+    paddingBottom: theme.SPACING.xl,
+  },
+  greetingSection: {
+    paddingHorizontal: theme.SPACING.lg,
+    marginBottom: theme.SPACING.xl,
+  },
+  greeting: {
+    marginBottom: theme.SPACING.xs,
+    textAlign: 'center',
+  },
+  dateText: {
+    textAlign: 'center',
+    fontSize: theme.FONTS.sizes.lg,
+  },
+  checkInCard: {
+    marginHorizontal: theme.SPACING.lg,
+    marginBottom: theme.SPACING.lg,
+    padding: theme.SPACING.xl,
+  },
+  challengeCard: {
+    marginHorizontal: theme.SPACING.lg,
+    padding: theme.SPACING.xl,
+  },
+  cardTitle: {
+    marginBottom: theme.SPACING.md,
+    textAlign: 'left',
+  },
+  cardDescription: {
+    marginBottom: theme.SPACING.lg,
+    color: theme.COLORS.ui.textSecondary,
   },
   checkInButton: {
     marginTop: theme.SPACING.md,
   },
+  challengeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: theme.SPACING.md,
+  },
+  points: {
+    color: theme.COLORS.primary.green,
+  },
   recentEntriesCard: {
     margin: theme.SPACING.lg,
-    marginTop: 0,
+    marginTop: theme.SPACING.md,
     padding: theme.SPACING.lg,
+    backgroundColor: theme.COLORS.ui.background,
+    borderRadius: theme.BORDER_RADIUS.lg,
+    shadowColor: theme.COLORS.ui.text,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: `${theme.COLORS.ui.border}30`,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.SPACING.md,
+    marginBottom: theme.SPACING.lg,
   },
   entryItem: {
     flexDirection: 'row',
@@ -327,7 +355,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: theme.SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: theme.COLORS.ui.border,
+    borderBottomColor: `${theme.COLORS.ui.border}20`,
+    marginBottom: theme.SPACING.sm,
   },
   entryItemLeft: {
     flexDirection: 'row',
@@ -336,28 +365,79 @@ const styles = StyleSheet.create({
   },
   entryIcon: {
     fontSize: 24,
+    width: 40,
+    height: 40,
+    textAlign: 'center',
+    lineHeight: 40,
+    backgroundColor: `${theme.COLORS.primary.green}10`,
+    borderRadius: 20,
+    overflow: 'hidden',
     marginRight: theme.SPACING.md,
   },
   entryPreview: {
     flex: 1,
     marginLeft: theme.SPACING.md,
-    textAlign: 'right',
+    color: theme.COLORS.ui.textSecondary,
+    fontSize: 14,
   },
-  quickActions: {
+  gratitudePreview: {
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: theme.SPACING.xs,
+    color: theme.COLORS.ui.textSecondary,
+  },
+  viewEntryButton: {
+    marginTop: theme.SPACING.md,
+    paddingVertical: theme.SPACING.sm,
+    alignItems: 'center',
+  },
+  viewEntryText: {
+    color: theme.COLORS.primary.green,
+    fontSize: 16,
+    fontWeight: theme.FONTS.weights.medium,
+  },
+  startCheckInButton: {
+    backgroundColor: theme.COLORS.primary.green,
     padding: theme.SPACING.lg,
+    borderRadius: theme.BORDER_RADIUS.lg,
+    marginTop: theme.SPACING.md,
   },
-  sectionTitle: {
+  startCheckInContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: theme.SPACING.sm,
+  },
+  startCheckInText: {
+    color: theme.COLORS.ui.background,
+    fontSize: 16,
+    fontWeight: theme.FONTS.weights.medium,
+  },
+  startCheckInEmoji: {
+    fontSize: 20,
+  },
+  todayMood: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: theme.SPACING.md,
   },
-  actionButtons: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginHorizontal: -theme.SPACING.xs,
+  moodIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    overflow: 'hidden',
+    marginRight: theme.SPACING.md,
   },
-  actionButton: {
+  moodIcon: {
+    fontSize: 24,
+    textAlign: 'center',
+    lineHeight: 40,
+  },
+  todayMoodText: {
     flex: 1,
-    minWidth: '30%',
-    marginHorizontal: theme.SPACING.xs,
-    marginBottom: theme.SPACING.sm,
+  },
+  cardSubtitle: {
+    marginBottom: theme.SPACING.md,
+    color: theme.COLORS.ui.textSecondary,
   },
 }); 
