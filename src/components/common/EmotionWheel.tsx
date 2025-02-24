@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Dimensions, ViewStyle } from 'react-native';
 import { Typography } from './Typography';
 import theme from '@/constants/theme';
 import { Emotion, primaryEmotions, getAllEmotions } from '@/constants/emotions';
@@ -11,6 +11,7 @@ interface EmotionWheelProps {
   selectedEmotion: string | undefined;
   type?: 'primary' | 'secondary';
   primaryEmotion?: string;
+  style?: ViewStyle;
 }
 
 export const EmotionWheel: React.FC<EmotionWheelProps> = ({
@@ -18,6 +19,7 @@ export const EmotionWheel: React.FC<EmotionWheelProps> = ({
   selectedEmotion,
   type = 'primary',
   primaryEmotion,
+  style,
 }) => {
   const getEmotionsToShow = () => {
     if (type === 'primary') {
@@ -78,7 +80,7 @@ export const EmotionWheel: React.FC<EmotionWheelProps> = ({
   const emotions = getEmotionsToShow();
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]}>
       {emotions.map((emotion) => (
         <TouchableOpacity
           key={emotion.id}
