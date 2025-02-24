@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Typography, Input, Button, Card } from '@/components/common';
+import { Typography, Input, Button, Card, VideoBackground } from '@/components/common';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppState } from '@/contexts/AppStateContext';
 import theme from '@/constants/theme';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export const SignInScreen = () => {
   const router = useRouter();
@@ -31,63 +32,82 @@ export const SignInScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Typography variant="h1" style={styles.title}>
-          Welcome Back
-        </Typography>
-        <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
-          Sign in to continue your journey
-        </Typography>
-      </View>
+      <VideoBackground />
+      
+      {/* Dark overlay gradient */}
+      <LinearGradient
+        colors={[
+          'rgba(28, 14, 45, 0.8)',
+          'rgba(28, 14, 45, 0.6)',
+          'rgba(28, 14, 45, 0.8)',
+        ]}
+        style={StyleSheet.absoluteFill}
+      />
 
-      <Card style={styles.card}>
-        <Input
-          label="Email"
-          value={email}
-          onChangeText={setEmail}
-          placeholder="Enter your email"
-          autoCapitalize="none"
-          keyboardType="email-address"
-          style={styles.input}
-        />
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Typography variant="h1" style={styles.title} glow="strong">
+            Welcome Back
+          </Typography>
+          <Typography variant="body" style={styles.subtitle} glow="medium">
+            Sign in to continue your journey
+          </Typography>
+        </View>
 
-        <Input
-          label="Password"
-          value={password}
-          onChangeText={setPassword}
-          placeholder="Enter your password"
-          secureTextEntry
-          style={styles.input}
-        />
+        <Card style={styles.card} variant="glow">
+          <Input
+            label="Email"
+            value={email}
+            onChangeText={setEmail}
+            placeholder="Enter your email"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            style={styles.input}
+          />
 
-        <TouchableOpacity
-          onPress={() => router.push('/(auth)/forgot-password')}
-          style={styles.forgotPassword}
-        >
-          <Typography
-            variant="caption"
-            color={theme.COLORS.primary.green}
+          <Input
+            label="Password"
+            value={password}
+            onChangeText={setPassword}
+            placeholder="Enter your password"
+            secureTextEntry
+            style={styles.input}
+          />
+
+          <TouchableOpacity
+            onPress={() => router.push('/(auth)/forgot-password')}
+            style={styles.forgotPassword}
           >
-            Forgot Password?
-          </Typography>
-        </TouchableOpacity>
+            <Typography
+              variant="caption"
+              color={theme.COLORS.primary.green}
+              glow="soft"
+            >
+              Forgot Password?
+            </Typography>
+          </TouchableOpacity>
 
-        <Button
-          title="Sign In"
-          onPress={handleSignIn}
-          style={styles.button}
-        />
-      </Card>
+          <Button
+            title="Sign In"
+            onPress={handleSignIn}
+            style={styles.button}
+            variant="primary"
+          />
+        </Card>
 
-      <View style={styles.footer}>
-        <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
-          Don't have an account?{' '}
-        </Typography>
-        <TouchableOpacity onPress={() => router.replace('/(auth)/sign-up')}>
-          <Typography color={theme.COLORS.primary.green}>
-            Sign Up
+        <View style={styles.footer}>
+          <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
+            Don't have an account?{' '}
           </Typography>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/(auth)/sign-up')}>
+            <Typography 
+              color={theme.COLORS.primary.green}
+              glow="medium"
+            >
+              Sign Up
+            </Typography>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -97,16 +117,30 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.COLORS.ui.background,
+  },
+  content: {
+    flex: 1,
     padding: theme.SPACING.lg,
+    justifyContent: 'center',
   },
   header: {
     marginBottom: theme.SPACING.xl,
+    alignItems: 'center',
   },
   title: {
     marginBottom: theme.SPACING.sm,
+    textAlign: 'center',
+    fontSize: theme.FONTS.sizes.xxxl,
+    color: theme.COLORS.ui.text,
+  },
+  subtitle: {
+    textAlign: 'center',
+    color: theme.COLORS.ui.textSecondary,
+    maxWidth: '80%',
   },
   card: {
     padding: theme.SPACING.lg,
+    backgroundColor: 'rgba(38, 20, 60, 0.85)',
   },
   input: {
     marginBottom: theme.SPACING.md,
@@ -117,6 +151,12 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: theme.SPACING.md,
+    backgroundColor: theme.COLORS.ui.accent,
+    shadowColor: theme.COLORS.ui.accent,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    elevation: 8,
   },
   footer: {
     flexDirection: 'row',

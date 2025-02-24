@@ -1,46 +1,90 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { Typography } from './Typography';
-import theme from '../../constants/theme';
+import theme from '@/constants/theme';
 
 interface HeaderProps {
-  title: string;
+  title?: string;
   onBack?: () => void;
   rightAction?: {
     label: string;
-    onPress: () => void;
+    onPress: () => void | Promise<void>;
   };
+  showBranding?: boolean;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   title,
   onBack,
   rightAction,
+  showBranding = true,
 }) => {
-  return (
-    <View style={styles.container}>
-      <View style={styles.leftContainer}>
-        {onBack && (
-          <TouchableOpacity onPress={onBack} style={styles.backButton}>
-            <Typography>←</Typography>
-          </TouchableOpacity>
-        )}
-      </View>
-      
-      <View style={styles.titleContainer}>
-        <Typography variant="h2" style={styles.title}>
-          {title}
-        </Typography>
-      </View>
+  const insets = useSafeAreaInsets();
 
-      <View style={styles.rightContainer}>
-        {rightAction && (
-          <TouchableOpacity onPress={rightAction.onPress}>
-            <Typography color={theme.COLORS.primary.green}>
-              {rightAction.label}
-            </Typography>
+  return (
+    <View style={[
+      styles.container,
+      { paddingTop: Math.max(insets.top, theme.SPACING.lg) }
+    ]}>
+      {showBranding && (
+        <View style={styles.branding}>
+          <Typography 
+            variant="h1" 
+            style={styles.brandText}
+            glow="medium"
+            color={theme.COLORS.primary.green}
+          >
+            Daily Glow
+          </Typography>
+        </View>
+      )}
+      
+      <View style={styles.content}>
+        {onBack && (
+          <TouchableOpacity
+            onPress={onBack}
+            style={styles.backButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons
+              name="chevron-back"
+              size={28}
+              color={theme.COLORS.ui.text}
+            />
           </TouchableOpacity>
         )}
+        
+        {title && (
+          <View style={styles.titleContainer}>
+            <Typography 
+              variant="h2" 
+              style={styles.title}
+              glow="soft"
+            >
+              {title}
+            </Typography>
+          </View>
+        )}
+
+        <View style={styles.rightElement}>
+          {rightAction && (
+            <TouchableOpacity
+              onPress={rightAction.onPress}
+              style={styles.rightActionButton}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Typography 
+                variant="body" 
+                style={styles.rightActionLabel}
+                glow="soft"
+              >
+                {rightAction.label}
+              </Typography>
+            </TouchableOpacity>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -48,30 +92,44 @@ export const Header: React.FC<HeaderProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
+    backgroundColor: 'transparent',
+    paddingBottom: theme.SPACING.md,
+  },
+  branding: {
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: theme.SPACING.md,
-    paddingVertical: theme.SPACING.lg,
-    backgroundColor: theme.COLORS.ui.background,
+    marginBottom: theme.SPACING.md,
+    paddingHorizontal: theme.SPACING.lg,
   },
-  leftContainer: {
-    flex: 1,
-    alignItems: 'flex-start',
-  },
-  titleContainer: {
-    flex: 2,
-    alignItems: 'center',
-  },
-  rightContainer: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
-  title: {
+  brandText: {
+    fontSize: 36,
     textAlign: 'center',
   },
+  content: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: theme.SPACING.lg,
+    minHeight: 44,
+  },
   backButton: {
-    padding: theme.SPACING.sm,
+    marginRight: theme.SPACING.sm,
     marginLeft: -theme.SPACING.sm,
+  },
+  titleContainer: {
+    flex: 1,
+    marginHorizontal: theme.SPACING.sm,
+  },
+  title: {
+    textAlign: 'left',
+    color: theme.COLORS.ui.text,
+  },
+  rightElement: {
+    marginLeft: 'auto',
+  },
+  rightActionButton: {
+    padding: theme.SPACING.sm,
+  },
+  rightActionLabel: {
+    textAlign: 'center',
+    color: theme.COLORS.ui.text,
   },
 }); 

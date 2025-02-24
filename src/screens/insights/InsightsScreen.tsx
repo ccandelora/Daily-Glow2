@@ -1,154 +1,367 @@
-import React, { useMemo } from 'react';
-import { View, StyleSheet, ScrollView, Dimensions } from 'react-native';
-import { Typography, Card, AnimatedMoodIcon } from '@/components/common';
+import React, { useMemo, useState, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, Dimensions, ActivityIndicator, ViewStyle, TouchableOpacity } from 'react-native';
+import { Typography, Card, AnimatedMoodIcon, Button, AnimatedBackground, Header, VideoBackground } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
+import { useAppState } from '@/contexts/AppStateContext';
 import theme from '@/constants/theme';
+import { getEmotionById, primaryEmotions } from '@/constants/emotions';
+import { generateInsights } from '@/utils/ai';
 
 const DAYS_IN_WEEK = 7;
 const screenWidth = Dimensions.get('window').width;
 
+interface EmotionStats {
+  id: string;
+  label: string;
+  count: number;
+  percentage: number;
+  color: string;
+}
+
+type TimeFilter = 'week' | 'month' | 'all';
+
+interface EmotionCategory {
+  id: string;
+  label: string;
+  color: string;
+  emotions: EmotionStats[];
+  totalCount: number;
+  percentage: number;
+}
+
+const calculateEmotionalGrowth = (journalEntries: any[]) => {
+  if (journalEntries.length < 2) return 0;
+  
+  // Compare emotional states between first and last entries
+  const firstEntry = journalEntries[journalEntries.length - 1];
+  const lastEntry = journalEntries[0];
+  
+  return lastEntry.emotional_shift - firstEntry.emotional_shift;
+};
+
 export const InsightsScreen = () => {
   const { entries } = useJournal();
+  const { setLoading } = useAppState();
+  const [aiInsights, setAiInsights] = useState<string[]>([]);
+  const [isLoadingInsights, setIsLoadingInsights] = useState(false);
+  const [timeFilter, setTimeFilter] = useState<TimeFilter>('week');
 
   const stats = useMemo(() => {
     const now = new Date();
-    const lastWeek = new Date(now.getTime() - DAYS_IN_WEEK * 24 * 60 * 60 * 1000);
-    const recentEntries = entries.filter(entry => entry.date >= lastWeek);
+    const getFilterDate = () => {
+      switch (timeFilter) {
+        case 'week':
+          return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        case 'month':
+          return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        default:
+          return new Date(0); // all time
+      }
+    };
 
-    // Calculate mood distribution
-    const moodCounts = entries.reduce((acc, entry) => {
-      acc[entry.mood] = (acc[entry.mood] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const filterDate = getFilterDate();
+    const filteredEntries = entries.filter(entry => entry.date >= filterDate);
+
+    // Calculate both initial and secondary emotion distributions
+    const emotionCounts: Record<string, number> = {};
+    filteredEntries.forEach(entry => {
+      emotionCounts[entry.initial_emotion] = (emotionCounts[entry.initial_emotion] || 0) + 1;
+      if (entry.secondary_emotion) {
+        emotionCounts[entry.secondary_emotion] = (emotionCounts[entry.secondary_emotion] || 0) + 1;
+      }
+    });
+
+    const total = Object.values(emotionCounts).reduce((a, b) => a + b, 0);
+
+    // Group emotions by primary categories
+    const emotionCategories: EmotionCategory[] = primaryEmotions.map(category => {
+      const categoryEmotions: EmotionStats[] = [
+        // Include the primary emotion itself
+        {
+          id: category.id,
+          label: category.label,
+          count: emotionCounts[category.id] || 0,
+          percentage: Math.round(((emotionCounts[category.id] || 0) / total) * 100),
+          color: category.color,
+        },
+        // Include secondary emotions
+        ...category.emotions.map(emotion => ({
+          id: emotion.id,
+          label: emotion.label,
+          count: emotionCounts[emotion.id] || 0,
+          percentage: Math.round(((emotionCounts[emotion.id] || 0) / total) * 100),
+          color: emotion.color,
+        }))
+      ].filter(emotion => emotion.count > 0);
+
+      const totalCount = categoryEmotions.reduce((sum, emotion) => sum + emotion.count, 0);
+      const percentage = Math.round((totalCount / total) * 100);
+
+      return {
+        id: category.id,
+        label: category.label,
+        color: category.color,
+        emotions: categoryEmotions.sort((a, b) => b.count - a.count),
+        totalCount,
+        percentage,
+      };
+    }).filter(category => category.totalCount > 0)
+      .sort((a, b) => b.totalCount - a.totalCount);
 
     // Calculate streak
     let currentStreak = 0;
     let date = new Date();
+    
+    // Count back from today until we find a day without entries
     while (true) {
-      const entry = entries.find(e => e.date.toDateString() === date.toDateString());
-      if (!entry) break;
+      const dayEntries = entries.filter(e => 
+        e.date.getFullYear() === date.getFullYear() &&
+        e.date.getMonth() === date.getMonth() &&
+        e.date.getDate() === date.getDate()
+      );
+      
+      if (dayEntries.length === 0) break;
       currentStreak++;
       date.setDate(date.getDate() - 1);
     }
 
-    // Calculate completion rate
-    const completionRate = (recentEntries.length / DAYS_IN_WEEK) * 100;
+    // Calculate completion rate (entries per day in the last week)
+    const completionRate = (filteredEntries.length / (DAYS_IN_WEEK * 3)) * 100; // 3 possible entries per day
+
+    // Calculate emotional growth
+    const emotionalGrowth = calculateEmotionalGrowth(entries);
 
     return {
-      moodCounts,
+      emotionCategories,
       currentStreak,
       completionRate: Math.round(completionRate),
       totalEntries: entries.length,
+      emotionalGrowth,
+      filteredEntries,
     };
+  }, [entries, timeFilter]);
+
+  useEffect(() => {
+    if (entries.length > 0 && !aiInsights.length) {
+      generateAIInsights();
+    }
   }, [entries]);
 
-  const renderMoodDistribution = () => {
-    const total = Object.values(stats.moodCounts).reduce((a, b) => a + b, 0);
-    if (total === 0) return null;
-
-    return (
-      <View style={styles.moodDistribution}>
-        {['great', 'good', 'okay', 'bad'].map(mood => {
-          const count = stats.moodCounts[mood] || 0;
-          const percentage = Math.round((count / total) * 100);
-          const width = Math.max((percentage / 100) * (screenWidth - theme.SPACING.lg * 4), 30);
-
-          return (
-            <View key={mood} style={styles.moodRow}>
-              <View style={styles.moodLabel}>
-                <AnimatedMoodIcon
-                  color={theme.COLORS.primary[
-                    mood === 'great' ? 'green' :
-                    mood === 'good' ? 'blue' :
-                    mood === 'okay' ? 'yellow' : 'red'
-                  ]}
-                  size={24}
-                >
-                  <Typography>
-                    {mood === 'great' ? '😊' :
-                     mood === 'good' ? '🙂' :
-                     mood === 'okay' ? '😐' : '😕'}
-                  </Typography>
-                </AnimatedMoodIcon>
-                <Typography style={styles.moodText}>
-                  {mood.charAt(0).toUpperCase() + mood.slice(1)}
-                </Typography>
-              </View>
-              <View style={styles.percentageBar}>
-                <View
-                  style={[
-                    styles.percentageFill,
-                    {
-                      width,
-                      backgroundColor: theme.COLORS.primary[
-                        mood === 'great' ? 'green' :
-                        mood === 'good' ? 'blue' :
-                        mood === 'okay' ? 'yellow' : 'red'
-                      ],
-                    },
-                  ]}
-                />
-                <Typography style={styles.percentageText}>
-                  {percentage}%
-                </Typography>
-              </View>
-            </View>
-          );
-        })}
-      </View>
-    );
+  const generateAIInsights = async () => {
+    setIsLoadingInsights(true);
+    try {
+      const insights = await generateInsights(entries);
+      setAiInsights(insights);
+    } catch (error) {
+      console.error('Failed to generate insights:', error);
+    } finally {
+      setIsLoadingInsights(false);
+    }
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Typography variant="h1" style={styles.title}>
-          Insights
-        </Typography>
-      </View>
-
-      <View style={styles.content}>
-        <View style={styles.statsRow}>
-          <Card style={styles.statsCard}>
-            <Typography variant="h1" style={styles.statNumber}>
-              {stats.currentStreak}
-            </Typography>
-            <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
-              Day Streak
-            </Typography>
-          </Card>
-          <Card style={styles.statsCard}>
-            <Typography variant="h1" style={styles.statNumber}>
-              {stats.completionRate}%
-            </Typography>
-            <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
-              Weekly Rate
-            </Typography>
-          </Card>
+    <View style={styles.container}>
+      <VideoBackground />
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.header}>
+          <Typography variant="h1" style={styles.title}>
+            Your Daily Glow Journey
+          </Typography>
         </View>
 
-        <Card style={styles.moodCard}>
-          <Typography variant="h3" style={styles.cardTitle}>
-            Mood Distribution
-          </Typography>
-          {renderMoodDistribution()}
-        </Card>
+        <View style={styles.content}>
+          {/* Stats Overview */}
+          <View style={styles.statsRow}>
+            <Card style={StyleSheet.flatten([styles.streakStatsCard])} variant="glow">
+              <Typography variant="h1" style={styles.statNumber}>
+                {stats.currentStreak}
+              </Typography>
+              <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
+                Day Streak
+              </Typography>
+            </Card>
+            <Card style={StyleSheet.flatten([styles.completionStatsCard])} variant="glow">
+              <Typography variant="h1" style={styles.statNumber}>
+                {stats.completionRate}%
+              </Typography>
+              <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
+                Check-in Rate
+              </Typography>
+            </Card>
+          </View>
 
-        <Card style={styles.insightsCard}>
-          <Typography variant="h3" style={styles.cardTitle}>
-            Your Journey
-          </Typography>
-          <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
-            {stats.totalEntries === 0 ? (
-              "Start your journey by completing your first check-in!"
+          {/* Emotional Journey */}
+          <Card style={StyleSheet.flatten([styles.journeyCard])} variant="glow">
+            <Typography variant="h3" style={styles.cardTitle}>
+              Your Emotional Journey
+            </Typography>
+            
+            <View style={styles.timeFilterRow}>
+              <TouchableOpacity 
+                style={[styles.filterButton, timeFilter === 'week' && styles.filterButtonActive]}
+                onPress={() => setTimeFilter('week')}
+              >
+                <Typography 
+                  style={styles.filterText}
+                  color={timeFilter === 'week' ? theme.COLORS.ui.background : theme.COLORS.ui.textSecondary}
+                >
+                  Week
+                </Typography>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.filterButton, timeFilter === 'month' && styles.filterButtonActive]}
+                onPress={() => setTimeFilter('month')}
+              >
+                <Typography 
+                  style={styles.filterText}
+                  color={timeFilter === 'month' ? theme.COLORS.ui.background : theme.COLORS.ui.textSecondary}
+                >
+                  Month
+                </Typography>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={[styles.filterButton, timeFilter === 'all' && styles.filterButtonActive]}
+                onPress={() => setTimeFilter('all')}
+              >
+                <Typography 
+                  style={styles.filterText}
+                  color={timeFilter === 'all' ? theme.COLORS.ui.background : theme.COLORS.ui.textSecondary}
+                >
+                  All Time
+                </Typography>
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.emotionStats}>
+              {stats.emotionCategories.map((category) => (
+                <View key={category.id} style={styles.categorySection}>
+                  <View style={styles.categoryHeader}>
+                    <AnimatedMoodIcon color={category.color} size={24}>
+                      <Typography>{getEmotionEmoji(category.id)}</Typography>
+                    </AnimatedMoodIcon>
+                    <Typography style={styles.categoryLabel} color={category.color}>
+                      {category.label}
+                    </Typography>
+                    <Typography style={styles.categoryCount}>
+                      ({category.totalCount})
+                    </Typography>
+                  </View>
+                  
+                  <View style={styles.categoryBar}>
+                    <View
+                      style={[
+                        styles.categoryBarFill,
+                        { width: `${category.percentage}%`, backgroundColor: category.color }
+                      ]}
+                    />
+                    <Typography style={styles.categoryPercentage}>
+                      {category.percentage}%
+                    </Typography>
+                  </View>
+
+                  <View style={styles.secondaryEmotions}>
+                    {category.emotions.slice(1).map((emotion) => (
+                      <View key={emotion.id} style={styles.secondaryEmotion}>
+                        <Typography style={styles.secondaryEmotionLabel}>
+                          {emotion.label} ({emotion.count})
+                        </Typography>
+                        <View style={styles.secondaryEmotionBar}>
+                          <View
+                            style={[
+                              styles.secondaryEmotionBarFill,
+                              { width: `${(emotion.count / category.totalCount) * 100}%`, backgroundColor: emotion.color }
+                            ]}
+                          />
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              ))}
+            </View>
+
+            <Typography 
+              variant="body" 
+              color={theme.COLORS.ui.textSecondary}
+              style={styles.emotionStatsFooter}
+            >
+              Based on {stats.filteredEntries.length} journal entries
+            </Typography>
+          </Card>
+
+          {/* AI Insights */}
+          <Card style={styles.insightsCard}>
+            <Typography variant="h3" style={styles.cardTitle}>
+              Personal Insights
+            </Typography>
+            {isLoadingInsights ? (
+              <ActivityIndicator color={theme.COLORS.primary.green} />
+            ) : aiInsights.length > 0 ? (
+              <>
+                {aiInsights.map((insight, index) => (
+                  <Typography 
+                    key={index} 
+                    variant="body" 
+                    style={styles.insightText}
+                    color={theme.COLORS.ui.textSecondary}
+                  >
+                    • {insight}
+                  </Typography>
+                ))}
+                <Button
+                  title="Refresh Insights"
+                  onPress={generateAIInsights}
+                  variant="secondary"
+                  style={styles.refreshButton}
+                />
+              </>
             ) : (
-              `You've logged ${stats.totalEntries} entries so far. Keep going! Regular check-ins help build self-awareness and emotional intelligence.`
+              <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
+                Complete more check-ins to receive personalized insights!
+              </Typography>
             )}
-          </Typography>
-        </Card>
-      </View>
-    </ScrollView>
+          </Card>
+
+          {/* Journey Summary */}
+          <Card style={styles.summaryCard}>
+            <Typography variant="h3" style={styles.cardTitle}>
+              Your Progress
+            </Typography>
+            <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
+              {stats.totalEntries === 0 ? (
+                "Start your journey by completing your first check-in!"
+              ) : (
+                `You've logged ${stats.totalEntries} entries and maintained a ${stats.currentStreak}-day streak. Your emotional awareness is growing stronger each day!`
+              )}
+            </Typography>
+            {stats.emotionalGrowth > 0 && (
+              <Typography 
+                variant="body" 
+                style={styles.growthText}
+                color={theme.COLORS.primary.green}
+              >
+                🌱 Your emotional well-being has improved by {Math.round(stats.emotionalGrowth * 100)}% since you started!
+              </Typography>
+            )}
+          </Card>
+        </View>
+      </ScrollView>
+    </View>
   );
+};
+
+const getEmotionEmoji = (emotionId: string): string => {
+  switch (emotionId) {
+    case 'happy': return '😊';
+    case 'sad': return '😢';
+    case 'angry': return '😠';
+    case 'scared': return '😨';
+    case 'optimistic': return '🌟';
+    case 'peaceful': return '😌';
+    case 'powerful': return '💪';
+    case 'proud': return '🦁';
+    default: return '😊';
+  }
 };
 
 const styles = StyleSheet.create({
@@ -156,11 +369,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.COLORS.ui.background,
   },
+  scrollView: {
+    flex: 1,
+  },
   header: {
     padding: theme.SPACING.lg,
+    paddingTop: 100,
   },
   title: {
+    color: theme.COLORS.ui.text,
     marginBottom: theme.SPACING.md,
+    fontSize: 34,
+    textAlign: 'center',
   },
   content: {
     padding: theme.SPACING.lg,
@@ -169,61 +389,190 @@ const styles = StyleSheet.create({
   statsRow: {
     flexDirection: 'row',
     marginBottom: theme.SPACING.lg,
+    gap: theme.SPACING.md,
   },
-  statsCard: {
+  streakStatsCard: {
     flex: 1,
-    alignItems: 'center' as const,
+    alignItems: 'center',
     padding: theme.SPACING.lg,
-    marginHorizontal: theme.SPACING.md,
-  },
-  streakCard: {
-    marginLeft: 0,
-  },
-  completionCard: {
-    marginRight: 0,
-  },
+    backgroundColor: theme.COLORS.ui.card,
+    borderRadius: theme.BORDER_RADIUS.lg,
+    shadowColor: theme.COLORS.primary.green,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  } as ViewStyle,
+  completionStatsCard: {
+    flex: 1,
+    alignItems: 'center',
+    padding: theme.SPACING.lg,
+    backgroundColor: theme.COLORS.ui.card,
+    borderRadius: theme.BORDER_RADIUS.lg,
+    shadowColor: theme.COLORS.primary.blue,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  } as ViewStyle,
   statNumber: {
     marginBottom: theme.SPACING.xs,
+    fontSize: 36,
+    fontWeight: theme.FONTS.weights.bold,
+    color: theme.COLORS.primary.green,
+    textShadowColor: 'rgba(0, 200, 83, 0.2)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
-  moodCard: {
+  journeyCard: {
     marginBottom: theme.SPACING.lg,
     padding: theme.SPACING.lg,
+    backgroundColor: theme.COLORS.ui.card,
+    borderRadius: theme.BORDER_RADIUS.lg,
+    shadowColor: theme.COLORS.ui.accent,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
   },
   cardTitle: {
+    marginBottom: theme.SPACING.xl,
+    fontSize: 24,
+    fontWeight: theme.FONTS.weights.semibold,
+    textAlign: 'center',
+    color: theme.COLORS.ui.text,
+  },
+  emotionStats: {
+    gap: theme.SPACING.lg,
+  },
+  emotionStatsFooter: {
+    marginTop: theme.SPACING.lg,
+    textAlign: 'center',
+    fontSize: 14,
+  },
+  insightsCard: {
     marginBottom: theme.SPACING.lg,
+    padding: theme.SPACING.lg,
+    backgroundColor: theme.COLORS.ui.card,
+    borderRadius: theme.BORDER_RADIUS.lg,
+    shadowColor: theme.COLORS.primary.blue,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
   },
-  moodDistribution: {
-    marginTop: theme.SPACING.md,
-  },
-  moodRow: {
+  insightText: {
     marginBottom: theme.SPACING.md,
+    lineHeight: 24,
   },
-  moodLabel: {
+  refreshButton: {
+    marginTop: theme.SPACING.lg,
+  },
+  summaryCard: {
+    padding: theme.SPACING.lg,
+    marginBottom: theme.SPACING.xl,
+    backgroundColor: theme.COLORS.ui.card,
+    borderRadius: theme.BORDER_RADIUS.lg,
+    shadowColor: theme.COLORS.ui.accent,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  growthText: {
+    marginTop: theme.SPACING.md,
+    fontWeight: theme.FONTS.weights.semibold,
+    color: theme.COLORS.primary.green,
+    textShadowColor: 'rgba(0, 200, 83, 0.15)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  timeFilterRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: theme.SPACING.lg,
+    gap: theme.SPACING.sm,
+  },
+  filterButton: {
+    paddingHorizontal: theme.SPACING.md,
+    paddingVertical: theme.SPACING.sm,
+    borderRadius: theme.BORDER_RADIUS.lg,
+    backgroundColor: theme.COLORS.ui.card,
+    shadowColor: theme.COLORS.ui.text,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  filterButtonActive: {
+    backgroundColor: theme.COLORS.primary.green,
+    shadowColor: theme.COLORS.primary.green,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  filterText: {
+    fontSize: 14,
+    fontWeight: theme.FONTS.weights.medium,
+  },
+  categorySection: {
+    marginBottom: theme.SPACING.xl,
+  },
+  categoryHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: theme.SPACING.xs,
+    marginBottom: theme.SPACING.sm,
   },
-  moodText: {
+  categoryLabel: {
     marginLeft: theme.SPACING.sm,
+    fontSize: 18,
+    fontWeight: theme.FONTS.weights.semibold,
+    flex: 1,
   },
-  percentageBar: {
-    height: 24,
+  categoryCount: {
+    fontSize: 16,
+    color: theme.COLORS.ui.textSecondary,
+  },
+  categoryBar: {
+    height: 16,
     backgroundColor: theme.COLORS.ui.card,
     borderRadius: theme.BORDER_RADIUS.sm,
     overflow: 'hidden',
-    flexDirection: 'row',
-    alignItems: 'center',
+    marginBottom: theme.SPACING.md,
   },
-  percentageFill: {
+  categoryBarFill: {
     height: '100%',
     borderRadius: theme.BORDER_RADIUS.sm,
   },
-  percentageText: {
+  categoryPercentage: {
     position: 'absolute',
     right: theme.SPACING.sm,
-    color: theme.COLORS.ui.text,
+    top: -2,
+    color: theme.COLORS.ui.background,
+    fontSize: 12,
+    fontWeight: theme.FONTS.weights.bold,
   },
-  insightsCard: {
-    padding: theme.SPACING.lg,
+  secondaryEmotions: {
+    marginLeft: theme.SPACING.xl,
+    gap: theme.SPACING.sm,
+  },
+  secondaryEmotion: {
+    marginBottom: theme.SPACING.xs,
+  },
+  secondaryEmotionLabel: {
+    fontSize: 14,
+    color: theme.COLORS.ui.textSecondary,
+    marginBottom: theme.SPACING.xs,
+  },
+  secondaryEmotionBar: {
+    height: 8,
+    backgroundColor: theme.COLORS.ui.card,
+    borderRadius: theme.BORDER_RADIUS.sm,
+    overflow: 'hidden',
+  },
+  secondaryEmotionBarFill: {
+    height: '100%',
+    borderRadius: theme.BORDER_RADIUS.sm,
   },
 }); 

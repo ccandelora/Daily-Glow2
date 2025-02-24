@@ -11,9 +11,10 @@ import theme from '@/constants/theme';
 
 const tabs = [
   { key: 'index', label: 'Home', icon: '🏠' },
-  { key: 'journal', label: 'Journal', icon: '📔' },
+  { key: 'journal', label: 'Journal', icon: '📖' },
   { key: 'insights', label: 'Insights', icon: '📊' },
-  { key: 'settings', label: 'Settings', icon: '⚙️' },
+  { key: 'achievements', label: 'Achievements', icon: '🏆' },
+  { key: 'settings', label: 'Settings', icon: '⚙️' }
 ];
 
 export default function AppLayout() {
@@ -27,18 +28,21 @@ export default function AppLayout() {
                 <Tabs
                   screenOptions={{
                     headerShown: false,
+                    tabBarStyle: {
+                      height: 85,
+                      paddingTop: 12,
+                      paddingBottom: 28,
+                      backgroundColor: theme.COLORS.ui.background,
+                      borderTopWidth: 1,
+                      borderTopColor: theme.COLORS.ui.border,
+                    }
                   }}
-                  tabBar={props => (
-                    <TabBar
-                      tabs={tabs}
-                      activeTab={props.state.routeNames[props.state.index]}
-                      onTabPress={(key) => props.navigation.navigate(key)}
-                    />
-                  )}
+                  tabBar={(props) => <TabBar {...props} tabs={tabs} />}
                 >
                   <Tabs.Screen name="index" />
                   <Tabs.Screen name="journal" />
                   <Tabs.Screen name="insights" />
+                  <Tabs.Screen name="achievements" />
                   <Tabs.Screen name="settings" />
                   <Tabs.Screen
                     name="check-in"
@@ -48,12 +52,6 @@ export default function AppLayout() {
                   />
                   <Tabs.Screen
                     name="notifications"
-                    options={{
-                      href: null,
-                    }}
-                  />
-                  <Tabs.Screen
-                    name="achievements"
                     options={{
                       href: null,
                     }}
