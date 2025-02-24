@@ -12,4 +12,6 @@ export { Toast } from './Toast';
 export { LoadingOverlay } from './LoadingOverlay';
 export { DailyChallenge } from './DailyChallenge';
 export { NotificationBadge } from './NotificationBadge';
-export { TabBar } from './TabBar'; 
+export { TabBar } from './TabBar';
+export { AnimatedBackground } from './AnimatedBackground';
+export { VideoBackground } from './VideoBackground'; 

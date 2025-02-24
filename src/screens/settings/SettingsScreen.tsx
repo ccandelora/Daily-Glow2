@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, Switch, Alert } from 'react-native';
-import { Typography, Card, Button } from '@/components/common';
+import { Typography, Card, Button, VideoBackground } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
 import { useAppState } from '@/contexts/AppStateContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -62,6 +62,7 @@ export const SettingsScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
+      <VideoBackground />
       <View style={styles.header}>
         <Typography variant="h1" style={styles.title}>
           Settings
@@ -90,20 +91,6 @@ export const SettingsScreen = () => {
             <Switch
               value={notifications}
               onValueChange={setNotifications}
-              trackColor={{ false: theme.COLORS.ui.card, true: theme.COLORS.primary.green }}
-            />
-          </View>
-        </Card>
-
-        <Card style={styles.section}>
-          <Typography variant="h3" style={styles.sectionTitle}>
-            Appearance
-          </Typography>
-          <View style={styles.settingRow}>
-            <Typography>Dark Mode</Typography>
-            <Switch
-              value={darkMode}
-              onValueChange={setDarkMode}
               trackColor={{ false: theme.COLORS.ui.card, true: theme.COLORS.primary.green }}
             />
           </View>
@@ -157,6 +144,13 @@ export const SettingsScreen = () => {
           >
             © 2024 Daily Glow. All rights reserved.
           </Typography>
+          <Typography
+            variant="caption"
+            color={theme.COLORS.ui.textSecondary}
+            style={styles.attribution}
+          >
+            Background video by Nicola Narracci via Pexels
+          </Typography>
         </Card>
       </View>
     </ScrollView>
@@ -209,5 +203,8 @@ const styles = StyleSheet.create({
   },
   copyright: {
     marginTop: theme.SPACING.md,
+  },
+  attribution: {
+    marginTop: theme.SPACING.xs,
   },
 }); 

@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Animated } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Typography, Card, Input } from '@/components/common';
+import { Typography, Card, Input, AnimatedBackground, Button, Header, VideoBackground } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
 import theme from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
@@ -60,120 +60,122 @@ export const JournalScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.safeArea}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Typography variant="h1" style={styles.title}>
-            Journal
-          </Typography>
-          <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => router.push('/check-in')}
-          >
-            <Ionicons name="add" size={24} color={theme.COLORS.ui.background} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Search */}
-        <View style={styles.searchContainer}>
-          <Ionicons 
-            name="search-outline" 
-            size={20} 
-            color={theme.COLORS.ui.textSecondary}
-            style={styles.searchIcon}
-          />
-          <Input
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholder="Search your entries..."
-            style={styles.searchInput}
-          />
-          {searchQuery ? (
+      <VideoBackground />
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.safeArea}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Typography variant="h1" style={styles.title}>
+              Your Journal
+            </Typography>
             <TouchableOpacity
-              onPress={() => setSearchQuery('')}
-              style={styles.clearButton}
+              style={styles.addButton}
+              onPress={() => router.push('/check-in')}
             >
-              <Ionicons 
-                name="close-circle" 
-                size={20} 
-                color={theme.COLORS.ui.textSecondary} 
-              />
+              <Ionicons name="add" size={24} color={theme.COLORS.ui.background} />
             </TouchableOpacity>
-          ) : null}
-        </View>
+          </View>
 
-        {/* Entries List */}
-        <ScrollView style={styles.content}>
-          {Object.entries(groupedEntries).map(([date, dateEntries]) => (
-            <View key={date} style={styles.monthGroup}>
-              <Typography variant="h2" style={styles.monthTitle}>
-                {date}
-              </Typography>
-              {dateEntries.map(entry => (
-                <TouchableOpacity
-                  key={entry.id}
-                  onPress={() => router.push(`/journal/${entry.id}`)}
-                >
-                  <Card style={styles.entryCard}>
-                    <View style={styles.entryHeader}>
-                      <Typography variant="h3" style={styles.entryDate}>
-                        {entry.date.toLocaleDateString('en-US', { 
-                          weekday: 'long',
-                          day: 'numeric'
-                        })}
-                      </Typography>
-                      <View style={styles.emotionsRow}>
-                        {renderEmotionBadge(entry.initial_emotion)}
-                        <Ionicons 
-                          name="arrow-forward" 
-                          size={16} 
-                          color={theme.COLORS.ui.textSecondary}
-                          style={styles.arrow}
-                        />
-                        {renderEmotionBadge(entry.secondary_emotion)}
-                      </View>
-                    </View>
-                    <Typography
-                      variant="body"
-                      numberOfLines={2}
-                      style={styles.gratitudeText}
-                    >
-                      {entry.gratitude}
-                    </Typography>
-                  </Card>
-                </TouchableOpacity>
-              ))}
-            </View>
-          ))}
-          
-          {filteredEntries.length === 0 && (
-            <View style={styles.emptyState}>
-              <Typography
-                variant="h3"
-                style={styles.emptyTitle}
-              >
-                No entries found
-              </Typography>
-              <Typography
-                variant="body"
-                style={styles.emptyText}
-              >
-                {searchQuery 
-                  ? "Try adjusting your search terms"
-                  : "Start your journey by adding your first entry"}
-              </Typography>
+          {/* Search */}
+          <View style={styles.searchContainer}>
+            <Ionicons 
+              name="search-outline" 
+              size={20} 
+              color={theme.COLORS.ui.textSecondary}
+              style={styles.searchIcon}
+            />
+            <Input
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder="Search your entries..."
+              style={styles.searchInput}
+            />
+            {searchQuery ? (
               <TouchableOpacity
-                style={styles.emptyButton}
-                onPress={() => router.push('/check-in')}
+                onPress={() => setSearchQuery('')}
+                style={styles.clearButton}
               >
-                <Typography style={styles.emptyButtonText}>
-                  Add New Entry
-                </Typography>
+                <Ionicons 
+                  name="close-circle" 
+                  size={20} 
+                  color={theme.COLORS.ui.textSecondary} 
+                />
               </TouchableOpacity>
-            </View>
-          )}
-        </ScrollView>
-      </View>
+            ) : null}
+          </View>
+
+          {/* Entries List */}
+          <View style={styles.content}>
+            {Object.entries(groupedEntries).map(([date, dateEntries]) => (
+              <View key={date} style={styles.monthGroup}>
+                <Typography variant="h2" style={styles.monthTitle}>
+                  {date}
+                </Typography>
+                {dateEntries.map(entry => (
+                  <TouchableOpacity
+                    key={entry.id}
+                    onPress={() => router.push(`/journal/${entry.id}`)}
+                  >
+                    <Card style={StyleSheet.flatten([styles.entryCard])} variant="glow">
+                      <View style={styles.entryHeader}>
+                        <Typography variant="h3" style={styles.entryDate}>
+                          {entry.date.toLocaleDateString('en-US', { 
+                            weekday: 'long',
+                            day: 'numeric'
+                          })}
+                        </Typography>
+                        <View style={styles.emotionsRow}>
+                          {renderEmotionBadge(entry.initial_emotion)}
+                          <Ionicons 
+                            name="arrow-forward" 
+                            size={16} 
+                            color={theme.COLORS.ui.textSecondary}
+                            style={styles.arrow}
+                          />
+                          {renderEmotionBadge(entry.secondary_emotion)}
+                        </View>
+                      </View>
+                      <Typography
+                        variant="body"
+                        style={styles.gratitudeText}
+                      >
+                        {entry.gratitude}
+                      </Typography>
+                    </Card>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            ))}
+            
+            {filteredEntries.length === 0 && (
+              <View style={styles.emptyState}>
+                <Typography
+                  variant="h3"
+                  style={styles.emptyTitle}
+                >
+                  No entries found
+                </Typography>
+                <Typography
+                  variant="body"
+                  style={styles.emptyText}
+                >
+                  {searchQuery 
+                    ? "Try adjusting your search terms"
+                    : "Start your journey by adding your first entry"}
+                </Typography>
+                <TouchableOpacity
+                  style={styles.emptyButton}
+                  onPress={() => router.push('/check-in')}
+                >
+                  <Typography style={styles.emptyButtonText}>
+                    Add New Entry
+                  </Typography>
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </View>
+      </ScrollView>
     </View>
   );
 };
@@ -182,6 +184,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.COLORS.ui.background,
+  },
+  scrollView: {
+    flex: 1,
   },
   safeArea: {
     flex: 1,

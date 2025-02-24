@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Typography, Card, Button } from '@/components/common';
+import { Typography, Card, Button, AnimatedBackground } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
 import theme from '@/constants/theme';
 import { getEmotionById, getAllEmotions } from '@/constants/emotions';
@@ -16,6 +16,7 @@ export const EntryDetailScreen = () => {
   if (!entry) {
     return (
       <View style={styles.container}>
+        <AnimatedBackground intensity="medium" />
         <Typography variant="h2" style={styles.errorText}>
           Entry not found
         </Typography>
@@ -45,6 +46,7 @@ export const EntryDetailScreen = () => {
     
     return (
       <View style={styles.container}>
+        <AnimatedBackground intensity="medium" />
         <Typography variant="h2" style={styles.errorText}>
           Invalid emotion data
         </Typography>
@@ -58,94 +60,97 @@ export const EntryDetailScreen = () => {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.safeArea}>
-        <View style={styles.header}>
-          <Button
-            title="← Back"
-            variant="secondary"
-            onPress={() => router.back()}
-            style={styles.backButton}
-          />
-          <Typography variant="h2" style={styles.title}>
-            {entry.date.toLocaleDateString('en-US', {
-              weekday: 'long',
-            })}
-          </Typography>
-          <Typography variant="h3" style={styles.subtitle}>
-            {entry.date.toLocaleDateString('en-US', {
-              month: 'long',
-              day: 'numeric',
-              year: 'numeric'
-            })}
-          </Typography>
-        </View>
-
-        <View style={styles.content}>
-          <Card style={styles.card}>
-            <Typography variant="h3" style={styles.sectionTitle}>
-              Initial Feeling
+    <View style={styles.container}>
+      <AnimatedBackground intensity="medium" />
+      <ScrollView style={styles.scrollView}>
+        <View style={styles.safeArea}>
+          <View style={styles.header}>
+            <Button
+              title="← Back"
+              variant="secondary"
+              onPress={() => router.back()}
+              style={styles.backButton}
+            />
+            <Typography variant="h2" style={styles.title}>
+              {entry.date.toLocaleDateString('en-US', {
+                weekday: 'long',
+              })}
             </Typography>
-            <View style={styles.emotionContainer}>
-              <View style={[styles.emotionBadge, { backgroundColor: initialEmotion.color }]}>
-                <View style={styles.emojiContainer}>
-                  <Typography style={styles.emoji}>
-                    {getEmojiForEmotion(initialEmotion.id)}
-                  </Typography>
-                </View>
-                <Typography
-                  variant="h3"
-                  style={styles.emotionLabel}
-                >
-                  {initialEmotion.label}
-                </Typography>
-              </View>
-            </View>
-          </Card>
-
-          <Card style={styles.card}>
-            <Typography variant="h3" style={styles.sectionTitle}>
-              Gratitude
+            <Typography variant="h3" style={styles.subtitle}>
+              {entry.date.toLocaleDateString('en-US', {
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric'
+              })}
             </Typography>
-            <Typography variant="body" style={styles.text}>
-              {entry.gratitude}
-            </Typography>
-          </Card>
+          </View>
 
-          <Card style={styles.card}>
-            <Typography variant="h3" style={styles.sectionTitle}>
-              More Specific Feeling
-            </Typography>
-            <View style={styles.emotionContainer}>
-              <View style={[styles.emotionBadge, { backgroundColor: secondaryEmotion.color }]}>
-                <View style={styles.emojiContainer}>
-                  <Typography style={styles.emoji}>
-                    {getEmojiForEmotion(secondaryEmotion.id)}
-                  </Typography>
-                </View>
-                <Typography
-                  variant="h3"
-                  style={styles.emotionLabel}
-                >
-                  {secondaryEmotion.label}
-                </Typography>
-              </View>
-            </View>
-          </Card>
-
-          {entry.note && (
+          <View style={styles.content}>
             <Card style={styles.card}>
               <Typography variant="h3" style={styles.sectionTitle}>
-                Additional Thoughts
+                Initial Feeling
+              </Typography>
+              <View style={styles.emotionContainer}>
+                <View style={[styles.emotionBadge, { backgroundColor: initialEmotion.color }]}>
+                  <View style={styles.emojiContainer}>
+                    <Typography style={styles.emoji}>
+                      {getEmojiForEmotion(initialEmotion.id)}
+                    </Typography>
+                  </View>
+                  <Typography
+                    variant="h3"
+                    style={styles.emotionLabel}
+                  >
+                    {initialEmotion.label}
+                  </Typography>
+                </View>
+              </View>
+            </Card>
+
+            <Card style={styles.card}>
+              <Typography variant="h3" style={styles.sectionTitle}>
+                Gratitude
               </Typography>
               <Typography variant="body" style={styles.text}>
-                {entry.note}
+                {entry.gratitude}
               </Typography>
             </Card>
-          )}
+
+            <Card style={styles.card}>
+              <Typography variant="h3" style={styles.sectionTitle}>
+                More Specific Feeling
+              </Typography>
+              <View style={styles.emotionContainer}>
+                <View style={[styles.emotionBadge, { backgroundColor: secondaryEmotion.color }]}>
+                  <View style={styles.emojiContainer}>
+                    <Typography style={styles.emoji}>
+                      {getEmojiForEmotion(secondaryEmotion.id)}
+                    </Typography>
+                  </View>
+                  <Typography
+                    variant="h3"
+                    style={styles.emotionLabel}
+                  >
+                    {secondaryEmotion.label}
+                  </Typography>
+                </View>
+              </View>
+            </Card>
+
+            {entry.note && (
+              <Card style={styles.card}>
+                <Typography variant="h3" style={styles.sectionTitle}>
+                  Additional Thoughts
+                </Typography>
+                <Typography variant="body" style={styles.text}>
+                  {entry.note}
+                </Typography>
+              </Card>
+            )}
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -190,9 +195,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.COLORS.ui.background,
   },
+  scrollView: {
+    flex: 1,
+  },
   safeArea: {
     flex: 1,
-    paddingTop: 60, // Add more space at the top
+    paddingTop: 60,
   },
   header: {
     padding: theme.SPACING.lg,

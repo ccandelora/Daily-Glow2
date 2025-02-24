@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface OnboardingState {
   purpose: string | null;
@@ -14,10 +15,13 @@ interface OnboardingContextType {
   setPurpose: (purpose: string) => void;
   setNotificationPreferences: (enabled: boolean, time?: string) => void;
   setFirstCheckIn: (mood: string, gratitude: string) => void;
-  completeOnboarding: () => void;
+  completeOnboarding: () => Promise<void>;
   currentStep: number;
   totalSteps: number;
+  hasCompletedOnboarding: boolean;
 }
+
+const ONBOARDING_STATE_KEY = '@onboarding_state';
 
 const initialState: OnboardingState = {
   purpose: null,
@@ -34,28 +38,53 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
   const [state, setState] = useState<OnboardingState>(initialState);
   const totalSteps = 4;
 
+  // Load saved state on mount
+  useEffect(() => {
+    loadState();
+  }, []);
+
+  const loadState = async () => {
+    try {
+      const savedState = await AsyncStorage.getItem(ONBOARDING_STATE_KEY);
+      if (savedState) {
+        setState(JSON.parse(savedState));
+      }
+    } catch (error) {
+      console.error('Error loading onboarding state:', error);
+    }
+  };
+
+  const saveState = async (newState: OnboardingState) => {
+    try {
+      await AsyncStorage.setItem(ONBOARDING_STATE_KEY, JSON.stringify(newState));
+      setState(newState);
+    } catch (error) {
+      console.error('Error saving onboarding state:', error);
+    }
+  };
+
   const setPurpose = (purpose: string) => {
-    setState(prev => ({ ...prev, purpose }));
+    saveState({ ...state, purpose });
   };
 
   const setNotificationPreferences = (enabled: boolean, time?: string) => {
-    setState(prev => ({
-      ...prev,
+    saveState({
+      ...state,
       notifications: enabled,
-      reminderTime: time || prev.reminderTime,
-    }));
+      reminderTime: time || state.reminderTime,
+    });
   };
 
   const setFirstCheckIn = (mood: string, gratitude: string) => {
-    setState(prev => ({
-      ...prev,
+    saveState({
+      ...state,
       firstMood: mood,
       firstGratitude: gratitude,
-    }));
+    });
   };
 
-  const completeOnboarding = () => {
-    setState(prev => ({ ...prev, isComplete: true }));
+  const completeOnboarding = async () => {
+    await saveState({ ...state, isComplete: true });
   };
 
   // Calculate current step based on state
@@ -75,6 +104,7 @@ export function OnboardingProvider({ children }: { children: React.ReactNode }) 
     completeOnboarding,
     currentStep: getCurrentStep(),
     totalSteps,
+    hasCompletedOnboarding: state.isComplete,
   };
 
   return (
