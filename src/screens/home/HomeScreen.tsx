@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, Animated, Dimensions, ViewStyle } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Typography, Card, Button, AnimatedMoodIcon, DailyChallenge, VideoBackground, Header } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
@@ -140,95 +140,34 @@ export default function HomeScreen() {
           />
         </Card>
 
-        <Card style={styles.challengeCard} variant="glow">
-          <View style={styles.challengeHeader}>
-            <Typography variant="h2" style={styles.cardTitle} glow="medium">
-              Daily Challenge
-            </Typography>
-            <Typography variant="body" style={styles.points}>
-              Level 2 • 125 pts
-            </Typography>
-          </View>
-          <Typography variant="body" style={styles.cardDescription}>
-            Create a short story about your emotional journey today
+        <Card 
+          style={StyleSheet.flatten([styles.checkInCard, styles.challengeCard])} 
+          variant="glow"
+        >
+          <Typography variant="h2" style={styles.cardTitle} glow="medium">
+            Daily Challenge
           </Typography>
+          <Typography variant="body" style={styles.cardDescription}>
+            Complete daily challenges to earn points
+          </Typography>
+          <DailyChallenge />
         </Card>
 
         <Animated.View style={{ opacity: fadeAnim }}>
-          {todayEntry ? (
-            <Card variant="elevated" style={styles.checkInCard}>
-              <Typography variant="h2" style={styles.cardTitle}>
-                {periodDetails.label} Check-in
+          <Card 
+            style={styles.recentEntriesCard} 
+            variant="glow"
+          >
+            <View>
+              <Typography variant="h2" style={styles.cardTitle} glow="medium">
+                Recent Entries
               </Typography>
-              <View style={styles.todayMood}>
-                <View style={[styles.moodIconContainer, { backgroundColor: getEmotionDisplay(todayEntry).color }]}>
-                  <Typography style={styles.moodIcon}>
-                    {getEmotionEmoji(todayEntry)}
-                  </Typography>
-                </View>
-                <View style={styles.todayMoodText}>
-                  <Typography 
-                    variant="h3" 
-                    color={getEmotionDisplay(todayEntry).color}
-                  >
-                    {getEmotionDisplay(todayEntry).label}
-                  </Typography>
-                  <Typography 
-                    variant="body" 
-                    style={styles.gratitudePreview}
-                  >
-                    {todayEntry.gratitude.length > 50 
-                      ? todayEntry.gratitude.substring(0, 50) + '...'
-                      : todayEntry.gratitude}
-                  </Typography>
-                </View>
-              </View>
-              <TouchableOpacity 
-                style={styles.viewEntryButton}
-                onPress={() => router.push(`/(app)/journal/${todayEntry.id}`)}
-              >
-                <Typography style={styles.viewEntryText}>
-                  View full entry →
-                </Typography>
-              </TouchableOpacity>
-            </Card>
-          ) : (
-            <Card variant="elevated" style={styles.checkInCard}>
-              <Typography variant="h2" style={styles.cardTitle}>
-                {periodDetails.label} Check-in
-              </Typography>
-              <Typography 
-                variant="body" 
-                style={styles.cardSubtitle}
-              >
-                Take a moment to reflect on how you're feeling
-              </Typography>
-              <TouchableOpacity 
-                style={styles.startCheckInButton}
-                onPress={() => router.push('/(app)/check-in')}
-              >
-                <View style={styles.startCheckInContent}>
-                  <Typography style={styles.startCheckInText}>
-                    Start {periodDetails.label.toLowerCase()} check-in
-                  </Typography>
-                  <Typography style={styles.startCheckInEmoji}>
-                    ✨
-                  </Typography>
-                </View>
-              </TouchableOpacity>
-            </Card>
-          )}
-          <DailyChallenge style={styles.challengeCard} />
-        </Animated.View>
-
-        <Animated.View style={{ opacity: fadeAnim }}>
-          <Card style={styles.recentEntriesCard}>
-            <View style={styles.cardHeader}>
-              <Typography variant="h3">Recent Entries</Typography>
               <Button
                 title="View All"
                 variant="secondary"
                 onPress={() => router.push('/(app)/journal')}
+                style={styles.viewAllButton}
+                textStyle={{ color: theme.COLORS.primary.green }}
               />
             </View>
             {recentEntries.length > 0 ? (
@@ -243,10 +182,18 @@ export default function HomeScreen() {
                       {getEmotionEmoji(entry)}
                     </Typography>
                     <View>
-                      <Typography variant="body" color={getEmotionDisplay(entry).color}>
+                      <Typography 
+                        variant="body" 
+                        color={getEmotionDisplay(entry).color}
+                        glow="soft"
+                      >
                         {getEmotionDisplay(entry).label}
                       </Typography>
-                      <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
+                      <Typography 
+                        variant="caption" 
+                        color={theme.COLORS.ui.textSecondary}
+                        glow="soft"
+                      >
                         {entry.date.toLocaleDateString('en-US', { 
                           month: 'short',
                           day: 'numeric'
@@ -258,6 +205,7 @@ export default function HomeScreen() {
                     variant="body" 
                     color={theme.COLORS.ui.textSecondary}
                     style={styles.entryPreview}
+                    glow="soft"
                   >
                     {entry.gratitude.length > 30 
                       ? entry.gratitude.substring(0, 30) + '...'
@@ -266,7 +214,11 @@ export default function HomeScreen() {
                 </TouchableOpacity>
               ))
             ) : (
-              <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
+              <Typography 
+                variant="body" 
+                color={theme.COLORS.ui.textSecondary}
+                glow="soft"
+              >
                 No entries yet. Start your journey by doing a check-in.
               </Typography>
             )}
@@ -304,21 +256,30 @@ const styles = StyleSheet.create({
     marginHorizontal: theme.SPACING.lg,
     marginBottom: theme.SPACING.lg,
     padding: theme.SPACING.xl,
+    backgroundColor: 'rgba(38, 20, 60, 0.85)',
   },
   challengeCard: {
-    marginHorizontal: theme.SPACING.lg,
-    padding: theme.SPACING.xl,
+    marginTop: theme.SPACING.lg,
   },
   cardTitle: {
     marginBottom: theme.SPACING.md,
     textAlign: 'left',
+    color: theme.COLORS.ui.text,
+    fontSize: theme.FONTS.sizes.xl,
   },
   cardDescription: {
     marginBottom: theme.SPACING.lg,
     color: theme.COLORS.ui.textSecondary,
+    fontSize: theme.FONTS.sizes.md,
   },
   checkInButton: {
     marginTop: theme.SPACING.md,
+    backgroundColor: theme.COLORS.ui.accent,
+    shadowColor: theme.COLORS.ui.accent,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    elevation: 8,
   },
   challengeHeader: {
     flexDirection: 'row',
@@ -332,16 +293,8 @@ const styles = StyleSheet.create({
   recentEntriesCard: {
     margin: theme.SPACING.lg,
     marginTop: theme.SPACING.md,
-    padding: theme.SPACING.lg,
-    backgroundColor: theme.COLORS.ui.background,
-    borderRadius: theme.BORDER_RADIUS.lg,
-    shadowColor: theme.COLORS.ui.text,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 3,
-    borderWidth: 1,
-    borderColor: `${theme.COLORS.ui.border}30`,
+    padding: theme.SPACING.xl,
+    backgroundColor: 'rgba(38, 20, 60, 0.85)',
   },
   cardHeader: {
     flexDirection: 'row',
@@ -349,13 +302,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: theme.SPACING.lg,
   },
+  viewAllButton: {
+    backgroundColor: 'rgba(65, 105, 225, 0.1)',
+    borderColor: theme.COLORS.ui.accent,
+    borderWidth: 1,
+    width: '100%',
+    marginBottom: theme.SPACING.lg,
+    marginTop: theme.SPACING.md,
+    shadowColor: theme.COLORS.ui.accent,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
+  },
   entryItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: theme.SPACING.md,
     borderBottomWidth: 1,
-    borderBottomColor: `${theme.COLORS.ui.border}20`,
+    borderBottomColor: `${theme.COLORS.ui.border}30`,
     marginBottom: theme.SPACING.sm,
   },
   entryItemLeft: {
@@ -369,7 +335,7 @@ const styles = StyleSheet.create({
     height: 40,
     textAlign: 'center',
     lineHeight: 40,
-    backgroundColor: `${theme.COLORS.primary.green}10`,
+    backgroundColor: `${theme.COLORS.primary.green}20`,
     borderRadius: 20,
     overflow: 'hidden',
     marginRight: theme.SPACING.md,
@@ -377,7 +343,6 @@ const styles = StyleSheet.create({
   entryPreview: {
     flex: 1,
     marginLeft: theme.SPACING.md,
-    color: theme.COLORS.ui.textSecondary,
     fontSize: 14,
   },
   gratitudePreview: {
@@ -439,5 +404,12 @@ const styles = StyleSheet.create({
   cardSubtitle: {
     marginBottom: theme.SPACING.md,
     color: theme.COLORS.ui.textSecondary,
+  },
+  pointsText: {
+    marginBottom: theme.SPACING.md,
+  },
+  completeButton: {
+    marginTop: theme.SPACING.md,
+    marginBottom: theme.SPACING.lg,
   },
 }); 

@@ -86,7 +86,7 @@ export const CheckInScreen = () => {
 
       <ScrollView style={styles.content}>
         {step === 'initial' && (
-          <Card style={styles.card}>
+          <Card style={StyleSheet.flatten([styles.card])} variant="glow">
             <Typography variant="h3" style={styles.sectionTitle}>
               How are you feeling right now?
             </Typography>
@@ -107,7 +107,7 @@ export const CheckInScreen = () => {
         )}
 
         {step === 'gratitude' && (
-          <Card style={styles.card}>
+          <Card style={StyleSheet.flatten([styles.card])} variant="glow">
             <Typography variant="h3" style={styles.sectionTitle}>
               What are you grateful for today?
             </Typography>
@@ -142,7 +142,7 @@ export const CheckInScreen = () => {
         )}
 
         {step === 'final' && (
-          <Card style={styles.card}>
+          <Card style={StyleSheet.flatten([styles.card])} variant="glow">
             <Typography variant="h3" style={styles.sectionTitle}>
               After reflecting, how do you feel now?
             </Typography>

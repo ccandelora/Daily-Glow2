@@ -98,20 +98,6 @@ export const SettingsScreen = () => {
 
         <Card style={styles.section}>
           <Typography variant="h3" style={styles.sectionTitle}>
-            Appearance
-          </Typography>
-          <View style={styles.settingRow}>
-            <Typography>Dark Mode</Typography>
-            <Switch
-              value={darkMode}
-              onValueChange={setDarkMode}
-              trackColor={{ false: theme.COLORS.ui.card, true: theme.COLORS.primary.green }}
-            />
-          </View>
-        </Card>
-
-        <Card style={styles.section}>
-          <Typography variant="h3" style={styles.sectionTitle}>
             Data Management
           </Typography>
           <View style={styles.dataManagement}>
@@ -157,6 +143,13 @@ export const SettingsScreen = () => {
             style={styles.copyright}
           >
             © 2024 Daily Glow. All rights reserved.
+          </Typography>
+          <Typography
+            variant="caption"
+            color={theme.COLORS.ui.textSecondary}
+            style={styles.attribution}
+          >
+            Background video by Nicola Narracci via Pexels
           </Typography>
         </Card>
       </View>
@@ -210,5 +203,8 @@ const styles = StyleSheet.create({
   },
   copyright: {
     marginTop: theme.SPACING.md,
+  },
+  attribution: {
+    marginTop: theme.SPACING.xs,
   },
 }); 

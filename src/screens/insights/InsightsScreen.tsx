@@ -172,7 +172,7 @@ export const InsightsScreen = () => {
         <View style={styles.content}>
           {/* Stats Overview */}
           <View style={styles.statsRow}>
-            <Card style={styles.streakStatsCard}>
+            <Card style={StyleSheet.flatten([styles.streakStatsCard])} variant="glow">
               <Typography variant="h1" style={styles.statNumber}>
                 {stats.currentStreak}
               </Typography>
@@ -180,7 +180,7 @@ export const InsightsScreen = () => {
                 Day Streak
               </Typography>
             </Card>
-            <Card style={styles.completionStatsCard}>
+            <Card style={StyleSheet.flatten([styles.completionStatsCard])} variant="glow">
               <Typography variant="h1" style={styles.statNumber}>
                 {stats.completionRate}%
               </Typography>
@@ -191,7 +191,7 @@ export const InsightsScreen = () => {
           </View>
 
           {/* Emotional Journey */}
-          <Card style={styles.journeyCard}>
+          <Card style={StyleSheet.flatten([styles.journeyCard])} variant="glow">
             <Typography variant="h3" style={styles.cardTitle}>
               Your Emotional Journey
             </Typography>

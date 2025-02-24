@@ -201,7 +201,7 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete, styl
 
   return (
     <View style={styles.glowContainer}>
-      <Card style={[styles.container, style]}>
+      <Card style={StyleSheet.flatten([styles.container, style])}>
         <View style={styles.header}>
           <View style={styles.titleContainer}>
             <Ionicons 
@@ -233,7 +233,7 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete, styl
         
         <Typography 
           variant="body" 
-          style={{ color: theme.COLORS.ui.textSecondary }}
+          style={styles.description}
         >
           {dailyChallenge.description}
         </Typography>
@@ -262,13 +262,16 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete, styl
               {dailyChallenge.points} points
             </Typography>
           </View>
-          <Button
-            title="Complete Challenge"
-            onPress={handleComplete}
-            style={styles.button}
-            disabled={isSubmitting}
-          />
         </View>
+
+        <Button
+          title="Complete Challenge"
+          onPress={handleComplete}
+          variant="secondary"
+          style={styles.completeButton}
+          textStyle={{ color: theme.COLORS.primary.green }}
+          disabled={isSubmitting || showLimitMessage}
+        />
 
         {currentStreak > 0 && (
           <View style={styles.streakContainer}>
@@ -294,13 +297,11 @@ const styles = StyleSheet.create({
   glowContainer: {
     width: '100%',
     alignItems: 'center',
-    marginVertical: theme.SPACING.lg,
-    paddingHorizontal: theme.SPACING.lg,
   },
   container: {
     width: '100%',
-    padding: theme.SPACING.xl,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    padding: theme.SPACING.lg,
+    backgroundColor: 'rgba(38, 20, 60, 0.85)',
   },
   header: {
     flexDirection: 'row',
@@ -321,6 +322,10 @@ const styles = StyleSheet.create({
   title: {
     marginLeft: theme.SPACING.xs,
     flexShrink: 1,
+    color: theme.COLORS.ui.text,
+    textShadowColor: theme.COLORS.ui.accent,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
   challengeStats: {
     alignItems: 'flex-end',
@@ -329,19 +334,24 @@ const styles = StyleSheet.create({
   },
   challengeTitle: {
     marginBottom: theme.SPACING.sm,
+    color: theme.COLORS.ui.text,
+    textShadowColor: theme.COLORS.ui.accent,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 6,
   },
   description: {
     marginBottom: theme.SPACING.lg,
+    color: theme.COLORS.ui.textSecondary,
   },
   input: {
     height: 120,
     marginBottom: theme.SPACING.lg,
     textAlignVertical: 'top',
+    backgroundColor: 'rgba(28, 14, 45, 0.3)',
+    borderColor: theme.COLORS.ui.border,
   },
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    marginBottom: theme.SPACING.md,
   },
   pointsContainer: {
     flexDirection: 'row',
@@ -352,10 +362,21 @@ const styles = StyleSheet.create({
   points: {
     fontWeight: theme.FONTS.weights.semibold,
     fontSize: theme.FONTS.sizes.md,
+    textShadowColor: theme.COLORS.primary.green,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 4,
   },
-  button: {
-    flex: 1,
-    marginLeft: theme.SPACING.md,
+  completeButton: {
+    marginTop: theme.SPACING.md,
+    backgroundColor: 'rgba(65, 105, 225, 0.15)',
+    borderColor: theme.COLORS.ui.accent,
+    borderWidth: 1,
+    width: '100%',
+    shadowColor: theme.COLORS.ui.accent,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   streakContainer: {
     flexDirection: 'row',
@@ -373,6 +394,9 @@ const styles = StyleSheet.create({
     minWidth: 100,
     flexWrap: 'wrap',
     flexShrink: 0,
+    textShadowColor: theme.COLORS.primary.green,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 4,
   },
   limitContainer: {
     padding: theme.SPACING.lg,

@@ -116,7 +116,7 @@ export const JournalScreen = () => {
                     key={entry.id}
                     onPress={() => router.push(`/journal/${entry.id}`)}
                   >
-                    <Card style={styles.entryCard}>
+                    <Card style={StyleSheet.flatten([styles.entryCard])} variant="glow">
                       <View style={styles.entryHeader}>
                         <Typography variant="h3" style={styles.entryDate}>
                           {entry.date.toLocaleDateString('en-US', { 
