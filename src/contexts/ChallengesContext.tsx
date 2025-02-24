@@ -117,24 +117,33 @@ export function ChallengesProvider({ children }: { children: React.ReactNode }) 
       if (achievementsError) throw achievementsError;
       setAchievements(achievementsData || []);
 
-      // Calculate total points from achievements
-      const totalPoints = achievementsData 
-        ? achievementsData.reduce((sum, achievement) => sum + achievement.points, 0)
-        : 0;
-
-      // Update user stats
-      const { data: updateResult, error: updateError } = await supabase
+      // Get user stats directly from the database
+      const { data: statsData, error: statsError } = await supabase
         .from('user_stats')
-        .upsert({
-          user_id: session.user.id,
-          total_points: totalPoints,
-          level: Math.floor(totalPoints / 100) + 1
-        }, { onConflict: 'user_id' })
-        .select()
+        .select('*')
+        .eq('user_id', session.user.id)
         .single();
 
-      if (updateError) throw updateError;
-      setUserStats(updateResult);
+      if (statsError && statsError.code !== 'PGRST116') throw statsError;
+      
+      // If stats exist, use them directly
+      if (statsData) {
+        setUserStats(statsData);
+      } else {
+        // If no stats exist, create initial stats
+        const { data: newStats, error: createError } = await supabase
+          .from('user_stats')
+          .insert({
+            user_id: session.user.id,
+            total_points: 0,
+            level: 1,
+          })
+          .select()
+          .single();
+
+        if (createError) throw createError;
+        setUserStats(newStats);
+      }
 
       // Load user challenges
       const { data: challengesData, error: challengesError } = await supabase
@@ -205,10 +214,32 @@ export function ChallengesProvider({ children }: { children: React.ReactNode }) 
       if (error) throw error;
       console.log('Challenge completion response:', data);
 
-      // Refresh data to get updated stats
-      await loadUserData();
-      
-      const newPoints = userStats?.total_points || 0;
+      if (data.success) {
+        // Update local state immediately with the new stats
+        setUserStats(prevStats => {
+          if (!prevStats) return null;
+          return {
+            ...prevStats,
+            total_points: data.total_points,
+            level: data.level,
+            total_entries: prevStats.total_entries + 1
+          };
+        });
+        
+        // Update challenges list
+        setUserChallenges(prevChallenges => [
+          ...prevChallenges,
+          {
+            id: challengeId,
+            challenge_id: challengeId,
+            status: 'completed',
+            completed_at: new Date().toISOString(),
+            created_at: new Date().toISOString()
+          }
+        ]);
+      }
+
+      const newPoints = data.total_points || 0;
       console.log(`Points update: ${oldPoints} -> ${newPoints} (change: ${newPoints - oldPoints})`);
       
     } catch (error) {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Animated, ViewStyle, StyleProp } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Typography } from './Typography';
 import { Card } from './Card';
@@ -13,6 +13,7 @@ import { useRouter } from 'expo-router';
 
 interface DailyChallengeProps {
   onComplete?: () => void;
+  style?: StyleProp<ViewStyle>;
 }
 
 const typeIcons = {
@@ -41,7 +42,7 @@ const getMinLengthForType = (type: string) => {
   return type === 'creative' ? 20 : 10;
 };
 
-export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete }) => {
+export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete, style }) => {
   const { dailyChallenge, userStats, completeChallenge, refreshDailyChallenge, userChallenges } = useChallenges();
   const { showError } = useAppState();
   const [completionText, setCompletionText] = useState('');
@@ -51,10 +52,6 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete }) =>
   const [showLimitMessage, setShowLimitMessage] = useState(false);
   const router = useRouter();
 
-  // Add glow animation
-  const glowAnim = React.useRef(new Animated.Value(0)).current;
-  const rotateAnim = React.useRef(new Animated.Value(0)).current;
-
   useEffect(() => {
     console.log('DailyChallenge state:', {
       hasDailyChallenge: !!dailyChallenge,
@@ -63,33 +60,6 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete }) =>
       showLimitMessage,
       userChallengesCount: userChallenges.length
     });
-    
-    // Create a continuous pulsing animation
-    const pulseGlow = () => {
-      Animated.parallel([
-        Animated.sequence([
-          Animated.timing(glowAnim, {
-            toValue: 1,
-            duration: 3000,
-            useNativeDriver: true,
-          }),
-          Animated.timing(glowAnim, {
-            toValue: 0.3,
-            duration: 3000,
-            useNativeDriver: true,
-          })
-        ]),
-        Animated.loop(
-          Animated.timing(rotateAnim, {
-            toValue: 1,
-            duration: 15000,
-            useNativeDriver: true,
-          })
-        )
-      ]).start(() => pulseGlow());
-    };
-
-    pulseGlow();
   }, []);
 
   useEffect(() => {
@@ -150,86 +120,33 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete }) =>
   if (showLimitMessage) {
     return (
       <View style={styles.glowContainer}>
-        <Animated.View style={[
-          styles.glowEffect,
-          {
-            opacity: glowAnim.interpolate({
-              inputRange: [0, 0.5, 1],
-              outputRange: [0.3, 0.5, 0.3],
-            }),
-            transform: [
-              {
-                scale: glowAnim.interpolate({
-                  inputRange: [0, 0.5, 1],
-                  outputRange: [1, 1.1, 1],
-                }),
-              },
-              {
-                rotate: rotateAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ['0deg', '360deg'],
-                }),
-              },
-            ],
-          }
-        ]}>
-          <LinearGradient
-            colors={[
-              theme.COLORS.primary.green,
-              theme.COLORS.primary.blue,
-              theme.COLORS.primary.yellow,
-              theme.COLORS.primary.green,
-            ]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.gradient}
-          />
-        </Animated.View>
         <Card style={styles.container}>
-          <View style={styles.limitContainer}>
-            <View style={styles.limitHeader}>
-              <Ionicons 
-                name="checkmark-circle-outline" 
-                size={48} 
-                color={theme.COLORS.primary.green}
-              />
-              <Typography variant="h2" style={styles.limitTitle}>
-                Daily Challenges Complete!
-              </Typography>
-            </View>
-            <Typography variant="body" style={styles.limitMessage}>
+          <View style={styles.completionContent}>
+            <Ionicons 
+              name="checkmark-circle-outline" 
+              size={48} 
+              color={theme.COLORS.primary.green}
+              style={styles.completionIcon}
+            />
+            <Typography variant="h2" style={styles.completionTitle}>
+              Daily Challenges Complete!
+            </Typography>
+            <Typography style={styles.completionMessage}>
               Great job! You've completed your daily challenges. Come back tomorrow for new challenges and more opportunities to earn points.
             </Typography>
-            <View style={styles.statsContainer}>
-              <View style={styles.pointsDisplay}>
-                <Typography variant="h2" style={styles.pointsValue}>
-                  {localPoints}
-                </Typography>
-                <Typography variant="body" style={styles.pointsLabel}>
-                  Total Points
-                </Typography>
-              </View>
-              {userStats?.current_streak && userStats.current_streak > 0 && (
-                <View style={styles.streakDisplay}>
-                  <Ionicons 
-                    name="flame" 
-                    size={24} 
-                    color={theme.COLORS.primary.red}
-                  />
-                  <Typography variant="h3" style={styles.streakValue}>
-                    {userStats.current_streak}
-                  </Typography>
-                  <Typography variant="caption" style={styles.streakLabel}>
-                    Day Streak
-                  </Typography>
-                </View>
-              )}
+            <View style={styles.completionPoints}>
+              <Typography variant="h1" style={styles.completionPointsValue}>
+                {localPoints}
+              </Typography>
+              <Typography style={styles.completionPointsLabel}>
+                Total Points
+              </Typography>
             </View>
             <Button
               title="View Your Achievements"
               onPress={() => router.push('/(app)/achievements')}
               variant="secondary"
-              style={styles.achievementsButton}
+              style={styles.completionButton}
             />
           </View>
         </Card>
@@ -284,42 +201,7 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete }) =>
 
   return (
     <View style={styles.glowContainer}>
-      <Animated.View style={[
-        styles.glowEffect,
-        {
-          opacity: glowAnim.interpolate({
-            inputRange: [0, 0.5, 1],
-            outputRange: [0.3, 0.5, 0.3],
-          }),
-          transform: [
-            {
-              scale: glowAnim.interpolate({
-                inputRange: [0, 0.5, 1],
-                outputRange: [1, 1.1, 1],
-              }),
-            },
-            {
-              rotate: rotateAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: ['0deg', '360deg'],
-              }),
-            },
-          ],
-        }
-      ]}>
-        <LinearGradient
-          colors={[
-            theme.COLORS.primary.green,
-            theme.COLORS.primary.blue,
-            theme.COLORS.primary.yellow,
-            theme.COLORS.primary.green,
-          ]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.gradient}
-        />
-      </Animated.View>
-      <Card style={styles.container}>
+      <Card style={StyleSheet.flatten([styles.container, style])}>
         <View style={styles.header}>
           <View style={styles.titleContainer}>
             <Ionicons 
@@ -370,22 +252,26 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete }) =>
             <Ionicons 
               name="star-outline" 
               size={16} 
-              color={theme.COLORS.primary.yellow}
+              color={theme.COLORS.primary.green}
             />
             <Typography 
-              variant="caption" 
-              style={[styles.points, { color: theme.COLORS.primary.yellow }]}
+              variant="body"
+              style={styles.points}
+              color={theme.COLORS.primary.green}
             >
               {dailyChallenge.points} points
             </Typography>
           </View>
-          <Button
-            title="Complete Challenge"
-            onPress={handleComplete}
-            style={styles.button}
-            disabled={isSubmitting}
-          />
         </View>
+
+        <Button
+          title="Complete Challenge"
+          onPress={handleComplete}
+          variant="secondary"
+          style={styles.completeButton}
+          textStyle={{ color: theme.COLORS.primary.green }}
+          disabled={isSubmitting || showLimitMessage}
+        />
 
         {currentStreak > 0 && (
           <View style={styles.streakContainer}>
@@ -409,80 +295,88 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete }) =>
 
 const styles = StyleSheet.create({
   glowContainer: {
-    position: 'relative',
     width: '100%',
     alignItems: 'center',
-    marginVertical: theme.SPACING.lg,
-    paddingHorizontal: theme.SPACING.lg,
-  },
-  glowEffect: {
-    position: 'absolute',
-    top: -50,
-    left: -50,
-    right: -50,
-    bottom: -50,
-    borderRadius: theme.BORDER_RADIUS.lg * 3,
-    overflow: 'hidden',
-    zIndex: -1,
-  },
-  gradient: {
-    width: '200%',
-    height: '200%',
-    opacity: 0.6,
-    position: 'absolute',
-    top: '-50%',
-    left: '-50%',
   },
   container: {
     width: '100%',
-    padding: theme.SPACING.xl,
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    padding: theme.SPACING.lg,
+    backgroundColor: 'rgba(38, 20, 60, 0.85)',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     marginBottom: theme.SPACING.md,
+    width: '100%',
+    flexWrap: 'wrap',
+    gap: theme.SPACING.md,
   },
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: theme.SPACING.sm,
+    flex: 1,
+    minWidth: 150,
   },
   title: {
     marginLeft: theme.SPACING.xs,
+    flexShrink: 1,
+    color: theme.COLORS.ui.text,
+    textShadowColor: theme.COLORS.ui.accent,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 8,
   },
   challengeStats: {
     alignItems: 'flex-end',
+    minWidth: 100,
+    flexShrink: 0,
   },
   challengeTitle: {
     marginBottom: theme.SPACING.sm,
+    color: theme.COLORS.ui.text,
+    textShadowColor: theme.COLORS.ui.accent,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 6,
   },
   description: {
     marginBottom: theme.SPACING.lg,
+    color: theme.COLORS.ui.textSecondary,
   },
   input: {
     height: 120,
     marginBottom: theme.SPACING.lg,
     textAlignVertical: 'top',
+    backgroundColor: 'rgba(28, 14, 45, 0.3)',
+    borderColor: theme.COLORS.ui.border,
   },
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    marginBottom: theme.SPACING.md,
   },
   pointsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 8,
+    gap: theme.SPACING.xs,
   },
   points: {
-    marginLeft: theme.SPACING.xs,
+    fontWeight: theme.FONTS.weights.semibold,
+    fontSize: theme.FONTS.sizes.md,
+    textShadowColor: theme.COLORS.primary.green,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 4,
   },
-  button: {
-    flex: 1,
-    marginLeft: theme.SPACING.md,
+  completeButton: {
+    marginTop: theme.SPACING.md,
+    backgroundColor: 'rgba(65, 105, 225, 0.15)',
+    borderColor: theme.COLORS.ui.accent,
+    borderWidth: 1,
+    width: '100%',
+    shadowColor: theme.COLORS.ui.accent,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   streakContainer: {
     flexDirection: 'row',
@@ -496,47 +390,71 @@ const styles = StyleSheet.create({
     fontWeight: theme.FONTS.weights.bold,
     color: theme.COLORS.primary.green,
     marginTop: theme.SPACING.xs,
+    textAlign: 'right',
+    minWidth: 100,
+    flexWrap: 'wrap',
+    flexShrink: 0,
+    textShadowColor: theme.COLORS.primary.green,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 4,
   },
   limitContainer: {
     padding: theme.SPACING.lg,
     alignItems: 'center',
+    width: '100%',
   },
   limitHeader: {
     alignItems: 'center',
     marginBottom: theme.SPACING.xl,
+    width: '100%',
   },
   limitTitle: {
     textAlign: 'center',
     color: theme.COLORS.primary.green,
     marginTop: theme.SPACING.md,
     fontSize: theme.FONTS.sizes.xxl,
+    paddingHorizontal: theme.SPACING.md,
+    width: '100%',
+    flexWrap: 'wrap',
   },
   limitMessage: {
     textAlign: 'center',
     color: theme.COLORS.ui.textSecondary,
     marginBottom: theme.SPACING.xl,
     lineHeight: 24,
-    paddingHorizontal: theme.SPACING.md,
+    paddingHorizontal: theme.SPACING.lg,
+    width: '100%',
   },
   statsContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
     alignItems: 'center',
     width: '100%',
     marginBottom: theme.SPACING.xl,
+    paddingHorizontal: theme.SPACING.lg,
   },
   pointsDisplay: {
     alignItems: 'center',
     flex: 1,
+    paddingHorizontal: theme.SPACING.lg,
+    width: '100%',
+    maxWidth: 200,
   },
   pointsValue: {
     color: theme.COLORS.primary.green,
     fontSize: theme.FONTS.sizes.xxxl,
     fontWeight: theme.FONTS.weights.bold,
+    textAlign: 'center',
+    width: '100%',
+    flexShrink: 0,
+    minWidth: 150,
+    paddingHorizontal: theme.SPACING.md,
   },
   pointsLabel: {
     color: theme.COLORS.ui.textSecondary,
     marginTop: theme.SPACING.xs,
+    textAlign: 'center',
+    width: '100%',
   },
   streakDisplay: {
     alignItems: 'center',
@@ -558,5 +476,54 @@ const styles = StyleSheet.create({
     marginTop: 0,
     paddingVertical: theme.SPACING.md,
     width: '100%',
+  },
+  completionContainer: {
+    width: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    borderRadius: theme.BORDER_RADIUS.lg,
+  },
+  completionContent: {
+    padding: theme.SPACING.xl,
+    alignItems: 'center',
+    paddingVertical: theme.SPACING.xl * 1.5,
+  },
+  completionIcon: {
+    marginBottom: theme.SPACING.lg,
+  },
+  completionTitle: {
+    color: theme.COLORS.primary.green,
+    fontSize: 28,
+    fontWeight: theme.FONTS.weights.semibold,
+    textAlign: 'center',
+    marginBottom: theme.SPACING.md,
+  },
+  completionMessage: {
+    color: theme.COLORS.ui.textSecondary,
+    textAlign: 'center',
+    marginBottom: theme.SPACING.xl * 1.5,
+    lineHeight: 24,
+    fontSize: theme.FONTS.sizes.md,
+  },
+  completionPoints: {
+    alignItems: 'center',
+    marginBottom: theme.SPACING.xl * 1.5,
+  },
+  completionPointsValue: {
+    color: theme.COLORS.primary.green,
+    fontSize: 72,
+    fontWeight: theme.FONTS.weights.bold,
+    textAlign: 'center',
+    marginBottom: theme.SPACING.xs,
+    lineHeight: 80,
+  },
+  completionPointsLabel: {
+    color: theme.COLORS.ui.textSecondary,
+    textAlign: 'center',
+    fontSize: theme.FONTS.sizes.lg,
+  },
+  completionButton: {
+    width: '100%',
+    paddingVertical: theme.SPACING.md,
+    marginTop: theme.SPACING.md,
   },
 }); 
