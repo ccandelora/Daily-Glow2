@@ -1,31 +1,90 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Typography, Card, Button, Input, Header, EmotionWheel } from '@/components/common';
+import { Typography, Card, Button, Input, Header, EmotionWheel, VideoBackground } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
 import { useAppState } from '@/contexts/AppStateContext';
-import theme from '@/constants/theme';
+import theme, { TIME_PERIODS } from '@/constants/theme';
 import { Emotion } from '@/constants/emotions';
+import { getCurrentTimePeriod, TimePeriod } from '@/utils/dateTime';
+import { LinearGradient } from 'expo-linear-gradient';
+
+const formatTime = (hour: number) => {
+  const period = hour >= 12 ? 'PM' : 'AM';
+  const standardHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  return `${standardHour}:00 ${period}`;
+};
 
 export const CheckInScreen = () => {
   const router = useRouter();
-  const { addEntry } = useJournal();
+  const { addEntry, getLatestEntryForPeriod, getTodayEntries } = useJournal();
   const { showError } = useAppState();
   const [step, setStep] = useState<'initial' | 'secondary' | 'gratitude'>('initial');
   const [initialEmotion, setInitialEmotion] = useState<string | undefined>();
   const [secondaryEmotion, setSecondaryEmotion] = useState<string | undefined>();
   const [gratitude, setGratitude] = useState('');
   const [note, setNote] = useState('');
+  const currentPeriod = getCurrentTimePeriod();
+  const periodDetails = TIME_PERIODS[currentPeriod];
+  const [hasCompletedCurrentPeriod, setHasCompletedCurrentPeriod] = useState(false);
+  const [nextPeriod, setNextPeriod] = useState<TimePeriod | null>(null);
+
+  // Animation values
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+  const scaleAnim = React.useRef(new Animated.Value(0.95)).current;
+
+  useEffect(() => {
+    checkPeriodCompletion();
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 50,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+
+  const checkPeriodCompletion = () => {
+    const existingEntry = getLatestEntryForPeriod(currentPeriod);
+    const todayEntries = getTodayEntries();
+    const currentHour = new Date().getHours();
+    
+    if (existingEntry) {
+      setHasCompletedCurrentPeriod(true);
+      
+      // Determine next available period
+      const completedPeriods = new Set(todayEntries.map(entry => entry.time_period));
+      
+      if (currentPeriod === 'EVENING') {
+        // After evening check-in, next check-in is tomorrow morning
+        setNextPeriod('MORNING');
+      } else if (currentPeriod === 'MORNING' && !completedPeriods.has('AFTERNOON')) {
+        setNextPeriod('AFTERNOON');
+      } else if ((currentPeriod === 'MORNING' || currentPeriod === 'AFTERNOON') && 
+                 !completedPeriods.has('EVENING')) {
+        setNextPeriod('EVENING');
+      } else {
+        // All periods completed for today
+        setNextPeriod(null);
+      }
+    }
+  };
 
   const handleInitialEmotionSelect = (emotion: Emotion) => {
     setInitialEmotion(emotion.id);
-    setSecondaryEmotion(undefined); // Reset secondary when primary changes
-    setStep('secondary'); // Automatically advance to secondary emotions
+    setSecondaryEmotion(undefined);
+    setStep('secondary');
   };
 
   const handleSecondaryEmotionSelect = (emotion: Emotion) => {
     setSecondaryEmotion(emotion.id);
-    setStep('gratitude'); // Automatically advance to gratitude
+    setStep('gratitude');
   };
 
   const handleSubmit = async () => {
@@ -56,94 +115,177 @@ export const CheckInScreen = () => {
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <Header
-        title="Daily Check-in"
-        onBack={() => router.back()}
-      />
-      
-      <ScrollView style={styles.content}>
-        {step === 'initial' && (
-          <Card style={styles.card}>
-            <Typography variant="h3" style={styles.sectionTitle}>
-              How are you feeling right now?
-            </Typography>
-            <View style={styles.emotionWheelContainer}>
-              <EmotionWheel
-                onSelectEmotion={handleInitialEmotionSelect}
-                selectedEmotion={initialEmotion}
-                type="primary"
-              />
-            </View>
-          </Card>
-        )}
+  if (hasCompletedCurrentPeriod) {
+    return (
+      <View style={styles.container}>
+        <VideoBackground />
+        
+        {/* Dark overlay gradient */}
+        <LinearGradient
+          colors={[
+            'rgba(28, 14, 45, 0.8)',
+            'rgba(28, 14, 45, 0.6)',
+            'rgba(28, 14, 45, 0.8)',
+          ]}
+          style={StyleSheet.absoluteFill}
+        />
 
-        {step === 'secondary' && (
-          <Card style={styles.card}>
-            <Typography variant="h3" style={styles.sectionTitle}>
-              More specifically...
-            </Typography>
-            <View style={styles.emotionWheelContainer}>
-              <EmotionWheel
-                onSelectEmotion={handleSecondaryEmotionSelect}
-                selectedEmotion={secondaryEmotion}
-                type="secondary"
-                primaryEmotion={initialEmotion}
-              />
-            </View>
-            <Button
-              title="Back"
-              onPress={handleBack}
-              variant="secondary"
-              style={styles.button}
-            />
-          </Card>
-        )}
-
-        {step === 'gratitude' && (
-          <>
-            <Card style={styles.card}>
-              <Typography variant="h3" style={styles.sectionTitle}>
-                What are you grateful for?
+        <Header />
+        <ScrollView style={styles.scrollView}>
+          <Animated.View
+            style={[
+              styles.content,
+              {
+                opacity: fadeAnim,
+                transform: [{ scale: scaleAnim }],
+              },
+            ]}
+          >
+            <Card style={styles.card} variant="glow">
+              <Typography variant="h2" style={styles.title} glow="strong">
+                Check-in Complete
               </Typography>
-              <Input
-                multiline
-                value={gratitude}
-                onChangeText={setGratitude}
-                placeholder="Take a moment to reflect on something positive..."
-                style={styles.input}
-              />
-            </Card>
-
-            <Card style={styles.card}>
-              <Typography variant="h3" style={styles.sectionTitle}>
-                Additional thoughts? (Optional)
+              <Typography variant="body" style={styles.message} glow="medium">
+                You've already completed your {periodDetails.label.toLowerCase()} check-in.
+                {nextPeriod ? (
+                  nextPeriod === 'MORNING' ? 
+                  ` Come back tomorrow morning between ${formatTime(TIME_PERIODS.MORNING.range.start)} - ${formatTime(TIME_PERIODS.MORNING.range.end)} for your next check-in!` :
+                  ` Your next check-in will be available between ${formatTime(TIME_PERIODS[nextPeriod].range.start)} - ${formatTime(TIME_PERIODS[nextPeriod].range.end)}.`
+                ) : (
+                  ` You've completed all check-ins for today. Come back tomorrow morning at ${formatTime(TIME_PERIODS.MORNING.range.start)}!`
+                )}
               </Typography>
-              <Input
-                multiline
-                value={note}
-                onChangeText={setNote}
-                placeholder="Any other thoughts or feelings you'd like to capture..."
-                style={styles.input}
-              />
-            </Card>
-
-            <View style={styles.buttonRow}>
+              {nextPeriod && (
+                <Typography 
+                  variant="body" 
+                  style={StyleSheet.flatten([
+                    styles.cardDescription, 
+                    { color: theme.COLORS.primary.green }
+                  ])}
+                  glow="medium"
+                >
+                  Next check-in: {TIME_PERIODS[nextPeriod].label}
+                </Typography>
+              )}
               <Button
-                title="Back"
-                onPress={handleBack}
+                title="Return Home"
+                onPress={() => router.back()}
                 variant="secondary"
                 style={styles.button}
               />
-              <Button
-                title="Save Entry"
-                onPress={handleSubmit}
-                style={styles.button}
-              />
-            </View>
-          </>
-        )}
+            </Card>
+          </Animated.View>
+        </ScrollView>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.container}>
+      <VideoBackground />
+      
+      {/* Dark overlay gradient */}
+      <LinearGradient
+        colors={[
+          'rgba(28, 14, 45, 0.8)',
+          'rgba(28, 14, 45, 0.6)',
+          'rgba(28, 14, 45, 0.8)',
+        ]}
+        style={StyleSheet.absoluteFill}
+      />
+
+      <Header />
+      <ScrollView style={styles.scrollView}>
+        <Animated.View
+          style={[
+            styles.content,
+            {
+              opacity: fadeAnim,
+              transform: [{ scale: scaleAnim }],
+            },
+          ]}
+        >
+          <Card style={styles.card} variant="glow">
+            <Typography variant="h2" style={styles.title} glow="strong">
+              {periodDetails.label} Check-in
+            </Typography>
+            <Typography variant="body" style={styles.subtitle} glow="medium">
+              Take a moment to reflect on how you're feeling
+            </Typography>
+
+            {step === 'initial' && (
+              <>
+                <Typography variant="h3" style={styles.sectionTitle} glow="medium">
+                  How are you feeling right now?
+                </Typography>
+                <EmotionWheel 
+                  onSelectEmotion={handleInitialEmotionSelect}
+                  selectedEmotion={initialEmotion}
+                  type="primary"
+                />
+              </>
+            )}
+
+            {step === 'secondary' && initialEmotion && (
+              <>
+                <Typography variant="h3" style={styles.sectionTitle} glow="medium">
+                  Any other emotions present?
+                </Typography>
+                <EmotionWheel 
+                  onSelectEmotion={handleSecondaryEmotionSelect}
+                  selectedEmotion={secondaryEmotion}
+                  type="secondary"
+                  primaryEmotion={initialEmotion}
+                />
+                <Button
+                  title="Back"
+                  onPress={handleBack}
+                  variant="secondary"
+                  style={styles.backButton}
+                />
+              </>
+            )}
+
+            {step === 'gratitude' && (
+              <>
+                <Typography variant="h3" style={styles.sectionTitle} glow="medium">
+                  What are you grateful for?
+                </Typography>
+                <Input
+                  multiline
+                  value={gratitude}
+                  onChangeText={setGratitude}
+                  placeholder="Share something you appreciate..."
+                  style={styles.input}
+                />
+                <Typography variant="h3" style={styles.sectionTitle} glow="medium">
+                  Additional thoughts (optional)
+                </Typography>
+                <Input
+                  multiline
+                  value={note}
+                  onChangeText={setNote}
+                  placeholder="Any other thoughts or reflections..."
+                  style={styles.input}
+                />
+                <View style={styles.buttonContainer}>
+                  <Button
+                    title="Back"
+                    onPress={handleBack}
+                    variant="secondary"
+                    style={styles.button}
+                  />
+                  <Button
+                    title="Complete Check-in"
+                    onPress={handleSubmit}
+                    variant="primary"
+                    style={styles.button}
+                  />
+                </View>
+              </>
+            )}
+          </Card>
+        </Animated.View>
       </ScrollView>
     </View>
   );
@@ -154,30 +296,67 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.COLORS.ui.background,
   },
+  scrollView: {
+    flex: 1,
+  },
   content: {
     padding: theme.SPACING.lg,
   },
   card: {
-    marginBottom: theme.SPACING.lg,
-    padding: theme.SPACING.lg,
+    padding: theme.SPACING.xl,
+  },
+  title: {
+    marginBottom: theme.SPACING.md,
+    textAlign: 'center',
+  },
+  subtitle: {
+    marginBottom: theme.SPACING.xl,
+    textAlign: 'center',
+    color: theme.COLORS.ui.textSecondary,
   },
   sectionTitle: {
     marginBottom: theme.SPACING.lg,
-    textAlign: 'center',
-  },
-  emotionWheelContainer: {
-    marginVertical: theme.SPACING.xl,
   },
   input: {
     height: 120,
+    marginBottom: theme.SPACING.xl,
+    textAlignVertical: 'top',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: theme.SPACING.md,
+    marginTop: theme.SPACING.xl,
+    marginBottom: theme.SPACING.lg,
+    paddingHorizontal: theme.SPACING.xl,
   },
   button: {
-    marginTop: theme.SPACING.lg,
+    flex: 1,
+    maxWidth: 160,
+    shadowColor: theme.COLORS.ui.accent,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: theme.SPACING.md,
+  backButton: {
+    backgroundColor: 'rgba(65, 105, 225, 0.1)',
+    borderColor: theme.COLORS.ui.accent,
+    borderWidth: 1,
+  },
+  submitButton: {
+    backgroundColor: theme.COLORS.ui.accent,
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+  },
+  message: {
     marginBottom: theme.SPACING.xl,
+    textAlign: 'center',
+    color: theme.COLORS.ui.textSecondary,
+  },
+  cardDescription: {
+    marginBottom: theme.SPACING.xl,
+    textAlign: 'center',
   },
 }); 

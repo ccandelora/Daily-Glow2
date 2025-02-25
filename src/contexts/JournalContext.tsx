@@ -4,6 +4,7 @@ import { useAuth } from './AuthContext';
 import { supabase } from '@/lib/supabase';
 import { getAllEmotions, Emotion } from '@/constants/emotions';
 import { TimePeriod, getCurrentTimePeriod, isSameDay } from '@/utils/dateTime';
+import { useCheckInStreak } from './CheckInStreakContext';
 
 interface JournalEntry {
   id: string;
@@ -37,8 +38,9 @@ const JournalContext = createContext<JournalContextType | undefined>(undefined);
 
 export function JournalProvider({ children }: { children: React.ReactNode }) {
   const [entries, setEntries] = useState<JournalEntry[]>([]);
-  const { setLoading, showError } = useAppState();
+  const { setLoading, showError, showSuccess } = useAppState();
   const { session } = useAuth();
+  const { incrementStreak, refreshStreaks } = useCheckInStreak();
 
   useEffect(() => {
     if (session?.user) {
@@ -62,10 +64,24 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
         throw new Error('Failed to load journal entries');
       }
 
-      setEntries(data.map((entry: DatabaseEntry) => ({
-        ...entry,
-        date: new Date(entry.created_at),
-      })));
+      // Convert created_at to local timezone date
+      setEntries(data.map((entry: DatabaseEntry) => {
+        const date = new Date(entry.created_at);
+        // Create date in local timezone using UTC components
+        const localDate = new Date(Date.UTC(
+          date.getUTCFullYear(),
+          date.getUTCMonth(),
+          date.getUTCDate(),
+          date.getUTCHours(),
+          date.getUTCMinutes(),
+          date.getUTCSeconds()
+        ));
+        
+        return {
+          ...entry,
+          date: localDate,
+        };
+      }));
     } catch (error) {
       showError(error instanceof Error ? error.message : 'Failed to load journal entries');
     } finally {
@@ -129,6 +145,20 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
       };
 
       setEntries(prev => [newEntry, ...prev]);
+      
+      // Make sure streak data is loaded before incrementing
+      try {
+        // Refresh streaks first to ensure we have the latest data
+        await refreshStreaks();
+        // Then increment streak for this time period
+        await incrementStreak(timePeriod);
+      } catch (streakError) {
+        console.error('Error updating streak:', streakError);
+        // Continue with success message even if streak update fails
+      }
+      
+      // Show success message
+      showSuccess(`Check-in complete! Your ${timePeriod.toLowerCase()} streak continues.`);
     } catch (error) {
       showError('Failed to save journal entry');
       console.error('Error adding entry:', error);
