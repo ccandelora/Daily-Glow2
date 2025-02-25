@@ -5,8 +5,10 @@ import { Typography, Card, Button, AnimatedMoodIcon, DailyChallenge, VideoBackgr
 import { useJournal } from '@/contexts/JournalContext';
 import theme, { TIME_PERIODS } from '@/constants/theme';
 import { getEmotionById } from '@/constants/emotions';
-import { getCurrentTimePeriod } from '@/utils/dateTime';
+import { getCurrentTimePeriod, TimePeriod } from '@/utils/dateTime';
 import { LinearGradient } from 'expo-linear-gradient';
+import { StreakSummary } from '@/components/home/StreakSummary';
+import { RecentBadges } from '@/components/home/RecentBadges';
 
 const getEmotionDisplay = (entry: any) => {
   const emotion = entry.initial_emotion ? getEmotionById(entry.initial_emotion) : null;
@@ -45,20 +47,27 @@ const getEmotionEmoji = (entry: any) => {
   return '😐';
 };
 
+const formatTime = (hour: number) => {
+  const period = hour >= 12 ? 'PM' : 'AM';
+  const standardHour = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+  return `${standardHour}:00 ${period}`;
+};
+
 export default function HomeScreen() {
   const router = useRouter();
-  const { getRecentEntries, getLatestEntryForPeriod } = useJournal();
+  const { getRecentEntries, getLatestEntryForPeriod, getTodayEntries } = useJournal();
   const currentPeriod = getCurrentTimePeriod();
   const periodDetails = TIME_PERIODS[currentPeriod];
   const todayEntry = getLatestEntryForPeriod(currentPeriod);
   const recentEntries = getRecentEntries(3);
+  const [nextPeriod, setNextPeriod] = React.useState<TimePeriod | null>(null);
 
   // Animation values
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const rotateAnim = React.useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    console.log('HomeScreen mounted - starting animations');
+    checkNextPeriod();
     
     // Fade in content
     Animated.timing(fadeAnim, {
@@ -73,7 +82,7 @@ export default function HomeScreen() {
         Animated.sequence([
           Animated.timing(rotateAnim, {
             toValue: 1,
-            duration: 30000, // 30 seconds per rotation
+            duration: 30000,
             useNativeDriver: true,
           }),
           Animated.timing(rotateAnim, {
@@ -86,7 +95,29 @@ export default function HomeScreen() {
     };
 
     startRotation();
-  }, []);
+  }, [todayEntry]);
+
+  const checkNextPeriod = () => {
+    const todayEntries = getTodayEntries();
+    const completedPeriods = new Set(todayEntries.map(entry => entry.time_period));
+
+    if (todayEntry) {
+      if (currentPeriod === 'EVENING' && completedPeriods.has('EVENING')) {
+        // After evening check-in, next check-in is tomorrow morning
+        setNextPeriod('MORNING');
+      } else if (currentPeriod === 'MORNING' && !completedPeriods.has('AFTERNOON')) {
+        setNextPeriod('AFTERNOON');
+      } else if (!completedPeriods.has('EVENING')) {
+        setNextPeriod('EVENING');
+      } else {
+        // All periods completed for today
+        setNextPeriod(null);
+      }
+    } else {
+      // If we haven't completed the current period, it's the next one
+      setNextPeriod(currentPeriod);
+    }
+  };
 
   const spin = rotateAnim.interpolate({
     inputRange: [0, 1],
@@ -126,18 +157,49 @@ export default function HomeScreen() {
         </View>
 
         <Card style={styles.checkInCard} variant="glow">
-          <Typography variant="h2" style={styles.cardTitle} glow="medium">
-            {`${periodDetails.label} Check-in`}
-          </Typography>
-          <Typography variant="body" style={styles.cardDescription}>
-            Take a moment to reflect on how you're feeling
-          </Typography>
-          <Button
-            title={`Start ${periodDetails.label.toLowerCase()} check-in ✨`}
-            onPress={() => router.push('/check-in')}
-            variant="primary"
-            style={styles.checkInButton}
-          />
+          {todayEntry ? (
+            <>
+              <Typography variant="h2" style={styles.cardTitle} glow="medium">
+                Check-in Complete
+              </Typography>
+              <Typography variant="body" style={styles.cardDescription}>
+                {nextPeriod ? (
+                  nextPeriod === 'MORNING' ? 
+                  `You've completed your ${periodDetails.label.toLowerCase()} check-in. Come back tomorrow morning between ${formatTime(TIME_PERIODS.MORNING.range.start)} - ${formatTime(TIME_PERIODS.MORNING.range.end)} for your next check-in!` :
+                  `You've completed your ${periodDetails.label.toLowerCase()} check-in. Your next check-in will be available between ${formatTime(TIME_PERIODS[nextPeriod].range.start)} - ${formatTime(TIME_PERIODS[nextPeriod].range.end)}.`
+                ) : (
+                  `You've completed all check-ins for today. Come back tomorrow morning at ${formatTime(TIME_PERIODS.MORNING.range.start)}!`
+                )}
+              </Typography>
+              {nextPeriod && (
+                <Typography 
+                  variant="body" 
+                  style={StyleSheet.flatten([
+                    styles.cardDescription, 
+                    { color: theme.COLORS.primary.green }
+                  ])}
+                  glow="medium"
+                >
+                  Next check-in: {TIME_PERIODS[nextPeriod].label}
+                </Typography>
+              )}
+            </>
+          ) : (
+            <>
+              <Typography variant="h2" style={styles.cardTitle} glow="medium">
+                {`${periodDetails.label} Check-in`}
+              </Typography>
+              <Typography variant="body" style={styles.cardDescription}>
+                Take a moment to reflect on how you're feeling
+              </Typography>
+              <Button
+                title={`Start ${periodDetails.label.toLowerCase()} check-in ✨`}
+                onPress={() => router.push('/check-in')}
+                variant="primary"
+                style={styles.checkInButton}
+              />
+            </>
+          )}
         </Card>
 
         <Card 
@@ -152,6 +214,10 @@ export default function HomeScreen() {
           </Typography>
           <DailyChallenge />
         </Card>
+
+        <StreakSummary />
+        
+        <RecentBadges />
 
         <Animated.View style={{ opacity: fadeAnim }}>
           <Card 

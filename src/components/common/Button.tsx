@@ -7,7 +7,7 @@ interface ButtonProps {
   title: string;
   onPress: () => void;
   variant?: 'primary' | 'secondary' | 'outline';
-  size?: 'small' | 'medium' | 'large';
+  size?: 'small' | 'medium' | 'large' | 'compact';
   disabled?: boolean;
   loading?: boolean;
   style?: ViewStyle;
@@ -47,9 +47,12 @@ export const Button: React.FC<ButtonProps> = ({
           style={[
             styles.text,
             styles[`${variant}Text` as keyof typeof styles] as TextStyle,
+            size === 'compact' && styles.compactText,
             disabled && styles.disabledText,
             textStyle,
-          ].filter(Boolean) as TextStyle}
+          ].filter(Boolean) as unknown as TextStyle}
+          numberOfLines={size === 'compact' ? 1 : undefined}
+          adjustsFontSizeToFit={size === 'compact'}
         >
           {title}
         </Typography>
@@ -92,6 +95,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.SPACING.lg,
     minWidth: 100,
   },
+  compact: {
+    paddingVertical: theme.SPACING.sm,
+    paddingHorizontal: theme.SPACING.md,
+    minWidth: 0, // No minimum width
+  },
   medium: {
     paddingVertical: theme.SPACING.md,
     paddingHorizontal: theme.SPACING.xl,
@@ -109,6 +117,9 @@ const styles = StyleSheet.create({
   },
   text: {
     textAlign: 'center',
+  },
+  compactText: {
+    fontSize: theme.FONTS.sizes.sm,
   },
   primaryText: {
     color: theme.COLORS.ui.text,

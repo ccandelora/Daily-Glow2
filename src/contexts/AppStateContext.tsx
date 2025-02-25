@@ -5,6 +5,7 @@ interface AppStateContextType {
   isLoading: boolean;
   setLoading: (loading: boolean) => void;
   showError: (message: string) => void;
+  showSuccess: (message: string) => void;
 }
 
 const AppStateContext = createContext<AppStateContextType | undefined>(undefined);
@@ -20,10 +21,15 @@ export function AppStateProvider({ children }: { children: React.ReactNode }) {
     Alert.alert('Error', message);
   };
 
+  const showSuccess = (message: string) => {
+    Alert.alert('Success', message);
+  };
+
   const value = {
     isLoading,
     setLoading,
     showError,
+    showSuccess,
   };
 
   return (

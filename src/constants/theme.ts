@@ -5,6 +5,9 @@ export const COLORS = {
     green: '#00C853',   // Vibrant green for positive emotions
     blue: '#2979FF',    // Bright blue for calm emotions
     yellow: '#FFD600',  // Bright yellow for energetic emotions
+    purple: '#9C27B0',  // Deep purple for complex emotions
+    orange: '#FF9800',  // Warm orange for energetic emotions
+    teal: '#00BCD4',    // Teal for calm/balanced emotions
   },
   
   // UI colors updated for dark theme with glowing accents

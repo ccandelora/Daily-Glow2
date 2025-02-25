@@ -98,6 +98,20 @@ export const SettingsScreen = () => {
 
         <Card style={styles.section}>
           <Typography variant="h3" style={styles.sectionTitle}>
+            Appearance
+          </Typography>
+          <View style={styles.settingRow}>
+            <Typography>Dark Mode</Typography>
+            <Switch
+              value={darkMode}
+              onValueChange={setDarkMode}
+              trackColor={{ false: theme.COLORS.ui.card, true: theme.COLORS.primary.green }}
+            />
+          </View>
+        </Card>
+
+        <Card style={styles.section}>
+          <Typography variant="h3" style={styles.sectionTitle}>
             Data Management
           </Typography>
           <View style={styles.dataManagement}>
@@ -186,23 +200,24 @@ const styles = StyleSheet.create({
     marginBottom: theme.SPACING.md,
   },
   signOutButton: {
-    marginTop: theme.SPACING.md,
+    marginTop: theme.SPACING.sm,
   },
   dataManagement: {
-    marginTop: theme.SPACING.md,
+    marginTop: theme.SPACING.sm,
   },
   dataButton: {
-    marginBottom: theme.SPACING.xs,
+    marginBottom: theme.SPACING.sm,
   },
   deleteButton: {
-    marginBottom: theme.SPACING.xs,
+    marginTop: theme.SPACING.md,
+    marginBottom: theme.SPACING.sm,
     backgroundColor: theme.COLORS.primary.red,
   },
   dataInfo: {
-    marginBottom: theme.SPACING.lg,
+    marginBottom: theme.SPACING.md,
   },
   copyright: {
-    marginTop: theme.SPACING.md,
+    marginTop: theme.SPACING.lg,
   },
   attribution: {
     marginTop: theme.SPACING.xs,

@@ -4,19 +4,26 @@ import { useRouter } from 'expo-router';
 import { Typography, Card, Button, Input, EmotionWheel, Header, AnimatedBackground } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
 import { useAppState } from '@/contexts/AppStateContext';
+import { useCheckInStreak } from '@/contexts/CheckInStreakContext';
+import { getCurrentTimePeriod } from '@/utils/dateTime';
 import theme from '@/constants/theme';
 import { Emotion } from '@/constants/emotions';
+import { useBadgeService } from '@/hooks/useBadgeService';
 
 export const CheckInScreen = () => {
   const router = useRouter();
-  const { addEntry } = useJournal();
-  const { showError } = useAppState();
+  const { addEntry, getTodayEntries } = useJournal();
+  const { showError, showSuccess } = useAppState();
+  const { streaks } = useCheckInStreak();
+  const badgeService = useBadgeService();
   
   const [step, setStep] = useState<'initial' | 'gratitude' | 'final'>('initial');
   const [initialEmotion, setInitialEmotion] = useState<string | undefined>();
   const [postEmotion, setPostEmotion] = useState<string | undefined>();
   const [gratitude, setGratitude] = useState('');
   const [note, setNote] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const transitionAnim = useRef(new Animated.Value(0)).current;
 
@@ -62,17 +69,64 @@ export const CheckInScreen = () => {
     }
   };
 
+  const getStreakMessage = () => {
+    const currentPeriod = getCurrentTimePeriod().toLowerCase();
+    let message = '';
+    
+    // Get the streak count for the current period
+    const streakCount = streaks[currentPeriod as keyof typeof streaks] as number || 0;
+    
+    if (streakCount === 0) {
+      message = "Great job on your first check-in!";
+    } else if (streakCount === 1) {
+      message = `You've started a ${currentPeriod} streak!`;
+    } else if (streakCount < 5) {
+      message = `You're on a ${streakCount}-day ${currentPeriod} streak!`;
+    } else if (streakCount < 10) {
+      message = `Impressive! ${streakCount}-day ${currentPeriod} streak!`;
+    } else {
+      message = `Amazing! ${streakCount}-day ${currentPeriod} streak! You're a check-in master!`;
+    }
+    
+    return message;
+  };
+
   const handleSave = async () => {
-    if (!initialEmotion || !postEmotion || !gratitude.trim()) {
-      showError('Please complete all fields before saving');
+    if (!initialEmotion) {
+      showError('Please select an emotion');
       return;
     }
-
+    
+    if (!gratitude.trim()) {
+      showError('Please enter what you are grateful for');
+      return;
+    }
+    
+    setLoading(true);
+    
     try {
-      await addEntry(initialEmotion, postEmotion, gratitude, note);
+      await addEntry(initialEmotion, postEmotion || '', gratitude, note);
+      
+      // Check and award badges
+      await badgeService.checkStreakBadges(streaks);
+      
+      // Check if all periods were completed today
+      const todayEntries = getTodayEntries();
+      const completedPeriods = new Set(todayEntries.map((entry: any) => entry.time_period));
+      
+      if (completedPeriods.size === 3) {
+        await badgeService.checkAllPeriodsCompleted();
+      }
+      
+      // Show success message with streak information
+      showSuccess(getStreakMessage());
+      
       router.back();
     } catch (error) {
-      // Error is already handled in JournalContext
+      console.error('Error saving journal entry:', error);
+      showError('Failed to save your check-in. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 

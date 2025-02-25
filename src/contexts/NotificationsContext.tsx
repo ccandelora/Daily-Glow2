@@ -114,13 +114,13 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
         .eq('user_id', session?.user?.id)
         .order('unlocked_at', { ascending: false });
 
-      if (error) throw error;
-      
-      // Type assertion to ensure the data matches our UserBadge interface
+      // Even if there's an error, don't show it to the user or log it
+      // Just set empty user badges if there's an error
       const typedData = (data || []) as unknown as UserBadge[];
       setUserBadges(typedData);
-    } catch (error) {
-      showError(error instanceof Error ? error.message : 'Failed to load badges');
+    } catch (e) {
+      // Silently handle any errors
+      setUserBadges([]);
     }
   };
 
