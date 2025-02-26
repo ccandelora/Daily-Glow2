@@ -3,7 +3,7 @@ import { View, ScrollView, StyleSheet, Animated } from 'react-native';
 import { Typography, Card } from '@/components/common';
 import { useBadges } from '@/contexts/BadgeContext';
 import theme from '@/constants/theme';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome6 } from '@expo/vector-icons';
 
 const BADGE_COLORS: Record<string, string> = {
   beginner: theme.COLORS.primary.green,
@@ -14,11 +14,11 @@ const BADGE_COLORS: Record<string, string> = {
 };
 
 const BADGE_ICONS: Record<string, string> = {
-  beginner: 'leaf-outline',
-  intermediate: 'shield-outline',
-  advanced: 'diamond-outline',
-  expert: 'star-outline',
-  master: 'crown-outline',
+  beginner: 'leaf',
+  intermediate: 'shield',
+  advanced: 'gem',
+  expert: 'star',
+  master: 'crown',
 };
 
 export const BadgesTab = () => {
@@ -36,7 +36,7 @@ export const BadgesTab = () => {
   }, []);
 
   const getBadgeColor = (category: string) => BADGE_COLORS[category] || theme.COLORS.ui.textSecondary;
-  const getBadgeIcon = (category: string) => BADGE_ICONS[category] || 'medal-outline';
+  const getBadgeIcon = (category: string) => BADGE_ICONS[category] || 'medal';
 
   const renderBadge = (badge: any, isEarned: boolean) => {
     const color = getBadgeColor(badge.category);
@@ -61,7 +61,7 @@ export const BadgesTab = () => {
               }
             ])}
           >
-            <Ionicons 
+            <FontAwesome6 
               name={iconName as any} 
               size={24} 
               color={isEarned ? color : 'rgba(120, 120, 120, 0.5)'} 

@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import { View, StyleSheet, ScrollView, Animated } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Typography, Card, Button, AnimatedBackground } from '@/components/common';
+import { Typography, Card, Button, VideoBackground } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
 import theme from '@/constants/theme';
 import { getEmotionById, getAllEmotions } from '@/constants/emotions';
@@ -11,12 +11,32 @@ export const EntryDetailScreen = () => {
   const { id } = useLocalSearchParams();
   const { entries } = useJournal();
   
+  // Animation values
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+  const slideAnim = React.useRef(new Animated.Value(50)).current;
+  
+  React.useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        tension: 50,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, []);
+  
   const entry = entries.find(e => e.id === id);
 
   if (!entry) {
     return (
       <View style={styles.container}>
-        <AnimatedBackground intensity="medium" />
+        <VideoBackground />
         <Typography variant="h2" style={styles.errorText}>
           Entry not found
         </Typography>
@@ -46,7 +66,7 @@ export const EntryDetailScreen = () => {
     
     return (
       <View style={styles.container}>
-        <AnimatedBackground intensity="medium" />
+        <VideoBackground />
         <Typography variant="h2" style={styles.errorText}>
           Invalid emotion data
         </Typography>
@@ -61,9 +81,17 @@ export const EntryDetailScreen = () => {
 
   return (
     <View style={styles.container}>
-      <AnimatedBackground intensity="medium" />
+      <VideoBackground />
       <ScrollView style={styles.scrollView}>
-        <View style={styles.safeArea}>
+        <Animated.View 
+          style={[
+            styles.safeArea,
+            {
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }],
+            },
+          ]}
+        >
           <View style={styles.header}>
             <Button
               title="← Back"
@@ -71,12 +99,12 @@ export const EntryDetailScreen = () => {
               onPress={() => router.back()}
               style={styles.backButton}
             />
-            <Typography variant="h2" style={styles.title}>
+            <Typography variant="h1" style={styles.title} glow="strong">
               {entry.date.toLocaleDateString('en-US', {
                 weekday: 'long',
               })}
             </Typography>
-            <Typography variant="h3" style={styles.subtitle}>
+            <Typography variant="h3" style={styles.subtitle} glow="medium">
               {entry.date.toLocaleDateString('en-US', {
                 month: 'long',
                 day: 'numeric',
@@ -86,8 +114,8 @@ export const EntryDetailScreen = () => {
           </View>
 
           <View style={styles.content}>
-            <Card style={styles.card}>
-              <Typography variant="h3" style={styles.sectionTitle}>
+            <Card style={styles.card} variant="glow">
+              <Typography variant="h3" style={styles.sectionTitle} glow="medium">
                 Initial Feeling
               </Typography>
               <View style={styles.emotionContainer}>
@@ -107,8 +135,8 @@ export const EntryDetailScreen = () => {
               </View>
             </Card>
 
-            <Card style={styles.card}>
-              <Typography variant="h3" style={styles.sectionTitle}>
+            <Card style={styles.card} variant="glow">
+              <Typography variant="h3" style={styles.sectionTitle} glow="medium">
                 Gratitude
               </Typography>
               <Typography variant="body" style={styles.text}>
@@ -116,8 +144,8 @@ export const EntryDetailScreen = () => {
               </Typography>
             </Card>
 
-            <Card style={styles.card}>
-              <Typography variant="h3" style={styles.sectionTitle}>
+            <Card style={styles.card} variant="glow">
+              <Typography variant="h3" style={styles.sectionTitle} glow="medium">
                 More Specific Feeling
               </Typography>
               <View style={styles.emotionContainer}>
@@ -138,8 +166,8 @@ export const EntryDetailScreen = () => {
             </Card>
 
             {entry.note && (
-              <Card style={styles.card}>
-                <Typography variant="h3" style={styles.sectionTitle}>
+              <Card style={styles.card} variant="glow">
+                <Typography variant="h3" style={styles.sectionTitle} glow="medium">
                   Additional Thoughts
                 </Typography>
                 <Typography variant="body" style={styles.text}>
@@ -148,7 +176,7 @@ export const EntryDetailScreen = () => {
               </Card>
             )}
           </View>
-        </View>
+        </Animated.View>
       </ScrollView>
     </View>
   );
@@ -231,14 +259,14 @@ const styles = StyleSheet.create({
     marginBottom: theme.SPACING.xl,
     padding: theme.SPACING.xl,
     borderRadius: theme.BORDER_RADIUS.lg,
-    shadowColor: "#000",
+    shadowColor: theme.COLORS.ui.accent,
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 6,
     },
     shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    shadowRadius: 12,
+    elevation: 6,
   },
   sectionTitle: {
     marginBottom: theme.SPACING.lg,
@@ -257,6 +285,14 @@ const styles = StyleSheet.create({
     borderRadius: theme.BORDER_RADIUS.xl,
     minWidth: 200,
     justifyContent: 'center',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 8,
   },
   emojiContainer: {
     width: 40,

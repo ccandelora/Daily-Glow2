@@ -35,42 +35,46 @@ export const TabBar: React.FC<TabBarProps> = ({
 
   return (
     <View style={styles.container}>
-      {tabs.map((tab) => (
-        <TouchableOpacity
-          key={tab.key}
-          style={[
-            styles.tab,
-            activeTab === tab.key && styles.activeTab,
-          ]}
-          onPress={() => handlePress(tab.key)}
-        >
-          <Typography
-            style={styles.icon}
-            color={activeTab === tab.key ? theme.COLORS.primary.green : theme.COLORS.ui.textSecondary}
+      <View style={styles.tabsContainer}>
+        {tabs.map((tab) => (
+          <TouchableOpacity
+            key={tab.key}
+            style={[
+              styles.tab,
+              activeTab === tab.key && styles.activeTab,
+            ]}
+            onPress={() => handlePress(tab.key)}
           >
-            {tab.icon}
-          </Typography>
-          <Typography
-            variant="caption"
-            color={activeTab === tab.key ? theme.COLORS.primary.green : theme.COLORS.ui.textSecondary}
-            numberOfLines={1}
-          >
-            {tab.label}
-          </Typography>
-        </TouchableOpacity>
-      ))}
+            <Typography
+              style={styles.icon}
+              color={activeTab === tab.key ? theme.COLORS.primary.green : theme.COLORS.ui.textSecondary}
+            >
+              {tab.icon}
+            </Typography>
+            <Typography
+              variant="caption"
+              color={activeTab === tab.key ? theme.COLORS.primary.green : theme.COLORS.ui.textSecondary}
+              numberOfLines={1}
+            >
+              {tab.label}
+            </Typography>
+          </TouchableOpacity>
+        ))}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     backgroundColor: theme.COLORS.ui.card,
     paddingBottom: theme.SPACING.xl,
     paddingTop: theme.SPACING.md,
     borderTopWidth: 1,
     borderTopColor: theme.COLORS.ui.border,
+  },
+  tabsContainer: {
+    flexDirection: 'row',
   },
   tab: {
     flex: 1,

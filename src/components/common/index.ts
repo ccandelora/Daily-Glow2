@@ -14,4 +14,5 @@ export { DailyChallenge } from './DailyChallenge';
 export { NotificationBadge } from './NotificationBadge';
 export { TabBar } from './TabBar';
 export { AnimatedBackground } from './AnimatedBackground';
-export { VideoBackground } from './VideoBackground'; 
+export { VideoBackground } from './VideoBackground';
+export { Logo } from './Logo'; 

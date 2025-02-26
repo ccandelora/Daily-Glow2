@@ -80,12 +80,6 @@ export default function AppLayout() {
                       <UserProfileProvider>
                         <View style={styles.container}>
                           <AnimatedBackground intensity="medium" />
-                          
-                          {/* Debug text */}
-                          <View style={styles.debugOverlay}>
-                            <Text style={styles.debugText}>App Layout Active</Text>
-                            <Text style={styles.debugText}>{`${width}x${height}`}</Text>
-                          </View>
 
                           <Tabs
                             screenOptions={{

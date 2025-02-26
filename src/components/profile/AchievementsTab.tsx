@@ -4,7 +4,7 @@ import { Typography, Card } from '@/components/common';
 import { useAchievements } from '@/contexts/AchievementsContext';
 import { useProfile } from '@/contexts/UserProfileContext';
 import theme from '@/constants/theme';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome6 } from '@expo/vector-icons';
 
 export const AchievementsTab = () => {
   const { achievements, userAchievements } = useAchievements();
@@ -76,7 +76,7 @@ export const AchievementsTab = () => {
 
   const renderAchievement = (achievement: any, isEarned: boolean) => {
     const color = isEarned ? theme.COLORS.primary.teal : 'rgba(120, 120, 120, 0.5)';
-    const iconName = achievement.icon_name || 'medal-outline';
+    const iconName = achievement.icon_name || 'medal';
 
     return (
       <Card 
@@ -97,7 +97,7 @@ export const AchievementsTab = () => {
               }
             ])}
           >
-            <Ionicons 
+            <FontAwesome6 
               name={iconName as any} 
               size={24} 
               color={isEarned ? color : 'rgba(120, 120, 120, 0.5)'} 
