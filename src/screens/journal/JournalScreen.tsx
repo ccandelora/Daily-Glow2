@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { Typography, Card, Input, AnimatedBackground, Button, Header, VideoBackground } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
 import theme from '@/constants/theme';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome6 } from '@expo/vector-icons';
 import { getEmotionById } from '@/constants/emotions';
 
 interface JournalEntry {
@@ -62,24 +62,20 @@ export const JournalScreen = () => {
     <View style={styles.container}>
       <VideoBackground />
       <ScrollView style={styles.scrollView}>
-        <View style={styles.safeArea}>
-          {/* Header */}
-          <View style={styles.header}>
+        <Header showBranding={true} />
+        
+        <View style={styles.content}>
+          {/* Title and Add Button */}
+          <View style={styles.titleContainer}>
             <Typography variant="h1" style={styles.title}>
               Your Journal
             </Typography>
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={() => router.push('/check-in')}
-            >
-              <Ionicons name="add" size={24} color={theme.COLORS.ui.background} />
-            </TouchableOpacity>
           </View>
 
           {/* Search */}
           <View style={styles.searchContainer}>
-            <Ionicons 
-              name="search-outline" 
+            <FontAwesome6 
+              name="search" 
               size={20} 
               color={theme.COLORS.ui.textSecondary}
               style={styles.searchIcon}
@@ -95,8 +91,8 @@ export const JournalScreen = () => {
                 onPress={() => setSearchQuery('')}
                 style={styles.clearButton}
               >
-                <Ionicons 
-                  name="close-circle" 
+                <FontAwesome6 
+                  name="circle-xmark" 
                   size={20} 
                   color={theme.COLORS.ui.textSecondary} 
                 />
@@ -105,75 +101,68 @@ export const JournalScreen = () => {
           </View>
 
           {/* Entries List */}
-          <View style={styles.content}>
-            {Object.entries(groupedEntries).map(([date, dateEntries]) => (
-              <View key={date} style={styles.monthGroup}>
-                <Typography variant="h2" style={styles.monthTitle}>
-                  {date}
-                </Typography>
-                {dateEntries.map(entry => (
-                  <TouchableOpacity
-                    key={entry.id}
-                    onPress={() => router.push(`/journal/${entry.id}`)}
-                  >
-                    <Card style={StyleSheet.flatten([styles.entryCard])} variant="glow">
-                      <View style={styles.entryHeader}>
-                        <Typography variant="h3" style={styles.entryDate}>
-                          {entry.date.toLocaleDateString('en-US', { 
-                            weekday: 'long',
-                            day: 'numeric'
-                          })}
-                        </Typography>
-                        <View style={styles.emotionsRow}>
-                          {renderEmotionBadge(entry.initial_emotion)}
-                          <Ionicons 
-                            name="arrow-forward" 
-                            size={16} 
-                            color={theme.COLORS.ui.textSecondary}
-                            style={styles.arrow}
-                          />
-                          {renderEmotionBadge(entry.secondary_emotion)}
-                        </View>
-                      </View>
-                      <Typography
-                        variant="body"
-                        style={styles.gratitudeText}
-                      >
-                        {entry.gratitude}
-                      </Typography>
-                    </Card>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            ))}
-            
-            {filteredEntries.length === 0 && (
-              <View style={styles.emptyState}>
-                <Typography
-                  variant="h3"
-                  style={styles.emptyTitle}
-                >
-                  No entries found
-                </Typography>
-                <Typography
-                  variant="body"
-                  style={styles.emptyText}
-                >
-                  {searchQuery 
-                    ? "Try adjusting your search terms"
-                    : "Start your journey by adding your first entry"}
-                </Typography>
+          {Object.entries(groupedEntries).map(([date, dateEntries]) => (
+            <View key={date} style={styles.monthGroup}>
+              <Typography variant="h2" style={styles.monthTitle}>
+                {date}
+              </Typography>
+              {dateEntries.map(entry => (
                 <TouchableOpacity
-                  style={styles.emptyButton}
-                  onPress={() => router.push('/check-in')}
+                  key={entry.id}
+                  onPress={() => router.push(`/journal/${entry.id}`)}
                 >
-                  <Typography style={styles.emptyButtonText}>
-                    Add New Entry
-                  </Typography>
+                  <Card style={StyleSheet.flatten([styles.entryCard])} variant="glow">
+                    <View style={styles.entryHeader}>
+                      <Typography variant="h3" style={styles.entryDate}>
+                        {entry.date.toLocaleDateString('en-US', { 
+                          weekday: 'long',
+                          day: 'numeric'
+                        })}
+                      </Typography>
+                      <View style={styles.emotionsRow}>
+                        {renderEmotionBadge(entry.initial_emotion)}
+                        <FontAwesome6 
+                          name="arrow-right" 
+                          size={16} 
+                          color={theme.COLORS.ui.textSecondary}
+                          style={styles.arrow}
+                        />
+                        {renderEmotionBadge(entry.secondary_emotion)}
+                      </View>
+                    </View>
+                    <Typography
+                      variant="body"
+                      style={styles.gratitudeText}
+                    >
+                      {entry.gratitude}
+                    </Typography>
+                  </Card>
                 </TouchableOpacity>
-              </View>
-            )}
-          </View>
+              ))}
+            </View>
+          ))}
+          
+          {filteredEntries.length === 0 && (
+            <View style={styles.emptyState}>
+              <Typography 
+                variant="body" 
+                style={styles.emptyText}
+                color={theme.COLORS.ui.textSecondary}
+              >
+                {searchQuery 
+                  ? "No entries match your search."
+                  : "You haven't created any journal entries yet. Start by completing a check-in."}
+              </Typography>
+              {!searchQuery && (
+                <Button
+                  title="Start Check-in"
+                  onPress={() => router.push('/check-in')}
+                  variant="primary"
+                  style={styles.startButton}
+                />
+              )}
+            </View>
+          )}
         </View>
       </ScrollView>
     </View>
@@ -188,39 +177,42 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  safeArea: {
-    flex: 1,
-    paddingTop: 60,
+  content: {
+    paddingHorizontal: theme.SPACING.lg,
+    paddingBottom: theme.SPACING.xl,
   },
-  header: {
+  titleContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: theme.SPACING.lg,
-    paddingBottom: theme.SPACING.lg,
+    marginBottom: theme.SPACING.md,
   },
   title: {
-    fontSize: 34,
-    fontWeight: 'bold',
+    fontSize: 32,
     color: theme.COLORS.ui.text,
   },
   addButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: theme.COLORS.primary.green,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: theme.COLORS.primary.green,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 5,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: theme.COLORS.ui.card,
-    marginHorizontal: theme.SPACING.lg,
-    marginBottom: theme.SPACING.lg,
-    borderRadius: theme.BORDER_RADIUS.lg,
+    backgroundColor: `${theme.COLORS.ui.card}80`,
+    borderRadius: theme.BORDER_RADIUS.md,
     paddingHorizontal: theme.SPACING.md,
-    height: 38,
+    marginBottom: theme.SPACING.md,
+    borderWidth: 1,
+    borderColor: `${theme.COLORS.ui.border}50`,
   },
   searchIcon: {
     marginRight: theme.SPACING.sm,
@@ -228,37 +220,33 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     backgroundColor: 'transparent',
-    height: 38,
-    fontSize: 17,
+    borderWidth: 0,
+    height: 44,
     color: theme.COLORS.ui.text,
-    padding: 0,
-    margin: 0,
-    top: -1,
   },
   clearButton: {
-    padding: theme.SPACING.sm,
-  },
-  content: {
-    paddingHorizontal: theme.SPACING.lg,
+    padding: theme.SPACING.xs,
   },
   monthGroup: {
-    marginBottom: theme.SPACING.xl,
+    marginBottom: theme.SPACING.md,
   },
   monthTitle: {
-    marginBottom: theme.SPACING.md,
-    fontSize: 22,
+    marginBottom: theme.SPACING.sm,
     color: theme.COLORS.ui.text,
   },
   entryCard: {
     marginBottom: theme.SPACING.md,
     padding: theme.SPACING.lg,
+    backgroundColor: 'rgba(38, 20, 60, 0.85)',
   },
   entryHeader: {
-    marginBottom: theme.SPACING.md,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: theme.SPACING.sm,
   },
   entryDate: {
     fontSize: 18,
-    marginBottom: theme.SPACING.sm,
     color: theme.COLORS.ui.text,
   },
   emotionsRow: {
@@ -266,44 +254,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   emotionBadge: {
-    paddingHorizontal: theme.SPACING.md,
+    paddingHorizontal: theme.SPACING.sm,
     paddingVertical: theme.SPACING.xs,
-    borderRadius: theme.BORDER_RADIUS.lg,
+    borderRadius: theme.BORDER_RADIUS.sm,
+    marginHorizontal: theme.SPACING.xs,
   },
   emotionText: {
     color: theme.COLORS.ui.background,
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: 'bold',
   },
   arrow: {
-    marginHorizontal: theme.SPACING.sm,
+    marginHorizontal: theme.SPACING.xs,
   },
   gratitudeText: {
     color: theme.COLORS.ui.textSecondary,
-    fontSize: 16,
-    lineHeight: 24,
   },
   emptyState: {
     alignItems: 'center',
-    padding: theme.SPACING.xl * 2,
-  },
-  emptyTitle: {
-    marginBottom: theme.SPACING.md,
-    textAlign: 'center',
+    justifyContent: 'center',
+    padding: theme.SPACING.xl,
+    marginTop: theme.SPACING.xl,
   },
   emptyText: {
-    color: theme.COLORS.ui.textSecondary,
     textAlign: 'center',
-    marginBottom: theme.SPACING.xl,
+    marginBottom: theme.SPACING.lg,
   },
-  emptyButton: {
-    backgroundColor: theme.COLORS.primary.green,
-    paddingHorizontal: theme.SPACING.xl,
-    paddingVertical: theme.SPACING.md,
-    borderRadius: theme.BORDER_RADIUS.lg,
-  },
-  emptyButtonText: {
-    color: theme.COLORS.ui.background,
-    fontWeight: 'bold',
+  startButton: {
+    width: '100%',
+    maxWidth: 200,
   },
 }); 

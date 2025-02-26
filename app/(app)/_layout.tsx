@@ -84,12 +84,6 @@ export default function AppLayout() {
                 <NotificationsProvider>
                   <View style={styles.container}>
                     <AnimatedBackground intensity="medium" />
-                    
-                    {/* Debug text */}
-                    <View style={styles.debugOverlay}>
-                      <Text style={styles.debugText}>App Layout Active</Text>
-                      <Text style={styles.debugText}>{`${width}x${height}`}</Text>
-                    </View>
 
                     {/* Base gradient layer */}
                     <LinearGradient

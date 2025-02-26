@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Animated } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Typography, Card, Button, Input, EmotionWheel, Header, AnimatedBackground } from '@/components/common';
+import { Typography, Card, Button, Input, EmotionWheel, Header, VideoBackground } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
 import { useAppState } from '@/contexts/AppStateContext';
 import { useCheckInStreak } from '@/contexts/CheckInStreakContext';
@@ -132,13 +132,14 @@ export const CheckInScreen = () => {
 
   return (
     <View style={styles.container}>
-      <AnimatedBackground intensity="medium" />
-      <Header
-        title="Daily Check-in"
-        onBack={() => router.back()}
-      />
+      <VideoBackground />
+      <Header showBranding={true} onBack={() => router.back()} />
 
       <ScrollView style={styles.content}>
+        <Typography variant="h1" style={styles.title}>
+          Daily Check-in
+        </Typography>
+        
         {step === 'initial' && (
           <Card style={StyleSheet.flatten([styles.card])} variant="glow">
             <Typography variant="h3" style={styles.sectionTitle}>
@@ -233,22 +234,23 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.COLORS.ui.background,
   },
-  header: {
-    padding: theme.SPACING.lg,
-  },
   title: {
-    marginBottom: theme.SPACING.xs,
+    fontSize: 32,
+    marginBottom: theme.SPACING.md,
+    color: theme.COLORS.ui.text,
   },
   content: {
-    padding: theme.SPACING.lg,
-    paddingTop: 0,
+    flex: 1,
+    paddingHorizontal: theme.SPACING.lg,
   },
   card: {
     padding: theme.SPACING.lg,
-    marginBottom: theme.SPACING.lg,
+    marginBottom: theme.SPACING.md,
+    backgroundColor: 'rgba(38, 20, 60, 0.85)',
   },
   sectionTitle: {
-    marginBottom: theme.SPACING.lg,
+    marginBottom: theme.SPACING.md,
+    color: theme.COLORS.ui.text,
   },
   gratitudeInput: {
     height: 100,
@@ -256,10 +258,10 @@ const styles = StyleSheet.create({
   },
   noteInput: {
     height: 100,
-    marginBottom: theme.SPACING.lg,
+    marginBottom: theme.SPACING.md,
   },
   button: {
-    marginBottom: theme.SPACING.md,
+    marginBottom: theme.SPACING.sm,
   },
   buttonRow: {
     flexDirection: 'row',

@@ -2,33 +2,32 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Typography, Card } from '@/components/common';
 import { useCheckInStreak } from '@/contexts/CheckInStreakContext';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome6 } from '@expo/vector-icons';
 import theme from '@/constants/theme';
+import { calculateOverallStreak } from '@/utils/streakCalculator';
 
 export const StreakSummary = () => {
   const { streaks } = useCheckInStreak();
   
-  const getTotalStreak = () => {
-    return streaks.morning + streaks.afternoon + streaks.evening;
-  };
+  // Use the standardized streak calculation utility
+  const overallStreak = calculateOverallStreak(streaks);
   
   const getBestStreak = () => {
     const { morning, afternoon, evening } = streaks;
     const max = Math.max(morning, afternoon, evening);
     
     if (max === morning) {
-      return { period: 'morning', count: morning, icon: 'sunny-outline' };
+      return { period: 'morning', count: morning, icon: 'sun' };
     } else if (max === afternoon) {
-      return { period: 'afternoon', count: afternoon, icon: 'partly-sunny-outline' };
+      return { period: 'afternoon', count: afternoon, icon: 'cloud-sun' };
     } else {
-      return { period: 'evening', count: evening, icon: 'moon-outline' };
+      return { period: 'evening', count: evening, icon: 'moon' };
     }
   };
   
   const bestStreak = getBestStreak();
-  const totalStreak = getTotalStreak();
   
-  if (totalStreak === 0) {
+  if (overallStreak === 0) {
     return null; // Don't show anything if there are no streaks
   }
   
@@ -38,13 +37,13 @@ export const StreakSummary = () => {
         <Typography variant="h3" style={styles.title} glow="soft">
           Your Streaks
         </Typography>
-        <Ionicons name="flame-outline" size={24} color={theme.COLORS.primary.orange} />
+        <FontAwesome6 name="fire" size={24} color={theme.COLORS.primary.orange} />
       </View>
       
       <View style={styles.content}>
         <View style={styles.streakItem}>
-          <Ionicons 
-            name={bestStreak.icon as any} 
+          <FontAwesome6 
+            name={bestStreak.icon} 
             size={20} 
             color={theme.COLORS.primary.yellow} 
             style={styles.icon} 
@@ -55,14 +54,14 @@ export const StreakSummary = () => {
         </View>
         
         <View style={styles.streakItem}>
-          <Ionicons 
-            name="calendar-outline" 
+          <FontAwesome6 
+            name="calendar" 
             size={20} 
             color={theme.COLORS.primary.green} 
             style={styles.icon} 
           />
           <Typography variant="body" style={styles.streakText}>
-            Total streaks: {totalStreak} check-ins
+            Overall streak: {overallStreak} days
           </Typography>
         </View>
       </View>

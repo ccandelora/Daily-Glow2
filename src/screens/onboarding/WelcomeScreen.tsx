@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
-import { Typography, Button, VideoBackground } from '@/components/common';
+import { Typography, Button, VideoBackground, Logo } from '@/components/common';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import theme from '@/constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -51,12 +50,7 @@ export const WelcomeScreen = () => {
         ]}
       >
         <View style={styles.logoContainer}>
-          <Ionicons 
-            name="sunny" 
-            size={80} 
-            color={theme.COLORS.ui.accent}
-            style={styles.logo}
-          />
+          <Logo size="large" />
         </View>
 
         <Typography variant="h1" style={styles.title} glow="strong">
@@ -117,11 +111,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 16,
     elevation: 8,
-  },
-  logo: {
-    textShadowColor: theme.COLORS.ui.accent,
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 10,
   },
   title: {
     textAlign: 'center',

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Typography, Input, Button, Card, VideoBackground } from '@/components/common';
+import { Typography, Input, Button, Card, VideoBackground, Logo } from '@/components/common';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppState } from '@/contexts/AppStateContext';
 import theme from '@/constants/theme';
@@ -46,6 +46,7 @@ export const SignInScreen = () => {
 
       <View style={styles.content}>
         <View style={styles.header}>
+          <Logo size="large" style={styles.logo} />
           <Typography variant="h1" style={styles.title} glow="strong">
             Welcome Back
           </Typography>
@@ -126,6 +127,9 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: theme.SPACING.xl,
     alignItems: 'center',
+  },
+  logo: {
+    marginBottom: theme.SPACING.md,
   },
   title: {
     marginBottom: theme.SPACING.sm,
