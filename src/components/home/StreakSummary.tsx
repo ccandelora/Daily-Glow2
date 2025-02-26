@@ -76,7 +76,8 @@ export const StreakSummary = () => {
 
 const styles = StyleSheet.create({
   container: {
-    marginBottom: theme.SPACING.md,
+    marginHorizontal: theme.SPACING.lg,
+    marginBottom: theme.SPACING.lg,
     padding: theme.SPACING.md,
   },
   header: {
