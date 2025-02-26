@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Animated } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Typography, Card, Button, VideoBackground } from '@/components/common';
 import { useNotifications } from '@/contexts/NotificationsContext';
 import { useChallenges } from '@/contexts/ChallengesContext';
@@ -21,7 +21,7 @@ type ProfileTab = 'achievements' | 'badges' | 'streaks';
 export const AchievementsScreen: React.FC = () => {
   const router = useRouter();
   const { userBadges } = useBadges();
-  const { userStats } = useChallenges();
+  const { userStats, refreshDailyChallenge } = useChallenges();
   const { userProfile, refreshProfile } = useProfile();
   const { streaks, refreshStreaks } = useCheckInStreak();
   const { userAchievements } = useAchievements();
@@ -44,6 +44,9 @@ export const AchievementsScreen: React.FC = () => {
       
       // Refresh streaks data
       await refreshStreaks();
+      
+      // Refresh challenges data to get latest points
+      await refreshDailyChallenge();
       
       // Get user stats (total_points and level)
       let totalUserPoints = 0;
@@ -132,6 +135,18 @@ export const AchievementsScreen: React.FC = () => {
     return userBadges?.length || 0;
   }, [userBadges]);
 
+  // Use useFocusEffect to refresh data when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      console.log('AchievementsScreen focused - refreshing data');
+      fetchLatestData();
+      
+      return () => {
+        // Cleanup if needed
+      };
+    }, [])
+  );
+
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -147,9 +162,6 @@ export const AchievementsScreen: React.FC = () => {
       }),
     ]).start();
     
-    // Fetch latest data when component mounts - only once
-    fetchLatestData();
-    
     // Debug data
     console.log('AchievementsScreen - userProfile:', userProfile);
     console.log('AchievementsScreen - userBadges:', userBadges);
@@ -157,7 +169,15 @@ export const AchievementsScreen: React.FC = () => {
     console.log('AchievementsScreen - totalPoints:', totalPoints);
     console.log('AchievementsScreen - badgesCount:', badgesCount);
     console.log('AchievementsScreen - currentStreak:', currentStreak);
-  }, []); // Empty dependency array to run only once on mount
+  }, []);
+
+  // Update the UI when userStats changes
+  useEffect(() => {
+    if (userStats && userStats.total_points > 0) {
+      setTotalPoints(userStats.total_points);
+      console.log('Updated points from userStats:', userStats.total_points);
+    }
+  }, [userStats]);
 
   const renderTabContent = () => {
     switch (activeTab) {
