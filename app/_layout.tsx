@@ -1,6 +1,7 @@
 import React, { useEffect, useCallback } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
+import '@/utils/cryptoPolyfill';
 import { AppStateProvider } from '@/contexts/AppStateContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { JournalProvider } from '@/contexts/JournalContext';
@@ -9,8 +10,12 @@ import { NotificationsProvider } from '@/contexts/NotificationsContext';
 import { OnboardingProvider, useOnboarding } from '@/contexts/OnboardingContext';
 import { BadgeProvider, useBadges } from '@/contexts/BadgeContext';
 import { CheckInStreakProvider, CheckInStreak } from '@/contexts/CheckInStreakContext';
-import { LoadingOverlay } from '@/components/common';
+import { LoadingOverlay, DeepLinkHandler } from '@/components/common';
 import { BadgeService } from '@/services/BadgeService';
+import * as Linking from 'expo-linking';
+import { supabase } from '@/lib/supabase';
+import { extractTokenFromUrl, verifyEmailWithToken } from '@/utils/authUtils';
+import { useAppState } from '@/contexts/AppStateContext';
 
 // Create a wrapper component to handle streak updates with badge context
 function CheckInStreakWithBadges({ children }: { children: React.ReactNode }) {
@@ -87,15 +92,26 @@ function RootLayoutNav() {
   }, [session, hasCompletedOnboarding, segments]);
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    />
+    <>
+      <DeepLinkHandler />
+      
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      />
+    </>
   );
 }
 
 export default function RootLayout() {
+  const { refreshSession } = useAuth();
+  const { session } = useAuth();
+  const { hasCompletedOnboarding } = useOnboarding();
+  const segments = useSegments();
+  const router = useRouter();
+  const { showError, showSuccess } = useAppState();
+
   console.log('Root layout rendering');
 
   return (

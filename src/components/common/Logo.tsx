@@ -38,20 +38,6 @@ export const Logo: React.FC<LogoProps> = ({
         ]}
         resizeMode="contain"
       />
-      {showText && (
-        <Typography
-          variant={size === 'large' ? 'h1' : size === 'medium' ? 'h2' : 'h3'}
-          style={{
-            ...styles.text,
-            fontSize: selectedSize.text,
-            ...textStyle,
-          }}
-          glow="medium"
-          color={theme.COLORS.primary.green}
-        >
-          Daily Glow
-        </Typography>
-      )}
     </View>
   );
 };

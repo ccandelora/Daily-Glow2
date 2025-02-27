@@ -238,6 +238,7 @@ export const AchievementsScreen: React.FC = () => {
                 title="Achievements"
                 variant={activeTab === 'achievements' ? 'primary' : 'secondary'}
                 onPress={() => setActiveTab('achievements')}
+                size="small"
                 style={{
                   ...styles.tabButton,
                   ...(activeTab === 'achievements' ? styles.activeTabButton : {})
@@ -252,6 +253,7 @@ export const AchievementsScreen: React.FC = () => {
                 title="Badges"
                 variant={activeTab === 'badges' ? 'primary' : 'secondary'}
                 onPress={() => setActiveTab('badges')}
+                size="small"
                 style={{
                   ...styles.tabButton,
                   ...(activeTab === 'badges' ? styles.activeTabButton : {})
@@ -266,6 +268,7 @@ export const AchievementsScreen: React.FC = () => {
                 title="Streaks"
                 variant={activeTab === 'streaks' ? 'primary' : 'secondary'}
                 onPress={() => setActiveTab('streaks')}
+                size="small"
                 style={{
                   ...styles.tabButton,
                   ...(activeTab === 'streaks' ? styles.activeTabButton : {})
@@ -349,11 +352,15 @@ const styles = StyleSheet.create({
   tabButtons: {
     flexDirection: 'row',
     marginBottom: theme.SPACING.md,
+    justifyContent: 'space-between',
+    paddingHorizontal: 2,
   },
   tabButton: {
     flex: 1,
-    marginHorizontal: 4,
+    marginHorizontal: 2,
     paddingVertical: theme.SPACING.sm,
+    paddingHorizontal: 0,
+    minWidth: 90,
   } as ViewStyle,
   activeTabButton: {
     backgroundColor: theme.COLORS.primary.green,
@@ -361,9 +368,11 @@ const styles = StyleSheet.create({
   activeTabText: {
     color: theme.COLORS.ui.background,
     fontWeight: 'bold',
+    fontSize: 14,
   },
   inactiveTabText: {
     color: theme.COLORS.ui.textSecondary,
+    fontSize: 14,
   },
   tabContent: {
     minHeight: 300,

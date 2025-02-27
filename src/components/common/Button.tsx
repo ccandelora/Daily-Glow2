@@ -51,8 +51,8 @@ export const Button: React.FC<ButtonProps> = ({
             disabled && styles.disabledText,
             textStyle,
           ].filter(Boolean) as unknown as TextStyle}
-          numberOfLines={size === 'compact' ? 1 : undefined}
-          adjustsFontSizeToFit={size === 'compact'}
+          numberOfLines={1}
+          adjustsFontSizeToFit={true}
         >
           {title}
         </Typography>

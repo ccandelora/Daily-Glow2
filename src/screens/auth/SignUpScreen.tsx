@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Typography, Input, Button, Card, VideoBackground, Logo } from '@/components/common';
 import { useAuth } from '@/contexts/AuthContext';
@@ -34,7 +34,14 @@ export const SignUpScreen = () => {
     try {
       setLoading(true);
       await signUp(email.trim(), password);
-      router.replace('/(onboarding)/welcome');
+      
+      // On mobile, redirect to verification instructions
+      // On web, redirect to welcome screen (verification will happen via email link)
+      if (Platform.OS === 'web') {
+        router.replace('/(onboarding)/welcome');
+      } else {
+        router.replace('/(auth)/verification-instructions');
+      }
     } catch (error) {
       // Error is already handled in AuthContext
     } finally {
@@ -96,6 +103,10 @@ export const SignUpScreen = () => {
             style={styles.input}
           />
 
+          <Typography variant="caption" style={styles.verificationNote}>
+            You'll need to verify your email address before accessing all features.
+          </Typography>
+
           <Button
             title="Sign Up"
             onPress={handleSignUp}
@@ -156,6 +167,12 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: theme.SPACING.md,
+  },
+  verificationNote: {
+    color: theme.COLORS.ui.textSecondary,
+    marginBottom: theme.SPACING.md,
+    textAlign: 'center',
+    fontStyle: 'italic',
   },
   button: {
     marginTop: theme.SPACING.md,
