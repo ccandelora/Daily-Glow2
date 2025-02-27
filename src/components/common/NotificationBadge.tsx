@@ -3,7 +3,7 @@ import { View, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import { Typography } from './Typography';
 import { useNotifications } from '@/contexts/NotificationsContext';
 import theme from '@/constants/theme';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome6 } from '@expo/vector-icons';
 
 interface NotificationBadgeProps {
   size?: number;
@@ -46,8 +46,8 @@ export const NotificationBadge: React.FC<NotificationBadgeProps> = ({
 
   return (
     <Container onPress={onPress} style={styles.container}>
-      <Ionicons
-        name="notifications-outline"
+      <FontAwesome6
+        name="bell"
         size={size}
         color={color}
       />

@@ -8,7 +8,7 @@ import { Input } from './Input';
 import { useChallenges } from '@/contexts/ChallengesContext';
 import { useAppState } from '@/contexts/AppStateContext';
 import theme from '@/constants/theme';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome6 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
 interface DailyChallengeProps {
@@ -17,10 +17,10 @@ interface DailyChallengeProps {
 }
 
 const typeIcons = {
-  mood: 'heart-outline',
-  gratitude: 'happy-outline',
-  mindfulness: 'leaf-outline',
-  creative: 'brush-outline',
+  mood: 'heart',
+  gratitude: 'face-smile',
+  mindfulness: 'leaf',
+  creative: 'paintbrush',
 } as const;
 
 const getPromptForType = (type: string) => {
@@ -122,8 +122,8 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete, styl
       <View style={styles.glowContainer}>
         <Card style={styles.container}>
           <View style={styles.completionContent}>
-            <Ionicons 
-              name="checkmark-circle-outline" 
+            <FontAwesome6 
+              name="circle-check" 
               size={48} 
               color={theme.COLORS.primary.green}
               style={styles.completionIcon}
@@ -204,7 +204,7 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete, styl
       <Card style={StyleSheet.flatten([styles.container, style])}>
         <View style={styles.header}>
           <View style={styles.titleContainer}>
-            <Ionicons 
+            <FontAwesome6 
               name={typeIcons[dailyChallenge.type as keyof typeof typeIcons]} 
               size={24} 
               color={theme.COLORS.primary.green}
@@ -249,17 +249,17 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete, styl
 
         <View style={styles.footer}>
           <View style={styles.pointsContainer}>
-            <Ionicons 
-              name="star-outline" 
+            <FontAwesome6 
+              name="star" 
               size={16} 
               color={theme.COLORS.primary.green}
+              style={styles.pointsIcon}
             />
             <Typography 
-              variant="body"
-              style={styles.points}
-              color={theme.COLORS.primary.green}
+              variant="caption" 
+              style={{ color: theme.COLORS.primary.green }}
             >
-              {dailyChallenge.points} points
+              +{dailyChallenge.points} points
             </Typography>
           </View>
         </View>
@@ -275,16 +275,14 @@ export const DailyChallenge: React.FC<DailyChallengeProps> = ({ onComplete, styl
 
         {currentStreak > 0 && (
           <View style={styles.streakContainer}>
-            <Ionicons 
-              name="flame-outline" 
+            <FontAwesome6 
+              name="flame" 
               size={16} 
               color={theme.COLORS.primary.red}
+              style={styles.streakIcon}
             />
-            <Typography 
-              variant="caption" 
-              style={{ color: theme.COLORS.primary.red }}
-            >
-              {currentStreak} day streak!
+            <Typography variant="caption" style={styles.streakText}>
+              {currentStreak} day streak
             </Typography>
           </View>
         )}
@@ -359,6 +357,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: theme.SPACING.xs,
   },
+  pointsIcon: {
+    marginRight: theme.SPACING.sm,
+  },
   points: {
     fontWeight: theme.FONTS.weights.semibold,
     fontSize: theme.FONTS.sizes.md,
@@ -385,6 +386,13 @@ const styles = StyleSheet.create({
     paddingTop: theme.SPACING.md,
     borderTopWidth: 1,
     borderTopColor: theme.COLORS.ui.border,
+  },
+  streakIcon: {
+    marginRight: theme.SPACING.sm,
+  },
+  streakText: {
+    color: theme.COLORS.primary.red,
+    fontWeight: theme.FONTS.weights.bold,
   },
   pointsText: {
     fontWeight: theme.FONTS.weights.bold,

@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome6 } from '@expo/vector-icons';
 import { Typography } from './Typography';
+import { Logo } from './Logo';
 import theme from '@/constants/theme';
 
 interface HeaderProps {
@@ -26,18 +27,11 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <View style={[
       styles.container,
-      { paddingTop: Math.max(insets.top, theme.SPACING.lg) }
+      { paddingTop: Math.max(insets.top, theme.SPACING.md) }
     ]}>
       {showBranding && (
         <View style={styles.branding}>
-          <Typography 
-            variant="h1" 
-            style={styles.brandText}
-            glow="medium"
-            color={theme.COLORS.primary.green}
-          >
-            Daily Glow
-          </Typography>
+          <Logo size="large" showText={false} />
         </View>
       )}
       
@@ -48,8 +42,8 @@ export const Header: React.FC<HeaderProps> = ({
             style={styles.backButton}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Ionicons
-              name="chevron-back"
+            <FontAwesome6
+              name="chevron-left"
               size={28}
               color={theme.COLORS.ui.text}
             />
@@ -93,16 +87,12 @@ export const Header: React.FC<HeaderProps> = ({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'transparent',
-    paddingBottom: theme.SPACING.md,
+    paddingBottom: theme.SPACING.xs,
   },
   branding: {
     alignItems: 'center',
-    marginBottom: theme.SPACING.md,
+    marginBottom: theme.SPACING.xs,
     paddingHorizontal: theme.SPACING.lg,
-  },
-  brandText: {
-    fontSize: 36,
-    textAlign: 'center',
   },
   content: {
     flexDirection: 'row',

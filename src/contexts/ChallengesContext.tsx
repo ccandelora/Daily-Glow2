@@ -130,19 +130,41 @@ export function ChallengesProvider({ children }: { children: React.ReactNode }) 
       if (statsData) {
         setUserStats(statsData);
       } else {
-        // If no stats exist, create initial stats
-        const { data: newStats, error: createError } = await supabase
-          .from('user_stats')
-          .insert({
-            user_id: session.user.id,
-            total_points: 0,
-            level: 1,
-          })
-          .select()
-          .single();
+        try {
+          // If no stats exist, create initial stats
+          const { data: newStats, error: createError } = await supabase
+            .from('user_stats')
+            .insert({
+              user_id: session.user.id,
+              total_points: 0,
+              level: 1,
+            })
+            .select()
+            .single();
 
-        if (createError) throw createError;
-        setUserStats(newStats);
+          if (createError) {
+            // If it's a duplicate key error, another process might have created the record
+            // This is not a critical error, so we can just fetch the record again
+            if (createError.code === '23505') {
+              console.log('User stats record already exists, fetching it instead');
+              const { data: existingStats, error: fetchError } = await supabase
+                .from('user_stats')
+                .select('*')
+                .eq('user_id', session.user.id)
+                .single();
+                
+              if (fetchError) throw fetchError;
+              setUserStats(existingStats);
+            } else {
+              throw createError;
+            }
+          } else {
+            setUserStats(newStats);
+          }
+        } catch (statsError) {
+          console.error('Error creating/fetching user stats:', statsError);
+          // Don't throw here, continue with other data loading
+        }
       }
 
       // Load user challenges
@@ -155,9 +177,31 @@ export function ChallengesProvider({ children }: { children: React.ReactNode }) 
       if (challengesError) throw challengesError;
       setUserChallenges(challengesData || []);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading user data:', error);
-      showError(error instanceof Error ? error.message : 'Failed to load user data');
+      
+      // Don't show duplicate key constraint errors to the user
+      if (error.code !== '23505') {
+        showError(error instanceof Error ? error.message : 'Failed to load user data');
+      } else {
+        console.log('Ignoring duplicate key constraint error:', error.message);
+        
+        // Try to fetch user stats again
+        try {
+          const { data: statsData } = await supabase
+            .from('user_stats')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .single();
+            
+          if (statsData) {
+            setUserStats(statsData);
+            console.log('User stats found:', { level: statsData.level, total_points: statsData.total_points });
+          }
+        } catch (retryError) {
+          console.error('Error fetching user stats after constraint error:', retryError);
+        }
+      }
     } finally {
       setLoading(false);
     }

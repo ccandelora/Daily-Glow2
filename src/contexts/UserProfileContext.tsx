@@ -98,8 +98,50 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ c
         .eq('user_id', user.id)
         .single();
 
-      if (error) throw error;
-      setUserProfile(data);
+      if (error) {
+        // If no profile exists, create one instead of throwing an error
+        if (error.code === 'PGRST116') {
+          console.log('No profile found for user, creating a new one');
+          
+          const newProfile: Omit<UserProfile, 'id' | 'created_at' | 'updated_at'> = {
+            user_id: user.id,
+            display_name: user.email || 'User',
+            avatar_url: null,
+            streak: 0,
+            last_check_in: null,
+            points: 0
+          };
+          
+          const { data: createdProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert([newProfile])
+            .select()
+            .single();
+            
+          if (createError) {
+            // If it's a duplicate key error, another process might have created the profile
+            if (createError.code === '23505') {
+              console.log('Profile already exists, fetching it instead');
+              const { data: existingProfile, error: fetchError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('user_id', user.id)
+                .single();
+                
+              if (fetchError) throw fetchError;
+              setUserProfile(existingProfile);
+            } else {
+              throw createError;
+            }
+          } else {
+            setUserProfile(createdProfile);
+          }
+        } else {
+          throw error;
+        }
+      } else {
+        setUserProfile(data);
+      }
     } catch (error: any) {
       console.error('Error fetching profile:', error.message);
       showError('Failed to load profile');

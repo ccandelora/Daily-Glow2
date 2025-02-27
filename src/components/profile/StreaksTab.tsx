@@ -3,7 +3,7 @@ import { View, ScrollView, StyleSheet, Animated } from 'react-native';
 import { Typography, Card } from '@/components/common';
 import { useCheckInStreak } from '@/contexts/CheckInStreakContext';
 import theme from '@/constants/theme';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome6 } from '@expo/vector-icons';
 
 export const StreaksTab = () => {
   const { streaks } = useCheckInStreak();
@@ -22,13 +22,13 @@ export const StreaksTab = () => {
   const getStreakIcon = (period: string) => {
     switch (period) {
       case 'morning':
-        return 'sunny-outline';
+        return 'sun';
       case 'afternoon':
-        return 'partly-sunny-outline';
+        return 'cloud-sun';
       case 'evening':
-        return 'moon-outline';
+        return 'moon';
       default:
-        return 'time-outline';
+        return 'clock';
     }
   };
 
@@ -91,7 +91,7 @@ export const StreaksTab = () => {
               }
             ]}
           >
-            <Ionicons 
+            <FontAwesome6 
               name={icon as any} 
               size={24} 
               color={count > 0 ? color : 'rgba(120, 120, 120, 0.5)'} 
@@ -147,19 +147,19 @@ export const StreaksTab = () => {
             Tips for Building Streaks
           </Typography>
           <View style={styles.tipItem}>
-            <Ionicons name="time-outline" size={20} color={theme.COLORS.ui.accent} style={styles.tipIcon} />
+            <FontAwesome6 name="clock" size={20} color={theme.COLORS.ui.accent} style={styles.tipIcon} />
             <Typography variant="body" style={styles.tipText}>
               Check in consistently during the same time period each day
             </Typography>
           </View>
           <View style={styles.tipItem}>
-            <Ionicons name="notifications-outline" size={20} color={theme.COLORS.ui.accent} style={styles.tipIcon} />
+            <FontAwesome6 name="bell" size={20} color={theme.COLORS.ui.accent} style={styles.tipIcon} />
             <Typography variant="body" style={styles.tipText}>
               Set a reminder to help you remember your daily check-in
             </Typography>
           </View>
           <View style={styles.tipItem}>
-            <Ionicons name="calendar-outline" size={20} color={theme.COLORS.ui.accent} style={styles.tipIcon} />
+            <FontAwesome6 name="calendar" size={20} color={theme.COLORS.ui.accent} style={styles.tipIcon} />
             <Typography variant="body" style={styles.tipText}>
               Don't break the chain! Try to maintain your streak every day
             </Typography>

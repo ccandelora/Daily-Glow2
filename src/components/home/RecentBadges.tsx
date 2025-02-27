@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Typography, Card } from '@/components/common';
 import { useBadges, UserBadge } from '@/contexts/BadgeContext';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome6 } from '@expo/vector-icons';
 import theme from '@/constants/theme';
 import { useRouter } from 'expo-router';
 
@@ -25,12 +25,12 @@ export const RecentBadges = () => {
   
   const getBadgeIcon = (category: string) => {
     switch (category) {
-      case 'beginner': return 'star-outline';
-      case 'intermediate': return 'trophy-outline';
-      case 'advanced': return 'ribbon-outline';
-      case 'expert': return 'medal-outline';
-      case 'master': return 'diamond-outline';
-      default: return 'star-outline';
+      case 'beginner': return 'star';
+      case 'intermediate': return 'trophy';
+      case 'advanced': return 'award';
+      case 'expert': return 'medal';
+      case 'master': return 'gem';
+      default: return 'star';
     }
   };
   
@@ -78,8 +78,8 @@ export const RecentBadges = () => {
                   { backgroundColor: `${getBadgeColor(badge.category)}30` }
                 ]}
               >
-                <Ionicons 
-                  name={getBadgeIcon(badge.category) as any} 
+                <FontAwesome6 
+                  name={getBadgeIcon(badge.category)} 
                   size={24} 
                   color={getBadgeColor(badge.category)} 
                 />

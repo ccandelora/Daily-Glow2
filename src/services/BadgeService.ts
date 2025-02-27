@@ -47,6 +47,7 @@ export const BADGE_IDS = {
   },
   // Completion badges
   COMPLETION: {
+    'Welcome Badge': 'Welcome Badge',
     'First Check-in': 'First Check-in',
     'First Week Completed': 'First Week Completed',
     'First Month Completed': 'First Month Completed',
@@ -392,6 +393,76 @@ export class BadgeService {
       });
     } catch (error) {
       console.error('Error checking all periods completed:', error);
+    }
+  }
+  
+  // Award welcome badge
+  public static async awardWelcomeBadge(addUserBadge: (badgeName: string) => Promise<void>): Promise<void> {
+    try {
+      console.log('BadgeService: Attempting to award welcome badge');
+      
+      // Try to award using the provided function
+      const badgeName = BADGE_IDS.COMPLETION['Welcome Badge'];
+      
+      // First, try to directly insert the badge using Supabase
+      const { data: user } = await supabase.auth.getUser();
+      if (user && user.user) {
+        console.log('BadgeService: Found user ID:', user.user.id);
+        
+        // Get the welcome badge ID
+        const { data: badgeData, error: badgeError } = await supabase
+          .from('badges')
+          .select('id')
+          .eq('name', 'Welcome Badge')
+          .single();
+          
+        if (badgeError) {
+          console.error('BadgeService: Error finding welcome badge:', badgeError);
+        } else if (badgeData) {
+          console.log('BadgeService: Found welcome badge with ID:', badgeData.id);
+          
+          // Check if user already has this badge
+          const { data: existingBadge, error: existingBadgeError } = await supabase
+            .from('user_badges')
+            .select('id')
+            .eq('user_id', user.user.id)
+            .eq('badge_id', badgeData.id)
+            .maybeSingle();
+            
+          if (existingBadgeError && existingBadgeError.code !== 'PGRST116') {
+            console.error('BadgeService: Error checking if user has welcome badge:', existingBadgeError);
+          }
+          
+          if (existingBadge) {
+            console.log('BadgeService: User already has welcome badge, skipping');
+          } else {
+            // Insert the user badge directly
+            const { error: insertError } = await supabase
+              .from('user_badges')
+              .insert([
+                { user_id: user.user.id, badge_id: badgeData.id }
+              ]);
+              
+            if (insertError) {
+              if (insertError.code === '23505') {
+                console.log('BadgeService: User already has welcome badge (detected by error code)');
+              } else {
+                console.error('BadgeService: Error inserting welcome badge:', insertError);
+              }
+            } else {
+              console.log('BadgeService: Successfully awarded welcome badge to user');
+            }
+          }
+        }
+      }
+      
+      // Also try using the provided function as a backup
+      await addUserBadge(badgeName).catch(e => {
+        // Just log the error but don't show to user
+        console.error(`BadgeService: Error awarding welcome badge "${badgeName}" via addUserBadge:`, e);
+      });
+    } catch (error) {
+      console.error('BadgeService: Error awarding welcome badge:', error);
     }
   }
   
