@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
   },
   greetingSection: {
     paddingHorizontal: theme.SPACING.lg,
-    marginBottom: theme.SPACING.xl,
+    marginBottom: theme.SPACING.md,
   },
   greeting: {
     marginBottom: theme.SPACING.xs,
@@ -320,21 +320,21 @@ const styles = StyleSheet.create({
   },
   checkInCard: {
     marginHorizontal: theme.SPACING.lg,
-    marginBottom: theme.SPACING.lg,
-    padding: theme.SPACING.xl,
+    marginBottom: theme.SPACING.md,
+    padding: theme.SPACING.lg,
     backgroundColor: 'rgba(38, 20, 60, 0.85)',
   },
   challengeCard: {
-    marginTop: theme.SPACING.lg,
+    marginTop: theme.SPACING.md,
   },
   cardTitle: {
-    marginBottom: theme.SPACING.md,
+    marginBottom: theme.SPACING.sm,
     textAlign: 'left',
     color: theme.COLORS.ui.text,
     fontSize: theme.FONTS.sizes.xl,
   },
   cardDescription: {
-    marginBottom: theme.SPACING.lg,
+    marginBottom: theme.SPACING.md,
     color: theme.COLORS.ui.textSecondary,
     fontSize: theme.FONTS.sizes.md,
   },

@@ -74,8 +74,8 @@ function ProtectedRoute() {
 export default function RootLayout() {
   return (
     <AppStateProvider>
-      <AuthProvider>
-        <BadgeProvider>
+      <BadgeProvider>
+        <AuthProvider>
           <CheckInStreakWithBadges>
             <View style={styles.container}>
               <Stack
@@ -100,8 +100,8 @@ export default function RootLayout() {
               <ProtectedRoute />
             </View>
           </CheckInStreakWithBadges>
-        </BadgeProvider>
-      </AuthProvider>
+        </AuthProvider>
+      </BadgeProvider>
     </AppStateProvider>
   );
 }

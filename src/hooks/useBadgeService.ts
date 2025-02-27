@@ -48,10 +48,25 @@ export const useBadgeService = () => {
     }
   }, [addUserBadge, isLoading]);
   
+  const awardWelcomeBadge = useCallback(async () => {
+    if (isLoading) {
+      console.log('Badges still loading, skipping welcome badge award');
+      return;
+    }
+    
+    try {
+      await BadgeService.awardWelcomeBadge(addUserBadge);
+    } catch (error) {
+      console.error('Error in awardWelcomeBadge:', error);
+      // Don't let errors propagate to UI
+    }
+  }, [addUserBadge, isLoading]);
+  
   return {
     checkStreakBadges,
     checkAllPeriodsCompleted,
     awardFirstCheckInBadge,
+    awardWelcomeBadge,
     isLoading
   };
 }; 

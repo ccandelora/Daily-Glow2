@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Animated } from 'react-native';
-import { useRouter } from 'expo-router';
-import { Typography, Card, Button, VideoBackground } from '@/components/common';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, StyleSheet, ScrollView, Animated, ViewStyle } from 'react-native';
+import { useRouter, useFocusEffect } from 'expo-router';
+import { Typography, Card, Button, VideoBackground, Header } from '@/components/common';
 import { useNotifications } from '@/contexts/NotificationsContext';
 import { useChallenges } from '@/contexts/ChallengesContext';
 import { useProfile } from '@/contexts/UserProfileContext';
@@ -9,19 +9,20 @@ import { AchievementsTab } from '@/components/profile/AchievementsTab';
 import { BadgesTab } from '@/components/profile/BadgesTab';
 import { StreaksTab } from '@/components/profile/StreaksTab';
 import theme from '@/constants/theme';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome6 } from '@expo/vector-icons';
 import { useCheckInStreak } from '@/contexts/CheckInStreakContext';
 import { useBadges } from '@/contexts/BadgeContext';
 import { useAchievements } from '@/contexts/AchievementsContext';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
+import { calculateOverallStreak } from '@/utils/streakCalculator';
 
 type ProfileTab = 'achievements' | 'badges' | 'streaks';
 
 export const AchievementsScreen: React.FC = () => {
   const router = useRouter();
   const { userBadges } = useBadges();
-  const { userStats } = useChallenges();
+  const { userStats, refreshDailyChallenge } = useChallenges();
   const { userProfile, refreshProfile } = useProfile();
   const { streaks, refreshStreaks } = useCheckInStreak();
   const { userAchievements } = useAchievements();
@@ -44,6 +45,9 @@ export const AchievementsScreen: React.FC = () => {
       
       // Refresh streaks data
       await refreshStreaks();
+      
+      // Refresh challenges data to get latest points
+      await refreshDailyChallenge();
       
       // Get user stats (total_points and level)
       let totalUserPoints = 0;
@@ -106,8 +110,9 @@ export const AchievementsScreen: React.FC = () => {
       const afternoonStreak = streaks?.afternoon || 0;
       const eveningStreak = streaks?.evening || 0;
       
-      // Use the highest streak value
-      const calculatedStreak = Math.max(profileStreak, morningStreak, afternoonStreak, eveningStreak);
+      // Use the standardized streak calculation utility
+      const calculatedStreak = calculateOverallStreak(streaks);
+      
       setCurrentStreak(calculatedStreak);
       
       console.log('Fetched latest data:');
@@ -132,6 +137,19 @@ export const AchievementsScreen: React.FC = () => {
     return userBadges?.length || 0;
   }, [userBadges]);
 
+  // Use useFocusEffect to refresh data when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      console.log('AchievementsScreen focused - refreshing data');
+      fetchLatestData();
+      
+      return () => {
+        // Cleanup if needed
+      };
+    }, [])
+  );
+
+  // Animation for tab content
   useEffect(() => {
     Animated.parallel([
       Animated.timing(fadeAnim, {
@@ -139,25 +157,21 @@ export const AchievementsScreen: React.FC = () => {
         duration: 500,
         useNativeDriver: true,
       }),
-      Animated.spring(slideAnim, {
+      Animated.timing(slideAnim, {
         toValue: 0,
-        tension: 50,
-        friction: 7,
+        duration: 500,
         useNativeDriver: true,
       }),
     ]).start();
-    
-    // Fetch latest data when component mounts - only once
-    fetchLatestData();
-    
-    // Debug data
-    console.log('AchievementsScreen - userProfile:', userProfile);
-    console.log('AchievementsScreen - userBadges:', userBadges);
-    console.log('AchievementsScreen - streaks:', streaks);
-    console.log('AchievementsScreen - totalPoints:', totalPoints);
-    console.log('AchievementsScreen - badgesCount:', badgesCount);
-    console.log('AchievementsScreen - currentStreak:', currentStreak);
-  }, []); // Empty dependency array to run only once on mount
+  }, [activeTab]);
+
+  // Update the UI when userStats changes
+  useEffect(() => {
+    if (userStats && userStats.total_points > 0) {
+      setTotalPoints(userStats.total_points);
+      console.log('Updated points from userStats:', userStats.total_points);
+    }
+  }, [userStats]);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -175,69 +189,111 @@ export const AchievementsScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <VideoBackground />
-      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
-        <View style={styles.header}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.contentContainer}>
+        <Header showBranding={true} />
+        
+        <View style={styles.content}>
           <Typography variant="h1" style={styles.title}>
             Achievements
           </Typography>
-          <Typography variant="body" style={styles.subtitle}>
-            Track your progress and earn rewards
-          </Typography>
-        </View>
-        
-        <View style={styles.statsContainer}>
-          <View style={styles.statCard}>
-            <Typography variant="h3" style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
-              {totalPoints}
-            </Typography>
-            <Typography variant="caption" style={styles.statLabel}>
-              Points
-            </Typography>
-          </View>
-          <View style={styles.statCard}>
-            <Typography variant="h3" style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
-              {badgesCount}
-            </Typography>
-            <Typography variant="caption" style={styles.statLabel}>
-              Badges
-            </Typography>
-          </View>
-          <View style={styles.statCard}>
-            <Typography variant="h3" style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
-              {currentStreak}
-            </Typography>
-            <Typography variant="caption" style={styles.statLabel}>
-              Streak
-            </Typography>
-          </View>
-        </View>
 
-        <Card style={styles.tabsSection}>
-          <View style={styles.tabButtons}>
-            <Button
-              title="Achieve"
-              onPress={() => setActiveTab('achievements')}
-              variant={activeTab === 'achievements' ? 'primary' : 'secondary'}
-              style={styles.tabButtonSmall}
-              size="compact"
-            />
-            <Button
-              title="Badges"
-              onPress={() => setActiveTab('badges')}
-              variant={activeTab === 'badges' ? 'primary' : 'secondary'}
-              style={styles.tabButtonSmall}
-              size="compact"
-            />
-            <Button
-              title="Streaks"
-              onPress={() => setActiveTab('streaks')}
-              variant={activeTab === 'streaks' ? 'primary' : 'secondary'}
-              style={styles.tabButtonSmall}
-              size="compact"
-            />
+          <Card style={styles.statsCard} variant="glow">
+            <View style={styles.statsRow}>
+              <View style={styles.statItem}>
+                <Typography variant="h3" style={styles.statValue} color={theme.COLORS.primary.green}>
+                  {totalPoints}
+                </Typography>
+                <Typography variant="caption" style={styles.statLabel}>
+                  Total Points
+                </Typography>
+              </View>
+              
+              <View style={styles.statDivider} />
+              
+              <View style={styles.statItem}>
+                <Typography variant="h3" style={styles.statValue} color={theme.COLORS.primary.green}>
+                  {currentStreak}
+                </Typography>
+                <Typography variant="caption" style={styles.statLabel}>
+                  Day Streak
+                </Typography>
+              </View>
+              
+              <View style={styles.statDivider} />
+              
+              <View style={styles.statItem}>
+                <Typography variant="h3" style={styles.statValue} color={theme.COLORS.primary.green}>
+                  {badgesCount}
+                </Typography>
+                <Typography variant="caption" style={styles.statLabel}>
+                  Badges
+                </Typography>
+              </View>
+            </View>
+          </Card>
+
+          <View style={styles.tabsContainer}>
+            <View style={styles.tabButtons}>
+              <Button
+                title="Achievements"
+                variant={activeTab === 'achievements' ? 'primary' : 'secondary'}
+                onPress={() => setActiveTab('achievements')}
+                size="small"
+                style={{
+                  ...styles.tabButton,
+                  ...(activeTab === 'achievements' ? styles.activeTabButton : {})
+                }}
+                textStyle={
+                  activeTab === 'achievements'
+                    ? styles.activeTabText
+                    : styles.inactiveTabText
+                }
+              />
+              <Button
+                title="Badges"
+                variant={activeTab === 'badges' ? 'primary' : 'secondary'}
+                onPress={() => setActiveTab('badges')}
+                size="small"
+                style={{
+                  ...styles.tabButton,
+                  ...(activeTab === 'badges' ? styles.activeTabButton : {})
+                }}
+                textStyle={
+                  activeTab === 'badges'
+                    ? styles.activeTabText
+                    : styles.inactiveTabText
+                }
+              />
+              <Button
+                title="Streaks"
+                variant={activeTab === 'streaks' ? 'primary' : 'secondary'}
+                onPress={() => setActiveTab('streaks')}
+                size="small"
+                style={{
+                  ...styles.tabButton,
+                  ...(activeTab === 'streaks' ? styles.activeTabButton : {})
+                }}
+                textStyle={
+                  activeTab === 'streaks'
+                    ? styles.activeTabText
+                    : styles.inactiveTabText
+                }
+              />
+            </View>
+
+            <Animated.View
+              style={[
+                styles.tabContent,
+                {
+                  opacity: fadeAnim,
+                  transform: [{ translateY: slideAnim }],
+                },
+              ]}
+            >
+              {renderTabContent()}
+            </Animated.View>
           </View>
-          {renderTabContent()}
-        </Card>
+        </View>
       </ScrollView>
     </View>
   );
@@ -251,72 +307,75 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
-  content: {
-    padding: theme.SPACING.lg,
-    paddingBottom: 100, // Extra padding at the bottom for scrolling
+  contentContainer: {
+    paddingBottom: theme.SPACING.xl,
   },
-  header: {
-    marginTop: 60,
-    marginBottom: theme.SPACING.xl,
+  content: {
+    paddingHorizontal: theme.SPACING.lg,
   },
   title: {
+    fontSize: 32,
+    marginBottom: theme.SPACING.md,
     color: theme.COLORS.ui.text,
-    marginBottom: theme.SPACING.sm,
   },
-  subtitle: {
-    color: theme.COLORS.ui.textSecondary,
+  statsCard: {
+    marginBottom: theme.SPACING.md,
+    padding: theme.SPACING.md,
+    backgroundColor: 'rgba(38, 20, 60, 0.85)',
   },
-  statsContainer: {
+  statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: theme.SPACING.xl,
-  },
-  statCard: {
-    backgroundColor: theme.COLORS.ui.card,
-    borderRadius: theme.BORDER_RADIUS.md,
-    padding: theme.SPACING.md,
     alignItems: 'center',
-    width: '30%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
   },
-  tabsSection: {
-    marginBottom: theme.SPACING.xl,
-    padding: theme.SPACING.lg,
+  statItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  statValue: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: theme.SPACING.xs,
+  },
+  statLabel: {
+    color: theme.COLORS.ui.textSecondary,
+    fontSize: 12,
+  },
+  statDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: `${theme.COLORS.ui.border}50`,
+  },
+  tabsContainer: {
+    marginTop: theme.SPACING.md,
   },
   tabButtons: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
     marginBottom: theme.SPACING.md,
-    width: '100%', // Ensure full width
-    paddingHorizontal: theme.SPACING.sm,
+    justifyContent: 'space-between',
+    paddingHorizontal: 2,
   },
   tabButton: {
     flex: 1,
     marginHorizontal: 2,
+    paddingVertical: theme.SPACING.sm,
     paddingHorizontal: 0,
-    minWidth: 0,
-  },
-  tabButtonSmall: {
-    flex: 1,
-    width: '30%',
-    marginHorizontal: 4,
-    paddingHorizontal: 0,
-    minWidth: 0,
-    height: 40, // Fixed height for buttons
-    justifyContent: 'center', // Center text vertically
-    alignItems: 'center', // Center text horizontally
-  },
-  statValue: {
-    fontSize: theme.FONTS.sizes.xl,
+    minWidth: 90,
+  } as ViewStyle,
+  activeTabButton: {
+    backgroundColor: theme.COLORS.primary.green,
+  } as ViewStyle,
+  activeTabText: {
+    color: theme.COLORS.ui.background,
     fontWeight: 'bold',
-    color: theme.COLORS.ui.text,
+    fontSize: 14,
   },
-  statLabel: {
-    fontSize: theme.FONTS.sizes.sm,
+  inactiveTabText: {
     color: theme.COLORS.ui.textSecondary,
+    fontSize: 14,
   },
+  tabContent: {
+    minHeight: 300,
+  },
+  // ... rest of the styles ...
 }); 

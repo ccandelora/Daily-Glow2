@@ -1,7 +1,9 @@
 import 'react-native-url-polyfill/auto';
 import { createClient } from '@supabase/supabase-js';
 import * as SecureStore from 'expo-secure-store';
-import { Platform } from 'react-native';
+import { Platform, AppState } from 'react-native';
+import * as Linking from 'expo-linking';
+import { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 const ExpoSecureStoreAdapter = {
   getItem: async (key: string) => {
@@ -63,11 +65,52 @@ const ExpoSecureStoreAdapter = {
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
 
+// Get the URL scheme from Expo
+const scheme = Linking.createURL('');
+const prefix = scheme.split('://')[0];
+
+// Create a redirect URL that works for both platforms
+const getRedirectUrl = () => {
+  // For Expo Go in development
+  if (__DEV__) {
+    // Get the current URL from Expo
+    const redirectUrl = Linking.createURL('confirm-email');
+    console.log('DEV Redirect URL:', redirectUrl);
+    return redirectUrl;
+  }
+  
+  // For production builds
+  return Platform.OS === 'web'
+    ? window.location.origin + '/confirm-email'
+    : 'daily-glow://confirm-email';
+};
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
     storage: Platform.OS === 'web' ? localStorage : ExpoSecureStoreAdapter,
     autoRefreshToken: true,
     persistSession: true,
-    detectSessionInUrl: false,
+    detectSessionInUrl: Platform.OS === 'web',
+    flowType: 'pkce',
   },
+});
+
+// Set up auth state change listener
+supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
+  console.log(`Supabase auth event: ${event}`, session ? 'User session available' : 'No user session');
+});
+
+// Export the redirect URL for use in other parts of the app
+export const redirectUrl = getRedirectUrl();
+
+// Tells Supabase Auth to continuously refresh the session automatically
+// if the app is in the foreground. When this is added, you will continue
+// to receive `onAuthStateChange` events with the `TOKEN_REFRESHED` or
+// `SIGNED_OUT` event if the user's session is terminated.
+AppState.addEventListener('change', (state) => {
+  if (state === 'active') {
+    supabase.auth.startAutoRefresh();
+  } else {
+    supabase.auth.stopAutoRefresh();
+  }
 }); 

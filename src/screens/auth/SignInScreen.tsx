@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Typography, Input, Button, Card, VideoBackground } from '@/components/common';
+import { Typography, Input, Button, Card, VideoBackground, Logo } from '@/components/common';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppState } from '@/contexts/AppStateContext';
 import theme from '@/constants/theme';
@@ -9,10 +9,11 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 export const SignInScreen = () => {
   const router = useRouter();
-  const { signIn } = useAuth();
-  const { setLoading } = useAppState();
+  const { signIn, resendVerificationEmail, user, isEmailVerified } = useAuth();
+  const { setLoading, showSuccess } = useAppState();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showVerificationPrompt, setShowVerificationPrompt] = useState(false);
 
   const handleSignIn = async () => {
     if (!email.trim() || !password.trim()) {
@@ -22,7 +23,31 @@ export const SignInScreen = () => {
     try {
       setLoading(true);
       await signIn(email.trim(), password);
-      router.replace('/(app)');
+      
+      // After sign-in, the AuthContext will have updated the user and isEmailVerified
+      // We can access them directly from the destructured values at the top
+      if (user && !isEmailVerified) {
+        setShowVerificationPrompt(true);
+      } else {
+        router.replace('/(app)');
+      }
+    } catch (error) {
+      // Error is already handled in AuthContext
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleResendVerification = async () => {
+    if (!email.trim()) {
+      Alert.alert('Email Required', 'Please enter your email address to resend verification.');
+      return;
+    }
+    
+    try {
+      setLoading(true);
+      await resendVerificationEmail(email.trim());
+      showSuccess('Verification email sent! Please check your inbox.');
     } catch (error) {
       // Error is already handled in AuthContext
     } finally {
@@ -46,6 +71,7 @@ export const SignInScreen = () => {
 
       <View style={styles.content}>
         <View style={styles.header}>
+          <Logo size="large" style={styles.logo} />
           <Typography variant="h1" style={styles.title} glow="strong">
             Welcome Back
           </Typography>
@@ -74,18 +100,35 @@ export const SignInScreen = () => {
             style={styles.input}
           />
 
-          <TouchableOpacity
-            onPress={() => router.push('/(auth)/forgot-password')}
-            style={styles.forgotPassword}
-          >
-            <Typography
-              variant="caption"
-              color={theme.COLORS.primary.green}
-              glow="soft"
+          <View style={styles.actionLinks}>
+            <TouchableOpacity
+              onPress={() => router.push('/(auth)/forgot-password')}
+              style={styles.forgotPassword}
             >
-              Forgot Password?
-            </Typography>
-          </TouchableOpacity>
+              <Typography
+                variant="caption"
+                color={theme.COLORS.primary.green}
+                glow="soft"
+              >
+                Forgot Password?
+              </Typography>
+            </TouchableOpacity>
+            
+            {showVerificationPrompt && (
+              <TouchableOpacity
+                onPress={handleResendVerification}
+                style={styles.resendVerification}
+              >
+                <Typography
+                  variant="caption"
+                  color={theme.COLORS.primary.purple}
+                  glow="soft"
+                >
+                  Resend Verification Email
+                </Typography>
+              </TouchableOpacity>
+            )}
+          </View>
 
           <Button
             title="Sign In"
@@ -93,6 +136,31 @@ export const SignInScreen = () => {
             style={styles.button}
             variant="primary"
           />
+          
+          {showVerificationPrompt && (
+            <View style={styles.verificationMessage}>
+              <Typography 
+                variant="body" 
+                color={theme.COLORS.status.warning}
+                style={styles.verificationText}
+              >
+                Your email is not verified. Please check your inbox or resend the verification email.
+              </Typography>
+              
+              <TouchableOpacity 
+                onPress={() => router.push('/(auth)/manual-verification')}
+                style={styles.manualVerificationLink}
+              >
+                <Typography 
+                  variant="body" 
+                  color={theme.COLORS.primary.blue}
+                  style={styles.manualVerificationText}
+                >
+                  Try manual verification instead
+                </Typography>
+              </TouchableOpacity>
+            </View>
+          )}
         </Card>
 
         <View style={styles.footer}>
@@ -127,6 +195,9 @@ const styles = StyleSheet.create({
     marginBottom: theme.SPACING.xl,
     alignItems: 'center',
   },
+  logo: {
+    marginBottom: theme.SPACING.md,
+  },
   title: {
     marginBottom: theme.SPACING.sm,
     textAlign: 'center',
@@ -145,9 +216,16 @@ const styles = StyleSheet.create({
   input: {
     marginBottom: theme.SPACING.md,
   },
-  forgotPassword: {
-    alignSelf: 'flex-end',
+  actionLinks: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: theme.SPACING.lg,
+  },
+  forgotPassword: {
+    alignSelf: 'flex-start',
+  },
+  resendVerification: {
+    alignSelf: 'flex-end',
   },
   button: {
     marginTop: theme.SPACING.md,
@@ -163,5 +241,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: theme.SPACING.xl,
+  },
+  verificationMessage: {
+    marginTop: theme.SPACING.md,
+    padding: theme.SPACING.sm,
+    backgroundColor: 'rgba(255, 204, 0, 0.1)',
+    borderRadius: theme.BORDER_RADIUS.md,
+    borderWidth: 1,
+    borderColor: theme.COLORS.status.warning,
+  },
+  verificationText: {
+    textAlign: 'center',
+  },
+  manualVerificationLink: {
+    marginTop: theme.SPACING.sm,
+    alignItems: 'center',
+  },
+  manualVerificationText: {
+    textAlign: 'center',
+    textDecorationLine: 'underline',
   },
 }); 

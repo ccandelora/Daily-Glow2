@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, Switch, Alert } from 'react-native';
-import { Typography, Card, Button, VideoBackground } from '@/components/common';
+import { Typography, Card, Button, VideoBackground, Header } from '@/components/common';
 import { useJournal } from '@/contexts/JournalContext';
 import { useAppState } from '@/contexts/AppStateContext';
 import { useAuth } from '@/contexts/AuthContext';
 import theme from '@/constants/theme';
+import { useRouter } from 'expo-router';
 
 export const SettingsScreen = () => {
+  const router = useRouter();
   const { entries, deleteAllEntries } = useJournal();
   const { setLoading, showError } = useAppState();
   const { signOut } = useAuth();
@@ -61,113 +63,114 @@ export const SettingsScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <VideoBackground />
-      <View style={styles.header}>
-        <Typography variant="h1" style={styles.title}>
-          Settings
-        </Typography>
-      </View>
-
-      <View style={styles.content}>
-        <Card style={styles.section}>
-          <Typography variant="h3" style={styles.sectionTitle}>
-            Account
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.contentContainer}>
+        <Header showBranding={true} />
+        
+        <View style={styles.content}>
+          <Typography variant="h1" style={styles.title}>
+            Settings
           </Typography>
-          <Button
-            title="Sign Out"
-            onPress={handleSignOut}
-            variant="secondary"
-            style={styles.signOutButton}
-          />
-        </Card>
 
-        <Card style={styles.section}>
-          <Typography variant="h3" style={styles.sectionTitle}>
-            Notifications
-          </Typography>
-          <View style={styles.settingRow}>
-            <Typography>Daily Check-in Reminder</Typography>
-            <Switch
-              value={notifications}
-              onValueChange={setNotifications}
-              trackColor={{ false: theme.COLORS.ui.card, true: theme.COLORS.primary.green }}
-            />
-          </View>
-        </Card>
-
-        <Card style={styles.section}>
-          <Typography variant="h3" style={styles.sectionTitle}>
-            Appearance
-          </Typography>
-          <View style={styles.settingRow}>
-            <Typography>Dark Mode</Typography>
-            <Switch
-              value={darkMode}
-              onValueChange={setDarkMode}
-              trackColor={{ false: theme.COLORS.ui.card, true: theme.COLORS.primary.green }}
-            />
-          </View>
-        </Card>
-
-        <Card style={styles.section}>
-          <Typography variant="h3" style={styles.sectionTitle}>
-            Data Management
-          </Typography>
-          <View style={styles.dataManagement}>
-            <Button
-              title="Export Journal Data"
-              onPress={handleExportData}
-              variant="secondary"
-              style={styles.dataButton}
-            />
-            <Typography
-              variant="caption"
-              color={theme.COLORS.ui.textSecondary}
-              style={styles.dataInfo}
-            >
-              {entries.length} entries available for export
+          <Card style={styles.section}>
+            <Typography variant="h3" style={styles.sectionTitle}>
+              Account
             </Typography>
             <Button
-              title="Delete All Data"
-              onPress={handleDeleteData}
+              title="View Profile"
+              onPress={() => router.navigate('profile')}
               variant="primary"
-              style={styles.deleteButton}
+              style={styles.profileButton}
             />
+            <Button
+              title="Sign Out"
+              onPress={handleSignOut}
+              variant="secondary"
+              style={styles.signOutButton}
+            />
+          </Card>
+
+          <Card style={styles.section}>
+            <Typography variant="h3" style={styles.sectionTitle}>
+              Notifications
+            </Typography>
+            <View style={styles.settingRow}>
+              <Typography>Daily Check-in Reminder</Typography>
+              <Switch
+                value={notifications}
+                onValueChange={setNotifications}
+                trackColor={{ false: theme.COLORS.ui.card, true: theme.COLORS.primary.green }}
+              />
+            </View>
+          </Card>
+
+          <Card style={styles.section}>
+            <Typography variant="h3" style={styles.sectionTitle}>
+              Appearance
+            </Typography>
+            <View style={styles.settingRow}>
+              <Typography>Dark Mode</Typography>
+              <Switch
+                value={darkMode}
+                onValueChange={setDarkMode}
+                trackColor={{ false: theme.COLORS.ui.card, true: theme.COLORS.primary.green }}
+              />
+            </View>
+          </Card>
+
+          <Card style={styles.section}>
+            <Typography variant="h3" style={styles.sectionTitle}>
+              Data Management
+            </Typography>
+            <View style={styles.dataManagement}>
+              <Button
+                title="Export Journal Data"
+                onPress={handleExportData}
+                variant="secondary"
+                style={styles.dataButton}
+              />
+              <Typography
+                variant="caption"
+                color={theme.COLORS.ui.textSecondary}
+                style={styles.dataInfo}
+              >
+                {entries.length} entries available for export
+              </Typography>
+              <Button
+                title="Delete All Data"
+                onPress={handleDeleteData}
+                variant="primary"
+                style={styles.deleteButton}
+              />
+              <Typography
+                variant="caption"
+                color={theme.COLORS.ui.textSecondary}
+                style={styles.dataInfo}
+              >
+                This action cannot be undone
+              </Typography>
+            </View>
+          </Card>
+
+          <Card style={styles.section}>
+            <Typography variant="h3" style={styles.sectionTitle}>
+              About
+            </Typography>
+            <Typography style={styles.aboutText}>
+              Daily Glow v1.0.0
+            </Typography>
             <Typography
               variant="caption"
               color={theme.COLORS.ui.textSecondary}
-              style={styles.dataInfo}
+              style={styles.aboutText}
             >
-              This action cannot be undone
+              © 2023 Daily Glow
             </Typography>
-          </View>
-        </Card>
-
-        <Card style={styles.section}>
-          <Typography variant="h3" style={styles.sectionTitle}>
-            About
-          </Typography>
-          <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
-            Daily Glow v1.0.0
-          </Typography>
-          <Typography
-            variant="caption"
-            color={theme.COLORS.ui.textSecondary}
-            style={styles.copyright}
-          >
-            © 2024 Daily Glow. All rights reserved.
-          </Typography>
-          <Typography
-            variant="caption"
-            color={theme.COLORS.ui.textSecondary}
-            style={styles.attribution}
-          >
-            Background video by Nicola Narracci via Pexels
-          </Typography>
-        </Card>
-      </View>
-    </ScrollView>
+          </Card>
+        </View>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -176,28 +179,34 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.COLORS.ui.background,
   },
-  header: {
-    padding: theme.SPACING.lg,
+  scrollView: {
+    flex: 1,
   },
-  title: {
-    marginBottom: theme.SPACING.md,
+  contentContainer: {
+    paddingBottom: theme.SPACING.xl,
   },
   content: {
-    padding: theme.SPACING.lg,
-    paddingTop: 0,
+    paddingHorizontal: theme.SPACING.lg,
+  },
+  title: {
+    fontSize: 32,
+    marginBottom: theme.SPACING.md,
+    color: theme.COLORS.ui.text,
   },
   section: {
-    marginBottom: theme.SPACING.lg,
+    marginBottom: theme.SPACING.md,
     padding: theme.SPACING.lg,
+    backgroundColor: 'rgba(38, 20, 60, 0.85)',
   },
   sectionTitle: {
-    marginBottom: theme.SPACING.lg,
+    marginBottom: theme.SPACING.md,
+    color: theme.COLORS.ui.text,
   },
   settingRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: theme.SPACING.md,
+    marginBottom: theme.SPACING.sm,
   },
   signOutButton: {
     marginTop: theme.SPACING.sm,
@@ -214,12 +223,12 @@ const styles = StyleSheet.create({
     backgroundColor: theme.COLORS.primary.red,
   },
   dataInfo: {
+    marginBottom: theme.SPACING.sm,
+  },
+  aboutText: {
+    marginBottom: theme.SPACING.sm,
+  },
+  profileButton: {
     marginBottom: theme.SPACING.md,
-  },
-  copyright: {
-    marginTop: theme.SPACING.lg,
-  },
-  attribution: {
-    marginTop: theme.SPACING.xs,
   },
 }); 

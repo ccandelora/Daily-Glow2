@@ -21,6 +21,7 @@ const tabs = [
   { key: 'journal', label: 'Journal', icon: '📖' },
   { key: 'insights', label: 'Insights', icon: '📊' },
   { key: 'achievements', label: 'Achievements', icon: '🏆' },
+  { key: 'profile', label: 'Profile', icon: '👤' },
   { key: 'settings', label: 'Settings', icon: '⚙️' }
 ];
 
@@ -84,12 +85,6 @@ export default function AppLayout() {
                 <NotificationsProvider>
                   <View style={styles.container}>
                     <AnimatedBackground intensity="medium" />
-                    
-                    {/* Debug text */}
-                    <View style={styles.debugOverlay}>
-                      <Text style={styles.debugText}>App Layout Active</Text>
-                      <Text style={styles.debugText}>{`${width}x${height}`}</Text>
-                    </View>
 
                     {/* Base gradient layer */}
                     <LinearGradient
@@ -179,6 +174,7 @@ export default function AppLayout() {
                       <Tabs.Screen name="journal" />
                       <Tabs.Screen name="insights" />
                       <Tabs.Screen name="achievements" />
+                      <Tabs.Screen name="profile" />
                       <Tabs.Screen name="settings" />
                       <Tabs.Screen
                         name="check-in"

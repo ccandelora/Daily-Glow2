@@ -62,11 +62,12 @@ export const CheckInStreakProvider: React.FC<CheckInStreakProviderProps> = ({
         .single();
         
       if (error) {
-        console.error('Error fetching streaks:', error);
-        
-        // If no record exists, create one
+        // If no record exists, create one without logging an error
         if (error.code === 'PGRST116') {
+          console.log('No streak record found for user, creating one...');
           await createStreakRecord();
+        } else {
+          console.error('Error fetching streaks:', error);
         }
         return;
       }
@@ -100,6 +101,14 @@ export const CheckInStreakProvider: React.FC<CheckInStreakProviderProps> = ({
         ]);
         
       if (error) {
+        // If it's a duplicate key error, another process might have created the record
+        // This is not a critical error, so we can just fetch the record again
+        if (error.code === '23505') {
+          console.log('Streak record already exists, fetching it instead');
+          await fetchStreaks();
+          return;
+        }
+        
         console.error('Error creating streak record:', error);
         return;
       }

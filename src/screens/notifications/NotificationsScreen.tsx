@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { Typography, Card, Header } from '@/components/common';
 import { useNotifications } from '@/contexts/NotificationsContext';
 import theme from '@/constants/theme';
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome6 } from '@expo/vector-icons';
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
 
@@ -74,7 +74,7 @@ export const NotificationsScreen = () => {
           onPress={() => handleDelete(notificationId)}
           style={[styles.swipeAction, { backgroundColor: theme.COLORS.primary.red }]}
         >
-          <Ionicons name="trash-outline" size={24} color={theme.COLORS.ui.background} />
+          <FontAwesome6 name="trash" size={24} color={theme.COLORS.ui.background} />
         </TouchableOpacity>
       </Animated.View>
     );
@@ -83,15 +83,15 @@ export const NotificationsScreen = () => {
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'achievement':
-        return 'trophy-outline';
+        return 'trophy';
       case 'badge':
-        return 'ribbon-outline';
+        return 'award';
       case 'streak':
-        return 'flame-outline';
+        return 'fire';
       case 'reminder':
-        return 'notifications-outline';
+        return 'bell';
       default:
-        return 'information-circle-outline';
+        return 'circle-info';
     }
   };
 
@@ -149,7 +149,7 @@ export const NotificationsScreen = () => {
                         { backgroundColor: getNotificationColor(notification.type) },
                       ]}
                     >
-                      <Ionicons
+                      <FontAwesome6
                         name={getNotificationIcon(notification.type)}
                         size={24}
                         color={theme.COLORS.ui.background}
@@ -185,8 +185,8 @@ export const NotificationsScreen = () => {
           ))
         ) : (
           <View style={styles.emptyContainer}>
-            <Ionicons
-              name="notifications-off-outline"
+            <FontAwesome6
+              name="bell-slash"
               size={48}
               color={theme.COLORS.ui.textSecondary}
             />
