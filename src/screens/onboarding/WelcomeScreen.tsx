@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
-import { Typography, Button, VideoBackground, Logo } from '@/components/common';
+import { Typography, Button, VideoBackground, Logo, EmailVerificationBanner } from '@/components/common';
 import { useRouter } from 'expo-router';
 import theme from '@/constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const WelcomeScreen = () => {
   const router = useRouter();
+  const { user, isEmailVerified, resendVerificationEmail } = useAuth();
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const scaleAnim = React.useRef(new Animated.Value(0.9)).current;
 
@@ -25,6 +27,12 @@ export const WelcomeScreen = () => {
       }),
     ]).start();
   }, []);
+
+  const handleResendVerification = async () => {
+    if (user?.email) {
+      await resendVerificationEmail(user.email);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -60,6 +68,16 @@ export const WelcomeScreen = () => {
         <Typography variant="body" style={styles.subtitle} glow="medium">
           Your journey to mindfulness and self-discovery starts here
         </Typography>
+
+        {/* Email Verification Banner */}
+        {!isEmailVerified && user?.email && (
+          <View style={styles.bannerContainer}>
+            <EmailVerificationBanner 
+              email={user.email}
+              onResendVerification={handleResendVerification}
+            />
+          </View>
+        )}
       </Animated.View>
 
       <Animated.View 
@@ -127,6 +145,10 @@ const styles = StyleSheet.create({
     maxWidth: '90%',
     lineHeight: 28,
     fontSize: theme.FONTS.sizes.md,
+  },
+  bannerContainer: {
+    width: '100%',
+    marginTop: theme.SPACING.xl,
   },
   footer: {
     padding: theme.SPACING.xl,

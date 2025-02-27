@@ -53,6 +53,19 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
   const loadEntries = async () => {
     try {
       setLoading(true);
+      
+      // First check if the journal_entries table exists
+      const { error: tableCheckError } = await supabase
+        .from('journal_entries')
+        .select('count')
+        .limit(1);
+      
+      if (tableCheckError && tableCheckError.message.includes('relation "journal_entries" does not exist')) {
+        console.log('Journal entries table does not exist yet');
+        setEntries([]);
+        return;
+      }
+      
       const { data, error } = await supabase
         .from('journal_entries')
         .select('*')
@@ -83,7 +96,14 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
         };
       }));
     } catch (error) {
-      showError(error instanceof Error ? error.message : 'Failed to load journal entries');
+      console.error('Error in loadEntries:', error);
+      // Don't show error to user if it's just that the table doesn't exist yet
+      if (error instanceof Error && !error.message.includes('does not exist')) {
+        showError(error.message || 'Failed to load journal entries');
+      } else {
+        // Just set empty entries if there's an error
+        setEntries([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -151,7 +171,7 @@ export function JournalProvider({ children }: { children: React.ReactNode }) {
         // Refresh streaks first to ensure we have the latest data
         await refreshStreaks();
         // Then increment streak for this time period
-        await incrementStreak(timePeriod);
+        await incrementStreak(timePeriod.toLowerCase() as 'morning' | 'afternoon' | 'evening');
       } catch (streakError) {
         console.error('Error updating streak:', streakError);
         // Continue with success message even if streak update fails

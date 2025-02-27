@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAppState } from './AppStateContext';
-import { useAuth } from './AuthContext';
 import { BadgeService, initializeBadges } from '@/services/BadgeService';
 import { Alert } from 'react-native';
 
@@ -30,6 +29,7 @@ interface BadgeContextType {
   getBadgeByName: (name: string) => Badge | undefined;
   refreshBadges: () => Promise<void>;
   isLoading: boolean;
+  setUserId: (userId: string | null) => void;
 }
 
 const BadgeContext = createContext<BadgeContextType | undefined>(undefined);
@@ -45,7 +45,7 @@ export const useBadges = () => {
 export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [badges, setBadges] = useState<Badge[]>([]);
   const [userBadges, setUserBadges] = useState<UserBadge[]>([]);
-  const { user } = useAuth();
+  const [userId, setUserId] = useState<string | null>(null);
   const { showError, showSuccess } = useAppState();
   const [isInitialized, setIsInitialized] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
@@ -164,7 +164,7 @@ export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const fetchUserBadges = async () => {
-    if (!user) return;
+    if (!userId) return;
     
     try {
       setIsLoading(true);
@@ -176,7 +176,7 @@ export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const { data, error } = await supabase
         .from('user_badges')
         .select('*, badge:badges(*)')
-        .eq('user_id', user.id);
+        .eq('user_id', userId);
         
       if (error) {
         console.error('Error fetching user badges:', error);
@@ -199,16 +199,16 @@ export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   
   // Check if user has completed any journal entries and award first badge if needed
   const checkAndAwardFirstBadge = async () => {
-    if (!user) return;
+    if (!userId) return;
     
     try {
-      console.log('Checking if user should receive first check-in badge...');
+      console.log('Checking if user should receive welcome badge or first check-in badge...');
       
       // First, check if user already has any badges
       const { data: existingUserBadges, error: userBadgesError } = await supabase
         .from('user_badges')
         .select('id, badge_id')
-        .eq('user_id', user.id);
+        .eq('user_id', userId);
         
       if (userBadgesError) {
         console.error('Error checking existing user badges:', userBadgesError);
@@ -216,9 +216,6 @@ export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         console.log(`User already has ${existingUserBadges.length} badges, skipping first badge check`);
         return;
       }
-      
-      // First, check if the First Check-in badge exists in the database
-      const firstCheckInBadgeName = 'First Check-in';
       
       // Fetch badges directly from database to ensure we have the latest data
       const { data: latestBadges, error: badgesError } = await supabase
@@ -239,43 +236,86 @@ export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Log all available badges to help debug
       console.log(`Available badges (${badgesToUse.length}):`, badgesToUse.map(b => b.name).join(', '));
       
-      // Try to find the badge with a case-insensitive search
+      // First try to find the Welcome Badge
       let badge = badgesToUse.find(b => 
-        b.name.toLowerCase() === firstCheckInBadgeName.toLowerCase() || 
-        b.name.includes(firstCheckInBadgeName) || 
-        firstCheckInBadgeName.includes(b.name)
+        b.name.toLowerCase() === 'welcome badge' || 
+        b.name.includes('Welcome') || 
+        b.name.includes('welcome')
       );
       
-      if (!badge) {
-        console.log('First Check-in badge not found with exact or partial match');
+      if (badge) {
+        console.log(`Found Welcome Badge: ${badge.name}`);
+      } else {
+        // If Welcome Badge not found, try to find First Check-in badge
+        const firstCheckInBadgeName = 'First Check-in';
         
-        // If we can't find it, look for any completion badge as a fallback
-        badge = badgesToUse.find(b => b.category === 'completion');
+        // Try to find the badge with a case-insensitive search
+        badge = badgesToUse.find(b => 
+          b.name.toLowerCase() === firstCheckInBadgeName.toLowerCase() || 
+          b.name.includes(firstCheckInBadgeName) || 
+          firstCheckInBadgeName.includes(b.name)
+        );
         
-        if (badge) {
-          console.log(`Found alternative completion badge: ${badge.name}`);
-        } else {
-          console.log('No completion badges found, using first available badge as fallback');
-          // Last resort: use any available badge
-          badge = badgesToUse[0];
+        if (!badge) {
+          console.log('Neither Welcome Badge nor First Check-in badge found with exact or partial match');
+          
+          // If we can't find it, look for any completion badge as a fallback
+          badge = badgesToUse.find(b => b.category === 'completion');
           
           if (badge) {
-            console.log(`Using first available badge as fallback: ${badge.name}`);
+            console.log(`Found alternative completion badge: ${badge.name}`);
           } else {
-            console.log('No badges available at all, cannot award badge');
-            return;
+            console.log('No completion badges found, using first available badge as fallback');
+            // Last resort: use any available badge
+            badge = badgesToUse[0];
+            
+            if (badge) {
+              console.log(`Using first available badge as fallback: ${badge.name}`);
+            } else {
+              console.log('No badges available at all, cannot award badge');
+              return;
+            }
           }
+        } else {
+          console.log(`Found First Check-in badge: ${badge.name}`);
         }
-      } else {
-        console.log(`Found First Check-in badge: ${badge.name}`);
       }
       
+      // Award the badge to the user since they don't have any badges yet
+      console.log('User has no badges, awarding badge directly');
+      try {
+        // Use direct badge ID
+        if (badge && badge.id) {
+          console.log(`Adding badge directly with ID: ${badge.id}`);
+          const { error } = await supabase
+            .from('user_badges')
+            .insert([
+              { user_id: userId, badge_id: badge.id }
+            ]);
+            
+          if (error) {
+            if (error.code === '23505') {
+              console.log(`User already has the "${badge.name}" badge`);
+            } else {
+              console.error('Error adding user badge directly:', error);
+            }
+          } else {
+            console.log(`Successfully added "${badge.name}" badge to user`);
+            showSuccess(`🏅 Badge Unlocked: ${badge.name}`);
+            await fetchUserBadges();
+          }
+        }
+      } catch (awardError) {
+        console.error('Error awarding badge:', awardError);
+      }
+      
+      // Also check for journal entries and streaks for the First Check-in badge
       // Check if user has any journal entries (which are check-ins)
       console.log('Checking for user journal entries...');
       const { data: journalEntries, error: journalError } = await supabase
         .from('journal_entries')
         .select('id')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .limit(1);
         
       if (journalError) {
@@ -285,32 +325,7 @@ export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       
       // If user has journal entries but no badges, award first check-in badge
       if (journalEntries && journalEntries.length > 0) {
-        console.log('User has journal entries but no badges, awarding badge');
-        try {
-          // Use direct badge ID
-          if (badge && badge.id) {
-            console.log(`Adding badge directly with ID: ${badge.id}`);
-            const { error } = await supabase
-              .from('user_badges')
-              .insert([
-                { user_id: user.id, badge_id: badge.id }
-              ]);
-              
-            if (error) {
-              if (error.code === '23505') {
-                console.log(`User already has the "${badge.name}" badge`);
-              } else {
-                console.error('Error adding user badge directly:', error);
-              }
-            } else {
-              console.log(`Successfully added "${badge.name}" badge to user`);
-              showSuccess(`🏅 Badge Unlocked: ${badge.name}`);
-              await fetchUserBadges();
-            }
-          }
-        } catch (awardError) {
-          console.error('Error awarding badge:', awardError);
-        }
+        console.log('User has journal entries but no badges, already awarded badge above');
         return; // Exit early if we've awarded the badge
       } else {
         console.log('User has no journal entries yet');
@@ -321,7 +336,7 @@ export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const { data: streaks, error: streaksError } = await supabase
         .from('user_streaks')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .single();
         
       if (streaksError && streaksError.code !== 'PGRST116') {
@@ -329,34 +344,9 @@ export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         // Don't throw error, just log it and continue
       }
       
-      // If user has any streaks > 0, award badge
+      // If user has any streaks > 0, we've already awarded the badge above
       if (streaks && (streaks.morning_streak > 0 || streaks.afternoon_streak > 0 || streaks.evening_streak > 0)) {
-        console.log('User has streaks but no badges, awarding badge');
-        try {
-          // Use direct badge ID
-          if (badge && badge.id) {
-            console.log(`Adding badge directly with ID: ${badge.id}`);
-            const { error } = await supabase
-              .from('user_badges')
-              .insert([
-                { user_id: user.id, badge_id: badge.id }
-              ]);
-              
-            if (error) {
-              if (error.code === '23505') {
-                console.log(`User already has the "${badge.name}" badge`);
-              } else {
-                console.error('Error adding user badge directly:', error);
-              }
-            } else {
-              console.log(`Successfully added "${badge.name}" badge to user`);
-              showSuccess(`🏅 Badge Unlocked: ${badge.name}`);
-              await fetchUserBadges();
-            }
-          }
-        } catch (awardError) {
-          console.error('Error awarding badge:', awardError);
-        }
+        console.log('User has streaks but no badges, already awarded badge above');
       } else {
         console.log('User has no streaks yet');
       }
@@ -380,7 +370,7 @@ export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   useEffect(() => {
-    if (user) {
+    if (userId) {
       initializeBadgesTables().then(() => {
         refreshBadges().catch(error => {
           console.error('Error in badge initialization:', error);
@@ -391,7 +381,7 @@ export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         // Don't show error to user, just log it
       });
     }
-  }, [user?.id]);
+  }, [userId]);
 
   const getBadgeById = (id: string) => {
     return badges.find(badge => badge.id === id);
@@ -402,27 +392,90 @@ export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const addUserBadge = async (badgeName: string) => {
-    if (!user) return;
+    if (!userId) return;
     
     try {
+      console.log(`Attempting to award badge: "${badgeName}" to user: ${userId}`);
+      
       // Find the badge by name
       const badge = getBadgeByName(badgeName);
       if (!badge) {
-        console.error(`Badge with name "${badgeName}" not found`);
+        console.error(`Badge with name "${badgeName}" not found in state`);
+        
+        // Try to fetch the badge directly from the database
+        const { data: directBadge, error: directBadgeError } = await supabase
+          .from('badges')
+          .select('*')
+          .ilike('name', `%${badgeName}%`)
+          .limit(1)
+          .single();
+          
+        if (directBadgeError) {
+          console.error(`Error fetching badge "${badgeName}" directly:`, directBadgeError);
+          return;
+        }
+        
+        if (!directBadge) {
+          console.error(`Badge with name "${badgeName}" not found in database`);
+          return;
+        }
+        
+        console.log(`Found badge directly from database: ${directBadge.name} (${directBadge.id})`);
+        
+        // Check if user already has this badge
+        const { data: existingBadge, error: existingBadgeError } = await supabase
+          .from('user_badges')
+          .select('id')
+          .eq('user_id', userId)
+          .eq('badge_id', directBadge.id)
+          .maybeSingle();
+          
+        if (existingBadgeError) {
+          console.error(`Error checking if user has badge "${badgeName}":`, existingBadgeError);
+        }
+        
+        if (existingBadge) {
+          console.log(`User already has badge "${badgeName}", skipping`);
+          return;
+        }
+        
+        // Award the badge
+        const { error: insertError } = await supabase
+          .from('user_badges')
+          .insert([
+            { user_id: userId, badge_id: directBadge.id }
+          ]);
+            
+        if (insertError) {
+          if (insertError.code === '23505') {
+            console.log(`User already has badge "${badgeName}" (detected by error code)`);
+            return;
+          }
+          console.error(`Error adding user badge "${badgeName}":`, insertError);
+          return;
+        }
+        
+        // Show success message
+        showSuccess(`🏅 Badge Unlocked: ${directBadge.name}`);
+        
+        // Refresh user badges
+        await fetchUserBadges();
         return;
       }
+      
+      console.log(`Found badge in state: ${badge.name} (${badge.id})`);
       
       // Check if user already has this badge
       const exists = userBadges.some(ub => ub.badge_id === badge.id);
       if (exists) {
-        console.log(`User already has badge "${badgeName}", skipping`);
+        console.log(`User already has badge "${badgeName}" in state, skipping`);
         return;
       }
       
       const { error } = await supabase
         .from('user_badges')
         .insert([
-          { user_id: user.id, badge_id: badge.id }
+          { user_id: userId, badge_id: badge.id }
         ]);
           
       if (error) {
@@ -430,7 +483,7 @@ export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           console.log(`User already has badge "${badgeName}" (detected by error code)`);
           return;
         }
-        console.error('Error adding user badge:', error);
+        console.error(`Error adding user badge "${badgeName}":`, error);
         return;
       }
       
@@ -440,13 +493,13 @@ export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       // Refresh user badges
       await fetchUserBadges();
     } catch (error: any) {
-      console.error('Error adding user badge:', error.message);
+      console.error(`Error adding user badge "${badgeName}":`, error.message);
     }
   };
 
   // Check and award streak badges
   const checkStreakBadges = async (streaks: any) => {
-    if (!user) return;
+    if (!userId) return;
     await BadgeService.checkStreakBadges(streaks, addUserBadge);
   };
 
@@ -459,6 +512,7 @@ export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       getBadgeByName,
       refreshBadges,
       isLoading,
+      setUserId,
     }}>
       {children}
     </BadgeContext.Provider>

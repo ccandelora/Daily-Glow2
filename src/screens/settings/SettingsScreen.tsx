@@ -5,8 +5,10 @@ import { useJournal } from '@/contexts/JournalContext';
 import { useAppState } from '@/contexts/AppStateContext';
 import { useAuth } from '@/contexts/AuthContext';
 import theme from '@/constants/theme';
+import { useRouter } from 'expo-router';
 
 export const SettingsScreen = () => {
+  const router = useRouter();
   const { entries, deleteAllEntries } = useJournal();
   const { setLoading, showError } = useAppState();
   const { signOut } = useAuth();
@@ -75,6 +77,12 @@ export const SettingsScreen = () => {
             <Typography variant="h3" style={styles.sectionTitle}>
               Account
             </Typography>
+            <Button
+              title="View Profile"
+              onPress={() => router.navigate('profile')}
+              variant="primary"
+              style={styles.profileButton}
+            />
             <Button
               title="Sign Out"
               onPress={handleSignOut}
@@ -219,5 +227,8 @@ const styles = StyleSheet.create({
   },
   aboutText: {
     marginBottom: theme.SPACING.sm,
+  },
+  profileButton: {
+    marginBottom: theme.SPACING.md,
   },
 }); 

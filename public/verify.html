@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Glow - Email Verification</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+      background-color: #1c0e2d;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      text-align: center;
+    }
+    .container {
+      max-width: 500px;
+      padding: 2rem;
+      background-color: rgba(38, 20, 60, 0.85);
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(65, 105, 225, 0.3);
+    }
+    h1 {
+      color: #4169e1;
+      margin-bottom: 1rem;
+    }
+    p {
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+    .button {
+      display: inline-block;
+      background-color: #4169e1;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: bold;
+      margin-top: 1rem;
+      transition: background-color 0.3s;
+    }
+    .button:hover {
+      background-color: #3a5fcd;
+    }
+    .loader {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top: 4px solid #4169e1;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Daily Glow Email Verification</h1>
+    <div id="loading">
+      <p>Verifying your email address...</p>
+      <div class="loader"></div>
+    </div>
+    <div id="success" style="display: none;">
+      <p>Your email has been successfully verified!</p>
+      <p>You can now return to the app and enjoy all features of Daily Glow.</p>
+      <a href="daily-glow://confirm-email" class="button">Open Daily Glow App</a>
+    </div>
+    <div id="error" style="display: none;">
+      <p>There was an issue verifying your email address.</p>
+      <p>Please try again or contact support if the problem persists.</p>
+      <a href="daily-glow://confirm-email" class="button">Return to App</a>
+    </div>
+  </div>
+
+  <script>
+    // Function to get URL parameters
+    function getUrlParams() {
+      const params = {};
+      const queryString = window.location.search.substring(1);
+      const pairs = queryString.split('&');
+      
+      for (const pair of pairs) {
+        const [key, value] = pair.split('=');
+        params[decodeURIComponent(key)] = decodeURIComponent(value || '');
+      }
+      
+      return params;
+    }
+
+    // Handle the verification
+    document.addEventListener('DOMContentLoaded', function() {
+      const params = getUrlParams();
+      const token = params.token;
+      
+      if (token) {
+        // Show success and redirect after a short delay
+        setTimeout(function() {
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('success').style.display = 'block';
+          
+          // Attempt to redirect to the app
+          setTimeout(function() {
+            window.location.href = 'daily-glow://confirm-email?token=' + token;
+          }, 1500);
+        }, 2000);
+      } else {
+        // Show error if no token
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('error').style.display = 'block';
+      }
+    });
+  </script>
+</body>
+</html> 
