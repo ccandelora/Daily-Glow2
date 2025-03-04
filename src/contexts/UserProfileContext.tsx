@@ -29,6 +29,7 @@ export interface UserProfile {
   streak: number;
   last_check_in: string | null;
   points: number;
+  has_completed_onboarding: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -83,6 +84,7 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ c
           streak: 0,
           last_check_in: null,
           points: 0,
+          has_completed_onboarding: false,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
@@ -109,7 +111,8 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ c
             avatar_url: null,
             streak: 0,
             last_check_in: null,
-            points: 0
+            points: 0,
+            has_completed_onboarding: false
           };
           
           const { data: createdProfile, error: createError } = await supabase
@@ -154,6 +157,8 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ c
     if (!user) return;
 
     try {
+      console.log('Updating profile with:', updates);
+      
       // First check if the profiles table exists
       const { error: tableCheckError } = await supabase
         .from('profiles')
@@ -175,12 +180,19 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ c
       }
       
       // If the table exists, proceed with the normal update
-      const { error } = await supabase
+      console.log('Updating profile in database for user:', user.id);
+      const { data, error } = await supabase
         .from('profiles')
         .update(updates)
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error in updateProfile:', error);
+        throw error;
+      }
+      
+      console.log('Profile update result:', data);
       
       // Refresh profile after update
       await fetchProfile();

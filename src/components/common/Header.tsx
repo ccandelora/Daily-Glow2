@@ -27,11 +27,11 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <View style={[
       styles.container,
-      { paddingTop: Math.max(insets.top, theme.SPACING.md) }
+      { paddingTop: insets.top > 0 ? insets.top + 15 : theme.SPACING.md }
     ]}>
       {showBranding && (
         <View style={styles.branding}>
-          <Logo size="large" showText={false} />
+          <Logo size="xxlarge" showText={false} />
         </View>
       )}
       
@@ -87,18 +87,21 @@ export const Header: React.FC<HeaderProps> = ({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'transparent',
-    paddingBottom: theme.SPACING.xs,
+    paddingBottom: 0,
+    marginTop: -15,
+    paddingTop: 10,
   },
   branding: {
     alignItems: 'center',
-    marginBottom: theme.SPACING.xs,
+    marginBottom: -10,
     paddingHorizontal: theme.SPACING.lg,
+    marginTop: 0,
   },
   content: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: theme.SPACING.lg,
-    minHeight: 44,
+    minHeight: 30,
   },
   backButton: {
     marginRight: theme.SPACING.sm,

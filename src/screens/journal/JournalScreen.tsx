@@ -342,7 +342,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: theme.SPACING.md,
-    paddingTop: theme.SPACING.md,
+    paddingTop: 0,
   },
   title: {
     fontSize: 32,

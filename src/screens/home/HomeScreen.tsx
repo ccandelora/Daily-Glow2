@@ -206,12 +206,6 @@ export default function HomeScreen() {
           style={StyleSheet.flatten([styles.checkInCard, styles.challengeCard])} 
           variant="glow"
         >
-          <Typography variant="h2" style={styles.cardTitle} glow="medium">
-            Daily Challenge
-          </Typography>
-          <Typography variant="body" style={styles.cardDescription}>
-            Complete daily challenges to earn points
-          </Typography>
           <DailyChallenge />
         </Card>
 
@@ -305,22 +299,27 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingBottom: theme.SPACING.xl,
+    paddingTop: 0,
+    marginTop: -20,
   },
   greetingSection: {
     paddingHorizontal: theme.SPACING.lg,
     marginBottom: theme.SPACING.md,
+    marginTop: -25,
   },
   greeting: {
-    marginBottom: theme.SPACING.xs,
+    marginBottom: 0,
     textAlign: 'center',
   },
   dateText: {
     textAlign: 'center',
     fontSize: theme.FONTS.sizes.lg,
+    marginBottom: theme.SPACING.sm,
   },
   checkInCard: {
     marginHorizontal: theme.SPACING.lg,
     marginBottom: theme.SPACING.md,
+    marginTop: theme.SPACING.sm,
     padding: theme.SPACING.lg,
     backgroundColor: 'rgba(38, 20, 60, 0.85)',
   },

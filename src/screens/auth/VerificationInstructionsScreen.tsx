@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView, Linking } from 'react-native';
+import { View, StyleSheet, ScrollView, Linking, Platform } from 'react-native';
 import { Typography, Button, VideoBackground, Logo, Card } from '@/components/common';
 import { useRouter } from 'expo-router';
 import theme from '@/constants/theme';
@@ -23,7 +23,8 @@ export const VerificationInstructionsScreen = () => {
   };
 
   const handleContinue = () => {
-    router.replace('/(onboarding)/welcome');
+    console.log('Continuing to onboarding...');
+    router.replace('/welcome-direct');
   };
 
   return (
@@ -43,7 +44,7 @@ export const VerificationInstructionsScreen = () => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
           <View style={styles.logoContainer}>
-            <Logo size="large" />
+            <Logo size="xxlarge" showText={false} />
           </View>
 
           <Typography variant="h1" style={styles.title} glow="strong">
@@ -142,36 +143,23 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    padding: theme.SPACING.xl,
-    paddingTop: theme.SPACING.xl * 2,
-    paddingBottom: theme.SPACING.xl * 2,
+    padding: theme.SPACING.lg,
+    paddingTop: Platform.OS === 'ios' ? 15 : 10,
+    paddingBottom: theme.SPACING.xl,
   },
   logoContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: 'rgba(65, 105, 225, 0.15)',
+    marginBottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: theme.SPACING.xl,
-    borderWidth: 2,
-    borderColor: theme.COLORS.ui.accent,
-    shadowColor: theme.COLORS.ui.accent,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 16,
-    elevation: 8,
+    marginTop: -10,
   },
   title: {
     textAlign: 'center',
-    marginBottom: theme.SPACING.md,
+    marginBottom: 0,
     color: theme.COLORS.ui.text,
-    fontSize: theme.FONTS.sizes.xxxl,
-    textShadowColor: theme.COLORS.ui.accent,
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 8,
+    fontSize: theme.FONTS.sizes.xxl,
   },
   subtitle: {
     textAlign: 'center',
@@ -179,13 +167,14 @@ const styles = StyleSheet.create({
     maxWidth: '90%',
     lineHeight: 24,
     fontSize: theme.FONTS.sizes.md,
-    marginBottom: theme.SPACING.xl,
+    marginBottom: theme.SPACING.sm,
+    marginTop: 5,
   },
   instructionsCard: {
     width: '100%',
     padding: theme.SPACING.lg,
     backgroundColor: 'rgba(38, 20, 60, 0.85)',
-    marginBottom: theme.SPACING.xl,
+    marginBottom: theme.SPACING.md,
   },
   stepContainer: {
     flexDirection: 'row',

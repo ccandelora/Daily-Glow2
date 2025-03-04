@@ -42,6 +42,12 @@ function OnboardingStack() {
           }}
         />
         <Stack.Screen
+          name="challenges"
+          options={{
+            animation: 'slide_from_right',
+          }}
+        />
+        <Stack.Screen
           name="first-check-in"
           options={{
             animation: 'slide_from_right',

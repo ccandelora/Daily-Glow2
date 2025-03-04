@@ -21,7 +21,7 @@ type ProfileTab = 'achievements' | 'badges' | 'streaks';
 
 export const AchievementsScreen: React.FC = () => {
   const router = useRouter();
-  const { userBadges } = useBadges();
+  const { userBadges, refreshBadges, getBadgeCount } = useBadges();
   const { userStats, refreshDailyChallenge } = useChallenges();
   const { userProfile, refreshProfile } = useProfile();
   const { streaks, refreshStreaks } = useCheckInStreak();
@@ -30,16 +30,37 @@ export const AchievementsScreen: React.FC = () => {
   const [activeTab, setActiveTab] = useState<ProfileTab>('achievements');
   const [totalPoints, setTotalPoints] = useState(0);
   const [currentStreak, setCurrentStreak] = useState(0);
+  const [badgeCount, setBadgeCount] = useState(0);
   
   // Animation values
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const slideAnim = React.useRef(new Animated.Value(50)).current;
 
+  // Add a ref to track if we're currently refreshing
+  const isRefreshingRef = React.useRef(false);
+
   // Fetch the most up-to-date data
   const fetchLatestData = async () => {
     if (!user) return;
     
+    // Prevent multiple refreshes in quick succession
+    if (isRefreshingRef.current) {
+      console.log('Already refreshing data, skipping duplicate refresh');
+      return;
+    }
+    
     try {
+      isRefreshingRef.current = true;
+      console.log('Fetching latest data for achievements screen');
+      
+      // Refresh badges data
+      await refreshBadges();
+      
+      // Get badge count directly from the database
+      const count = await getBadgeCount();
+      console.log('Direct badge count from context:', count);
+      setBadgeCount(count);
+      
       // Refresh profile data
       await refreshProfile();
       
@@ -129,12 +150,19 @@ export const AchievementsScreen: React.FC = () => {
       console.log('- Calculated streak:', calculatedStreak);
     } catch (error) {
       console.error('Error fetching latest data:', error);
+    } finally {
+      // Reset the refreshing flag
+      isRefreshingRef.current = false;
     }
   };
 
-  // Get badges count
-  const badgesCount = React.useMemo(() => {
-    return userBadges?.length || 0;
+  // Log badge count changes separately
+  useEffect(() => {
+    console.log('User badges updated:', userBadges?.length || 0);
+    // Update badge count if userBadges changes and has items
+    if (userBadges && userBadges.length > 0) {
+      setBadgeCount(userBadges.length);
+    }
   }, [userBadges]);
 
   // Use useFocusEffect to refresh data when screen comes into focus
@@ -173,12 +201,27 @@ export const AchievementsScreen: React.FC = () => {
     }
   }, [userStats]);
 
+  // Callback function to update badge count directly from BadgesTab
+  const updateBadgeCount = useCallback((count: number) => {
+    console.log('Updating badge count from BadgesTab:', count);
+    setBadgeCount(count);
+  }, []);
+
+  // Update the UI when activeTab changes
+  useEffect(() => {
+    // When badges tab is selected, ensure the badge count is updated
+    if (activeTab === 'badges' && userBadges && userBadges.length > 0) {
+      console.log('Badge tab selected, updating badge count from userBadges:', userBadges.length);
+      setBadgeCount(userBadges.length);
+    }
+  }, [activeTab, userBadges]);
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'achievements':
         return <AchievementsTab />;
       case 'badges':
-        return <BadgesTab />;
+        return <BadgesTab updateParentBadgeCount={updateBadgeCount} />;
       case 'streaks':
         return <StreaksTab />;
       default:
@@ -223,7 +266,7 @@ export const AchievementsScreen: React.FC = () => {
               
               <View style={styles.statItem}>
                 <Typography variant="h3" style={styles.statValue} color={theme.COLORS.primary.green}>
-                  {badgesCount}
+                  {badgeCount}
                 </Typography>
                 <Typography variant="caption" style={styles.statLabel}>
                   Badges
@@ -317,6 +360,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     marginBottom: theme.SPACING.md,
     color: theme.COLORS.ui.text,
+    paddingTop: 0,
   },
   statsCard: {
     marginBottom: theme.SPACING.md,

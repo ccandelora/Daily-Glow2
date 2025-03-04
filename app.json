@@ -56,14 +56,21 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-router",
+      [
+        "expo-router",
+        {
+          "origin": "daily-glow://"
+        }
+      ],
       "expo-secure-store",
       "expo-video"
     ],
     "newArchEnabled": true,
     "extra": {
       "router": {
-        "origin": false
+        "origin": false,
+        "developerTools": true,
+        "unstable_forceSSR": false 
       },
       "eas": {
         "projectId": "dailyglow"
@@ -75,6 +82,20 @@
     },
     "updates": {
       "url": "https://u.expo.dev/dailyglow"
+    },
+    "experiments": {
+      "tsconfigPaths": true
+    },
+    "hooks": {
+      "postPublish": [
+        {
+          "file": "sentry-expo/upload-sourcemaps",
+          "config": {
+            "organization": "dailyglow",
+            "project": "daily-glow"
+          }
+        }
+      ]
     }
   }
 }

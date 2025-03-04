@@ -6,6 +6,7 @@ import { useAppState } from '@/contexts/AppStateContext';
 import { useAuth } from '@/contexts/AuthContext';
 import theme from '@/constants/theme';
 import { useRouter } from 'expo-router';
+import DebugTools from '@/components/debug/DebugTools';
 
 export const SettingsScreen = () => {
   const router = useRouter();
@@ -14,6 +15,7 @@ export const SettingsScreen = () => {
   const { signOut } = useAuth();
   const [notifications, setNotifications] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
+  const [showDebugTools, setShowDebugTools] = useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -60,6 +62,11 @@ export const SettingsScreen = () => {
         },
       ]
     );
+  };
+
+  // Toggle debug tools with 5 taps on version number
+  const handleVersionPress = () => {
+    setShowDebugTools(prev => !prev);
   };
 
   return (
@@ -157,7 +164,10 @@ export const SettingsScreen = () => {
             <Typography variant="h3" style={styles.sectionTitle}>
               About
             </Typography>
-            <Typography style={styles.aboutText}>
+            <Typography 
+              style={styles.aboutText}
+              onPress={handleVersionPress}
+            >
               Daily Glow v1.0.0
             </Typography>
             <Typography
@@ -168,6 +178,10 @@ export const SettingsScreen = () => {
               © 2023 Daily Glow
             </Typography>
           </Card>
+          
+          {showDebugTools && (
+            <DebugTools />
+          )}
         </View>
       </ScrollView>
     </View>

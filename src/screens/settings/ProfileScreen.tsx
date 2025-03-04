@@ -4,12 +4,15 @@ import { Typography, Card, Button, Header, VideoBackground, EmailVerificationBan
 import theme from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppState } from '@/contexts/AppStateContext';
+import { useRouter } from 'expo-router';
 
 const ProfileScreen = () => {
   const { user, signOut, isEmailVerified, resendVerificationEmail } = useAuth();
   const { showError } = useAppState();
+  const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
   const [displayName, setDisplayName] = useState('Jane Doe');
+  const [debugTapCount, setDebugTapCount] = useState(0);
 
   const handleLogout = async () => {
     try {
@@ -26,6 +29,17 @@ const ProfileScreen = () => {
       } catch (error) {
         // Error is already handled in AuthContext
       }
+    }
+  };
+  
+  const handleDebugTap = () => {
+    const newCount = debugTapCount + 1;
+    setDebugTapCount(newCount);
+    
+    if (newCount >= 7) {
+      // Reset counter and navigate to debug menu
+      setDebugTapCount(0);
+      router.push('/debug');
     }
   };
 
@@ -50,10 +64,13 @@ const ProfileScreen = () => {
           {/* Profile Header */}
           <Card style={styles.profileCard}>
             <View style={styles.profileHeader}>
-              <Image 
-                source={{ uri: 'https://via.placeholder.com/150' }} 
-                style={styles.profileImage} 
-              />
+              <TouchableOpacity onPress={handleDebugTap}>
+                <View style={styles.avatar}>
+                  <Typography variant="h3" style={styles.avatarText}>
+                    {user?.email ? user.email.charAt(0).toUpperCase() : 'U'}
+                  </Typography>
+                </View>
+              </TouchableOpacity>
               <View style={styles.profileInfo}>
                 {isEditing ? (
                   <TextInput
@@ -115,7 +132,7 @@ const ProfileScreen = () => {
           <Card style={styles.aboutCard}>
             <View style={styles.aboutHeader}>
               <Image 
-                source={require('@/assets/default_transparent_353x345.png')}
+                source={require('@/assets/default_transparent_765x625.png')}
                 style={styles.logo}
                 resizeMode="contain"
               />
@@ -168,6 +185,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     marginBottom: theme.SPACING.md,
     color: theme.COLORS.ui.text,
+    paddingTop: 0,
   },
   profileCard: {
     marginBottom: theme.SPACING.md,
@@ -179,11 +197,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: theme.SPACING.md,
   },
-  profileImage: {
+  avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
+    backgroundColor: theme.COLORS.primary.purple,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: theme.COLORS.ui.accent,
     marginRight: theme.SPACING.md,
+  },
+  avatarText: {
+    color: 'white',
+    fontSize: 40,
+    fontWeight: 'bold',
   },
   profileInfo: {
     flex: 1,

@@ -1,25 +1,119 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { Typography, Card } from '@/components/common';
-import { useBadges, UserBadge } from '@/contexts/BadgeContext';
+import { useBadges, UserBadge, Badge } from '@/contexts/BadgeContext';
 import { FontAwesome6 } from '@expo/vector-icons';
 import theme from '@/constants/theme';
 import { useRouter } from 'expo-router';
+import { supabase } from '@/lib/supabase';
 
 export const RecentBadges = () => {
-  const { userBadges, badges, refreshBadges } = useBadges();
+  const { userBadges, badges, refreshBadges, isLoading } = useBadges();
+  const [localBadges, setLocalBadges] = useState<UserBadge[]>([]);
   const router = useRouter();
   
   useEffect(() => {
-    refreshBadges();
+    console.log('RecentBadges component mounted, refreshing badges...');
+    
+    const loadBadges = async () => {
+      try {
+        // First try to refresh badges through the context
+        await refreshBadges();
+        
+        console.log(`RecentBadges: After refresh - Found ${userBadges.length} user badges`);
+        if (userBadges.length > 0) {
+          console.log('User badges available:', userBadges.map(ub => 
+            `${ub.badge?.name || 'Unknown'} (ID: ${ub.badge_id})`
+          ).join(', '));
+          setLocalBadges(userBadges);
+        } else {
+          console.log('No user badges available after refresh, trying direct database query');
+          
+          // If no badges found, try to fetch directly from the database
+          const { data: user } = await supabase.auth.getUser();
+          if (user && user.user) {
+            const userId = user.user.id;
+            console.log(`Fetching badges directly for user: ${userId}`);
+            
+            const { data: directBadges, error: directError } = await supabase
+              .from('user_badges')
+              .select('id, badge_id, created_at, user_id')
+              .eq('user_id', userId);
+              
+            if (directError) {
+              console.error('Error fetching user badges directly:', directError);
+            } else if (directBadges && directBadges.length > 0) {
+              console.log(`Found ${directBadges.length} user badges directly`);
+              
+              // Now fetch the badge details for each badge
+              const badgePromises = directBadges.map(async (userBadge) => {
+                const { data: badgeData, error: badgeError } = await supabase
+                  .from('badges')
+                  .select('*')
+                  .eq('id', userBadge.badge_id)
+                  .single();
+                  
+                if (badgeError) {
+                  console.error(`Error fetching badge details for badge_id ${userBadge.badge_id}:`, badgeError);
+                  return { ...userBadge, badge: null };
+                }
+                
+                return { ...userBadge, badge: badgeData };
+              });
+              
+              const userBadgesWithDetails = await Promise.all(badgePromises);
+              console.log(`Fetched details for ${userBadgesWithDetails.filter(ub => ub.badge).length} badges`);
+              
+              setLocalBadges(userBadgesWithDetails);
+            } else {
+              console.log('No user badges found directly');
+              setLocalBadges([]);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error loading badges:', error);
+      }
+    };
+    
+    loadBadges();
   }, []);
   
+  // Update local badges when userBadges changes
+  useEffect(() => {
+    if (userBadges.length > 0) {
+      console.log(`RecentBadges: userBadges updated - Found ${userBadges.length} user badges`);
+      setLocalBadges(userBadges);
+    }
+  }, [userBadges]);
+  
   // Get the most recent 3 badges
-  const recentBadges = [...userBadges]
+  const recentBadges = [...localBadges]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 3);
   
+  console.log(`RecentBadges: Displaying ${recentBadges.length} recent badges`);
+  
+  if (isLoading) {
+    return (
+      <Card style={styles.container} variant="glow">
+        <View style={styles.header}>
+          <Typography variant="h3" style={styles.title} glow="soft">
+            Recent Badges
+          </Typography>
+        </View>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="small" color={theme.COLORS.primary.blue} />
+          <Typography variant="caption" style={styles.loadingText}>
+            Loading badges...
+          </Typography>
+        </View>
+      </Card>
+    );
+  }
+  
   if (recentBadges.length === 0) {
+    console.log('RecentBadges: No badges to display, returning null');
     return null; // Don't show anything if there are no badges
   }
   
@@ -30,6 +124,8 @@ export const RecentBadges = () => {
       case 'advanced': return 'award';
       case 'expert': return 'medal';
       case 'master': return 'gem';
+      case 'completion': return 'medal'; // Added for completion badges like Welcome Badge
+      case 'streak': return 'fire'; // Added for streak badges
       default: return 'star';
     }
   };
@@ -41,6 +137,8 @@ export const RecentBadges = () => {
       case 'advanced': return theme.COLORS.primary.purple;
       case 'expert': return theme.COLORS.primary.orange;
       case 'master': return theme.COLORS.primary.yellow;
+      case 'completion': return theme.COLORS.primary.green; // Added for completion badges
+      case 'streak': return theme.COLORS.primary.orange; // Added for streak badges
       default: return theme.COLORS.primary.green;
     }
   };
@@ -53,7 +151,7 @@ export const RecentBadges = () => {
         </Typography>
         <TouchableOpacity 
           style={styles.viewAllButton}
-          onPress={() => router.push('/(app)/settings')}
+          onPress={() => router.push('/(app)/profile')}
         >
           <Typography variant="caption" color={theme.COLORS.primary.blue}>
             View All
@@ -67,8 +165,13 @@ export const RecentBadges = () => {
         contentContainerStyle={styles.badgesContainer}
       >
         {recentBadges.map(userBadge => {
-          const badge = badges.find(b => b.id === userBadge.badge_id);
-          if (!badge) return null;
+          const badge = userBadge.badge || badges.find(b => b.id === userBadge.badge_id);
+          if (!badge) {
+            console.log(`RecentBadges: Could not find badge with ID ${userBadge.badge_id}`);
+            return null;
+          }
+          
+          console.log(`RecentBadges: Rendering badge ${badge.name} (${badge.category})`);
           
           return (
             <View key={userBadge.id} style={styles.badgeItem}>
@@ -147,5 +250,14 @@ const styles = StyleSheet.create({
   badgeDate: {
     textAlign: 'center',
     fontSize: 10,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: theme.SPACING.md,
+  },
+  loadingText: {
+    marginTop: theme.SPACING.xs,
+    color: theme.COLORS.ui.textSecondary,
   },
 }); 

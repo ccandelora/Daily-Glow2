@@ -35,7 +35,8 @@ export const EmailVerificationSuccessScreen = () => {
   }, []);
 
   const handleContinue = () => {
-    router.replace('/(onboarding)/welcome');
+    console.log('Verification successful, navigating to onboarding...');
+    router.replace('/welcome-direct');
   };
 
   const handleRetry = async () => {
@@ -67,7 +68,7 @@ export const EmailVerificationSuccessScreen = () => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.content}>
           <View style={styles.logoContainer}>
-            <Logo size="large" />
+            <Logo size="xxlarge" showText={false} />
           </View>
 
           {isVerifying ? (
@@ -145,7 +146,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: theme.SPACING.xl,
-    paddingTop: theme.SPACING.xl * 2,
+    paddingTop: theme.SPACING.xl,
     paddingBottom: theme.SPACING.xl * 2,
   },
   logoContainer: {
@@ -155,7 +156,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(65, 105, 225, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: theme.SPACING.xl,
+    marginBottom: 0,
     borderWidth: 2,
     borderColor: theme.COLORS.ui.accent,
     shadowColor: theme.COLORS.ui.accent,
@@ -166,7 +167,7 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: 'center',
-    marginBottom: theme.SPACING.md,
+    marginBottom: 0,
     color: theme.COLORS.ui.text,
     fontSize: theme.FONTS.sizes.xxxl,
     textShadowColor: theme.COLORS.ui.accent,
@@ -179,7 +180,8 @@ const styles = StyleSheet.create({
     maxWidth: '90%',
     lineHeight: 24,
     fontSize: theme.FONTS.sizes.md,
-    marginBottom: theme.SPACING.xl,
+    marginBottom: theme.SPACING.lg,
+    marginTop: 5,
   },
   buttonContainer: {
     width: '100%',

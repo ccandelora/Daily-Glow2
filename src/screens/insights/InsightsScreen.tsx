@@ -725,6 +725,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     marginBottom: theme.SPACING.md,
     color: theme.COLORS.ui.text,
+    paddingTop: 0,
   },
   filterContainer: {
     flexDirection: 'row',

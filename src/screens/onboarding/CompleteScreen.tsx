@@ -115,9 +115,9 @@ export const CompleteScreen = () => {
       // Longer delay to ensure AsyncStorage is updated
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      console.log('Attempting navigation to /(app)');
+      console.log('Attempting navigation to /app');
       // Navigate to the app group
-      router.replace('/(app)');
+      router.replace('app');
     } catch (error: unknown) {
       console.error('Navigation error:', error);
       if (error instanceof Error) {
@@ -163,7 +163,7 @@ export const CompleteScreen = () => {
 
         <Typography variant="body" style={styles.subtitle} glow="medium">
           Congratulations on taking the first step towards better emotional well-being! 
-          Your daily check-ins will help you understand yourself better and cultivate gratitude.
+          Your daily check-ins and completed challenges will help you understand yourself better, earn rewards, and cultivate mindfulness.
         </Typography>
       </Animated.View>
 

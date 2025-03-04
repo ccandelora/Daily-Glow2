@@ -66,7 +66,7 @@ export const PurposeScreen = () => {
 
   const handleContinue = () => {
     if (selectedPurpose) {
-      router.push('/(onboarding)/setup');
+      router.push('/setup');
     }
   };
 

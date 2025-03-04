@@ -276,7 +276,7 @@ export const CheckInScreen = () => {
                     style={styles.button}
                   />
                   <Button
-                    title="Complete Check-in"
+                    title="Check In"
                     onPress={handleSubmit}
                     variant="primary"
                     style={styles.button}

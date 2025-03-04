@@ -34,7 +34,7 @@ export const ManualVerification = () => {
         Alert.alert(
           'Verification Successful',
           'Your email has been verified successfully!',
-          [{ text: 'OK', onPress: () => router.replace('/') }]
+          [{ text: 'OK', onPress: () => router.replace('app') }]
         );
       } else {
         console.error('Email verification failed');

@@ -1,6 +1,6 @@
-import React, { useEffect, useCallback } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import React, { useEffect } from 'react';
+import { View, StyleSheet, Text, Platform } from 'react-native';
+import { Stack, useRouter, useSegments, usePathname } from 'expo-router';
 import '@/utils/cryptoPolyfill';
 import { AppStateProvider } from '@/contexts/AppStateContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
@@ -8,138 +8,207 @@ import { JournalProvider } from '@/contexts/JournalContext';
 import { ChallengesProvider } from '@/contexts/ChallengesContext';
 import { NotificationsProvider } from '@/contexts/NotificationsContext';
 import { OnboardingProvider, useOnboarding } from '@/contexts/OnboardingContext';
-import { BadgeProvider, useBadges } from '@/contexts/BadgeContext';
-import { CheckInStreakProvider, CheckInStreak } from '@/contexts/CheckInStreakContext';
-import { LoadingOverlay, DeepLinkHandler } from '@/components/common';
-import { BadgeService } from '@/services/BadgeService';
-import * as Linking from 'expo-linking';
-import { supabase } from '@/lib/supabase';
-import { extractTokenFromUrl, verifyEmailWithToken } from '@/utils/authUtils';
-import { useAppState } from '@/contexts/AppStateContext';
+import { BadgeProvider } from '@/contexts/BadgeContext';
+import { CheckInStreakProvider } from '@/contexts/CheckInStreakContext';
+import { LoadingOverlay, DeepLinkHandler, ErrorBoundary } from '@/components/common';
+import { isDevelopment, isDevelopmentUrl } from '@/utils/developmentUtils';
+import { RouteHandler } from '@/utils/routeUtils';
+import { useLinkingFix } from '@/utils/linkingFix';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ThemeProvider } from '@/contexts/ThemeContext';
+import { StatusBar } from 'expo-status-bar';
+import { SplashScreen } from '@/components/SplashScreen';
+import { DevRouteHandler } from '@/utils/devRouteUtils';
+import { Redirect } from 'expo-router';
 
-// Create a wrapper component to handle streak updates with badge context
-function CheckInStreakWithBadges({ children }: { children: React.ReactNode }) {
-  const { addUserBadge, isLoading } = useBadges();
+// Auth middleware component that manages navigation based on auth state
+function AuthMiddleware({ children }: { children: React.ReactNode }) {
+  const { user, isLoading, isEmailVerified } = useAuth();
+  const { hasCompletedOnboarding, checkDatabaseOnboardingStatus } = useOnboarding();
+  const segments = useSegments();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const isDevUrl = isDevelopmentUrl(pathname);
   
-  const handleStreakUpdated = useCallback(async (
-    streaks: CheckInStreak, 
-    isFirstCheckIn: boolean, 
-    allPeriodsCompleted: boolean
-  ) => {
-    // Skip badge processing if badges are still loading
-    if (isLoading) {
-      console.log('Badges still loading, skipping badge processing');
+  // For debugging
+  useEffect(() => {
+    if (segments.length && (segments[0]?.startsWith('--') || pathname.includes('--'))) {
+      console.log('[AuthMiddleware] Development URL detected:', pathname);
+      console.log('[AuthMiddleware] Navigation segments:', segments);
+    }
+  }, [segments, pathname]);
+
+  const checkAuthAndOnboarding = async () => {
+    // Skip navigation checks if we're in a development URL with -- pattern
+    // Let the DevelopmentUrlHandler take care of it instead
+    if (__DEV__ && pathname.includes('--')) {
+      console.log('🔍 DEBUG: Skipping auth navigation for development URL:', pathname);
+      return;
+    }
+
+    // For debugging
+    if (__DEV__) {
+      console.log('🔍 DEBUG: Checking auth and onboarding status');
+      console.log('🔍 DEBUG: Current path:', pathname);
+      console.log('🔍 DEBUG: User:', user ? 'Authenticated' : 'Not authenticated');
+      console.log('🔍 DEBUG: Email verified:', isEmailVerified);
+      console.log('🔍 DEBUG: Onboarding completed:', hasCompletedOnboarding);
+      console.log('🔍 DEBUG: Is loading:', isLoading);
+    }
+
+    if (isLoading) return;
+
+    const appRoute = segments.join('/');
+    
+    if (isDevUrl) {
+      console.log('[AuthMiddleware] Skipping auth check for dev URL:', pathname);
+      return;
+    }
+
+    // Root segment
+    const segment = segments[0] || '';
+    
+    // Check if we're in the protected app area
+    const isAppSegment = segment === 'app';
+    // Check if we're in the auth flow
+    const isAuthSegment = segment === 'auth';
+    // Check if we're in the onboarding flow
+    const isOnboardingSegment = segment === 'onboarding';
+    
+    console.log('Auth state:', { 
+      isAppSegment, 
+      isAuthSegment, 
+      isOnboardingSegment, 
+      user: !!user, 
+      verified: isEmailVerified, 
+      pathname
+    });
+
+    // Not signed in, trying to access protected route, redirect to login
+    if (!user && isAppSegment) {
+      console.log('Redirecting to sign-in: Not authenticated');
+      router.replace('/auth/sign-in');
       return;
     }
     
-    // Award badges based on streak updates
-    if (isFirstCheckIn) {
-      await BadgeService.awardFirstCheckInBadge(addUserBadge);
+    // If user not verified and trying to access the app, redirect to pending verification
+    if (user && !isEmailVerified && isAppSegment) {
+      console.log('Redirecting to pending: Email not verified');
+      router.replace('/auth/pending');
+      return;
     }
     
-    // Check streak badges
-    await BadgeService.checkStreakBadges(streaks, addUserBadge);
-    
-    // Check if all periods were completed
-    if (allPeriodsCompleted) {
-      await BadgeService.checkAllPeriodsCompleted(addUserBadge);
+    // If user is signed in and verified but in auth flow, redirect to app
+    if (user && isEmailVerified && (isAuthSegment || pathname === '/')) {
+      console.log('Redirecting to app: Already authenticated');
+      router.replace('/app');
+      return;
     }
-  }, [addUserBadge, isLoading]);
-  
-  return (
-    <CheckInStreakProvider onStreakUpdated={handleStreakUpdated}>
-      {children}
-    </CheckInStreakProvider>
-  );
-}
 
-function RootLayoutNav() {
-  const { session } = useAuth();
-  const { hasCompletedOnboarding } = useOnboarding();
-  const segments = useSegments();
-  const router = useRouter();
+    // If user hasn't completed onboarding but is trying to access app
+    // This would involve checking a user flag from the database
+    if (user && isEmailVerified && !hasCompletedOnboarding && isAppSegment) {
+      console.log('Redirecting to onboarding: Onboarding not completed');
+      router.replace('/onboarding/welcome');
+      return;
+    }
+  };
 
   useEffect(() => {
-    const inAuthGroup = segments[0] === '(auth)';
-    const inAppGroup = segments[0] === '(app)';
-    const inOnboardingGroup = segments[0] === '(onboarding)';
+    checkAuthAndOnboarding();
+  }, [isLoading, user, segments, pathname, router, isEmailVerified, hasCompletedOnboarding]);
 
-    console.log('Root layout navigation check:', {
-      session: !!session,
-      hasCompletedOnboarding,
-      currentSegment: segments[0],
-      inAuthGroup,
-      inAppGroup,
-      inOnboardingGroup
-    });
+  // Show splash screen while loading
+  if (isLoading) {
+    return <SplashScreen />;
+  }
 
-    if (!session) {
-      // Not authenticated
-      if (!inAuthGroup) {
-        console.log('Not authenticated, redirecting to login');
-        router.replace('/(auth)/login');
-      }
-    } else {
-      // Authenticated
-      if (!hasCompletedOnboarding && !inOnboardingGroup) {
-        console.log('Onboarding incomplete, redirecting to welcome');
-        router.replace('/(onboarding)/welcome');
-      } else if (hasCompletedOnboarding && !inAppGroup) {
-        console.log('Onboarding complete, redirecting to app');
-        router.replace('/(app)');
-      }
-    }
-  }, [session, hasCompletedOnboarding, segments]);
-
-  return (
-    <>
-      <DeepLinkHandler />
-      
-      <Stack
-        screenOptions={{
-          headerShown: false,
-        }}
-      />
-    </>
-  );
+  return <>{children}</>;
 }
 
+// Root layout with all providers
 export default function RootLayout() {
-  const { refreshSession } = useAuth();
-  const { session } = useAuth();
-  const { hasCompletedOnboarding } = useOnboarding();
-  const segments = useSegments();
-  const router = useRouter();
-  const { showError, showSuccess } = useAppState();
-
-  console.log('Root layout rendering');
-
+  const pathname = usePathname();
+  
+  // Special handling for development URLs
+  if (__DEV__ && pathname && pathname.includes('/--/')) {
+    console.log('🔍 ROOT LAYOUT: Development URL detected:', pathname);
+    
+    // Handle the specific problematic URL pattern
+    if (pathname.includes('/--/app')) {
+      console.log('🔍 ROOT LAYOUT: Redirecting /--/app to /app');
+      return <Redirect href="/app" />;
+    }
+    
+    // Handle other development URL patterns
+    const cleanPath = pathname.split('/--/')[1];
+    if (cleanPath) {
+      console.log('🔍 ROOT LAYOUT: Redirecting to:', cleanPath);
+      return <Redirect href={`/${cleanPath}`} />;
+    }
+  }
+  
+  console.log('Root Layout Rendering. Dev mode:', isDevelopment);
+  
   return (
-    <AppStateProvider>
-      <AuthProvider>
-        <OnboardingProvider>
-          <BadgeProvider>
-            <CheckInStreakWithBadges>
-              <JournalProvider>
-                <ChallengesProvider>
-                  <NotificationsProvider>
-                    <View style={styles.container}>
-                      <RootLayoutNav />
-                      <LoadingOverlay />
-                    </View>
-                  </NotificationsProvider>
-                </ChallengesProvider>
-              </JournalProvider>
-            </CheckInStreakWithBadges>
-          </BadgeProvider>
-        </OnboardingProvider>
-      </AuthProvider>
-    </AppStateProvider>
+    <ErrorBoundary>
+      <AppStateProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <OnboardingProvider>
+              <StatusBar style="light" />
+              
+              {/* Development URL Handler */}
+              <DevRouteHandler pathname={pathname} />
+              
+              {/* Global Route Handler Component */}
+              <RouteHandler pathname={pathname} />
+              
+              {/* Authentication Middleware */}
+              <AuthMiddleware>
+                <NotificationsProvider>
+                  <View style={styles.container}>
+                    <Stack screenOptions={{ headerShown: false }}>
+                      <Stack.Screen name="index" />
+                      <Stack.Screen name="app" />
+                      <Stack.Screen name="app/index" />
+                      <Stack.Screen name="auth/sign-in" />
+                      <Stack.Screen name="auth/sign-up" />
+                      <Stack.Screen name="auth/forgot-password" />
+                      <Stack.Screen name="auth/reset-password" />
+                      <Stack.Screen name="auth/pending" />
+                      <Stack.Screen name="onboarding/welcome" />
+                      <Stack.Screen name="onboarding/purpose" />
+                      <Stack.Screen name="onboarding/notifications" />
+                      <Stack.Screen name="onboarding/complete" />
+                      <Stack.Screen name="--" />
+                      <Stack.Screen name="--/app" />
+                      <Stack.Screen name="--/app/index" />
+                      <Stack.Screen name="--/[...route]" />
+                      <Stack.Screen name="--/onboarding/welcome" />
+                      <Stack.Screen name="--_app" />
+                      <Stack.Screen name="[...404]" />
+                    </Stack>
+                  </View>
+                </NotificationsProvider>
+              </AuthMiddleware>
+            </OnboardingProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </AppStateProvider>
+    </ErrorBoundary>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  loadingText: {
+    fontSize: 18,
+    color: '#fff',
+    textAlign: 'center',
+    marginTop: 100,
   },
 }); 

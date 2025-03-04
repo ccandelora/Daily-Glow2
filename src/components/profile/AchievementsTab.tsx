@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 import { Typography, Card } from '@/components/common';
 import { useAchievements } from '@/contexts/AchievementsContext';
@@ -7,10 +7,29 @@ import theme from '@/constants/theme';
 import { FontAwesome6 } from '@expo/vector-icons';
 
 export const AchievementsTab = () => {
-  const { achievements, userAchievements } = useAchievements();
+  const { achievements, userAchievements, refreshAchievements } = useAchievements();
   const { userProfile } = useProfile();
   
   const currentStreak = userProfile?.streak || 0;
+
+  useEffect(() => {
+    console.log('AchievementsTab component mounted, refreshing achievements...');
+    refreshAchievements().then(() => {
+      console.log(`AchievementsTab: After refresh - Found ${userAchievements.length} user achievements`);
+      if (userAchievements.length > 0) {
+        console.log('User achievements available:', userAchievements.map(ua => 
+          `${ua.achievement?.name || 'Unknown'} (ID: ${ua.achievement_id})`
+        ).join(', '));
+      } else {
+        console.log('No user achievements available after refresh');
+      }
+      
+      console.log(`Available achievements: ${achievements.length}`);
+      achievements.forEach(achievement => {
+        console.log(`Achievement: ${achievement.name} (ID: ${achievement.id})`);
+      });
+    });
+  }, []);
 
   const styles = StyleSheet.create({
     container: {
@@ -74,9 +93,32 @@ export const AchievementsTab = () => {
     }
   });
 
+  const getIconName = (iconName: string) => {
+    // Convert icon names that might be from Ionicons to FontAwesome6
+    if (iconName.includes('outline')) {
+      const baseName = iconName.replace('-outline', '');
+      switch (baseName) {
+        case 'trophy': return 'trophy';
+        case 'ribbon': return 'award';
+        case 'star': return 'star';
+        case 'checkmark-circle': return 'check-circle';
+        case 'person': return 'user';
+        default: return 'medal';
+      }
+    }
+    return iconName || 'medal';
+  };
+
   const renderAchievement = (achievement: any, isEarned: boolean) => {
+    if (!achievement) {
+      console.log('Attempted to render undefined achievement');
+      return null;
+    }
+    
+    console.log(`Rendering achievement: ${achievement.name} (${isEarned ? 'earned' : 'not earned'})`);
+    
     const color = isEarned ? theme.COLORS.primary.teal : 'rgba(120, 120, 120, 0.5)';
-    const iconName = achievement.icon_name || 'medal';
+    const iconName = getIconName(achievement.icon_name);
 
     return (
       <Card 
@@ -143,11 +185,20 @@ export const AchievementsTab = () => {
 
   return (
     <ScrollView style={styles.container}>
+      <Typography variant="h3" style={{ marginBottom: 16 }} glow="soft">
+        Your Achievements
+      </Typography>
+      
       {userAchievements.length > 0 ? (
         <View style={styles.achievementsContainer}>
-          {userAchievements.map(ua => 
-            renderAchievement(ua.achievement, true)
-          )}
+          {userAchievements.map(ua => {
+            const achievement = ua.achievement || achievements.find(a => a.id === ua.achievement_id);
+            if (!achievement) {
+              console.log(`Could not find achievement with ID ${ua.achievement_id}`);
+              return null;
+            }
+            return renderAchievement(achievement, true);
+          })}
         </View>
       ) : (
         <View style={styles.emptyContainer}>

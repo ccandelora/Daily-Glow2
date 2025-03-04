@@ -5,6 +5,13 @@ import { useAppState } from './AppStateContext';
 import { Platform } from 'react-native';
 import { BadgeService } from '@/services/BadgeService';
 import { useBadges } from '@/contexts/BadgeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import Constants from 'expo-constants';
+import { useProfile } from './UserProfileContext';
+import * as Linking from 'expo-linking';
+import { getCorrectRoutePath } from '@/utils/urlUtils';
+import { isDevelopment } from '@/utils/developmentUtils';
 
 interface AuthState {
   session: Session | null;
@@ -27,6 +34,9 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Get the onboarding storage key to directly reset it for new users
+const ONBOARDING_STATE_KEY = '@onboarding_state';
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>({
     session: null,
@@ -37,6 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const { showError, showSuccess } = useAppState();
   const { setUserId } = useBadges();
+  const router = useRouter();
 
   // Check if email is verified
   const checkEmailVerification = (user: User | null) => {
@@ -147,16 +158,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signUp = async (email: string, password: string) => {
     try {
       console.log('[AuthContext] Signing up with redirectTo:', redirectUrl);
-        
+      
+      // For development, ensure we're using the correct redirect URL
+      let emailRedirectTo = redirectUrl;
+      
+      // Log the redirect URL for debugging
+      console.log('[AuthContext] Using redirect URL:', emailRedirectTo);
+      
       const { error, data } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: redirectUrl
+          emailRedirectTo
         }
       });
 
       if (error) throw error;
+      
+      console.log('[AuthContext] Sign up successful, user data:', data.user);
+      console.log('[AuthContext] Verification email sent to:', email);
       
       // Remove the attempt to award welcome badge during signup
       // Instead, just log that we'll award it after verification
@@ -164,6 +184,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       showSuccess('Account created! Please check your email for verification. After verifying, come back and sign in.');
     } catch (error) {
+      console.error('[AuthContext] Sign up error:', error);
       showError(error instanceof Error ? error.message : 'Failed to sign up');
       throw error;
     }
@@ -171,102 +192,162 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error, data } = await supabase.auth.signInWithPassword({
+      setState(prev => ({ ...prev, isLoading: true }));
+      console.log('🔍 DEBUG: Starting sign in process for:', email);
+
+      // Attempt to sign in
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('🔍 DEBUG: Sign in error:', error.message);
+        showError(error.message);
+        throw error;
+      }
+
+      // Update session state
+      setState(prev => ({
+        ...prev,
+        session: data.session,
+        user: data.user
+      }));
       
-      // Check if email is verified after sign in
+      // Check if email is verified
       const isVerified = checkEmailVerification(data.user);
       setState(prev => ({
         ...prev,
-        isEmailVerified: isVerified,
+        isEmailVerified: isVerified
       }));
       
+      console.log('🔍 DEBUG: Sign in successful, user data:', JSON.stringify({
+        id: data.user?.id,
+        email: data.user?.email,
+        created_at: data.user?.created_at,
+        last_sign_in_at: data.user?.last_sign_in_at,
+        email_confirmed_at: data.user?.email_confirmed_at
+      }));
+      console.log('🔍 DEBUG: Email verification status:', isVerified);
+      
+      // If email is verified, ensure proper onboarding
       if (isVerified) {
-        // Try to award welcome badge if this is the first sign-in after verification
-        try {
-          console.log('Email verified, checking if welcome badge should be awarded...');
+        console.log('🔍 DEBUG: User authenticated successfully, checking onboarding status');
+        
+        // Check if this is a new user (created within the last 5 minutes)
+        const createdAt = new Date(data.user?.created_at || '').getTime();
+        const lastSignIn = new Date(data.user?.last_sign_in_at || '').getTime();
+        const emailConfirmedAt = new Date(data.user?.email_confirmed_at || '').getTime();
+        const timeDifference = Math.abs(createdAt - lastSignIn);
+        const isNewUser = timeDifference < 300000; // 5 minutes in milliseconds
+        
+        console.log('🔍 DEBUG: User newness check:', {
+          created_at: new Date(createdAt).toISOString(),
+          last_sign_in_at: new Date(lastSignIn).toISOString(),
+          email_confirmed_at: data.user?.email_confirmed_at,
+          timeDifference: `${timeDifference}ms`,
+          isNewUser,
+          isVerified
+        });
+        
+        // Check if the user has completed onboarding
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('has_completed_onboarding')
+          .eq('user_id', data.user?.id)
+          .single();
           
-          // Check if user has any badges
-          const { data: userBadges, error: badgesError } = await supabase
-            .from('user_badges')
-            .select('id')
-            .eq('user_id', data.user.id);
-            
-          if (badgesError) {
-            console.error('Error checking user badges:', badgesError);
-          } else {
-            console.log(`User has ${userBadges?.length || 0} badges`);
-            
-            if (!userBadges || userBadges.length === 0) {
-              console.log('User has no badges, attempting to award welcome badge');
-              
-              // Get the welcome badge ID
-              const { data: badgeData, error: badgeError } = await supabase
-                .from('badges')
-                .select('id, name')
-                .eq('name', 'Welcome Badge')
-                .single();
-                
-              if (badgeError) {
-                console.error('Error finding welcome badge:', badgeError);
-              } else if (badgeData) {
-                console.log(`Found welcome badge: ${badgeData.name} (${badgeData.id})`);
-                
-                // Insert the user badge
-                const { error: insertError } = await supabase
-                  .from('user_badges')
-                  .insert([
-                    { user_id: data.user.id, badge_id: badgeData.id }
-                  ]);
-                  
-                if (insertError) {
-                  if (insertError.code === '23505') {
-                    console.log('User already has the welcome badge (constraint violation)');
-                  } else {
-                    console.error('Error inserting welcome badge:', insertError);
-                  }
-                } else {
-                  console.log('Successfully awarded welcome badge to user after verification');
-                  showSuccess('🏅 Welcome Badge Unlocked!');
-                }
-              } else {
-                console.log('Welcome badge not found in database');
-              }
-            } else {
-              console.log('User already has badges, skipping welcome badge award');
-            }
+        const hasCompletedOnboarding = profileData?.has_completed_onboarding || false;
+        console.log('🔍 DEBUG: Onboarding completion status:', hasCompletedOnboarding);
+        
+        // For new users or users who haven't completed onboarding,
+        // reset onboarding state and direct to onboarding flow
+        if (isNewUser || !hasCompletedOnboarding) {
+          console.log('🔍 DEBUG: User needs to complete onboarding');
+          
+          // Reset onboarding state by clearing the AsyncStorage key
+          await AsyncStorage.removeItem(ONBOARDING_STATE_KEY);
+          
+          // Reset onboarding in database if it's a new user
+          if (isNewUser) {
+            console.log('🔍 DEBUG: New user, resetting onboarding status in database');
+            await supabase
+              .from('profiles')
+              .update({ has_completed_onboarding: false })
+              .eq('user_id', data.user?.id);
           }
-        } catch (badgeError) {
-          console.error('Error awarding welcome badge after verification:', badgeError);
-          // Don't let badge error affect sign-in flow
+          
+          // Set a flag to force navigation to the welcome screen
+          await AsyncStorage.setItem('ONBOARDING_PATH', '/onboarding/welcome');
+          await AsyncStorage.setItem('FORCE_ONBOARDING_NAVIGATION', 'true');
+          
+          // Verify the flags were set
+          const forceNav = await AsyncStorage.getItem('FORCE_ONBOARDING_NAVIGATION');
+          const path = await AsyncStorage.getItem('ONBOARDING_PATH');
+          console.log('🔍 DEBUG: Navigation flags set:', { forceNav, path });
+          
+          try {
+            // Navigate to the onboarding welcome screen
+            console.log('🔍 DEBUG: Navigating to onboarding welcome screen');
+            router.replace('/onboarding/welcome');
+          } catch (error) {
+            console.error('🔍 DEBUG: Navigation error:', error);
+            console.error('Failed to navigate to onboarding. Trying alternative approach...');
+            
+            // Use a timeout as a fallback
+            setTimeout(() => {
+              try {
+                router.replace('/onboarding/welcome');
+              } catch (secondError) {
+                console.error('🔍 DEBUG: Second navigation attempt failed:', secondError);
+                // As a last resort, show success and let the AuthMiddleware handle it
+                showSuccess('Signed in successfully. Please restart the app if you are not redirected.');
+              }
+            }, 300);
+          }
+        } else {
+          // User has already completed onboarding, go to main app
+          console.log('🔍 DEBUG: User has completed onboarding, navigating to app');
+          
+          try {
+            router.replace('/app');
+          } catch (error) {
+            console.error('🔍 DEBUG: Navigation error:', error);
+            
+            // Use a timeout as a fallback
+            setTimeout(() => {
+              try {
+                router.replace('/app');
+              } catch (secondError) {
+                console.error('🔍 DEBUG: Second navigation attempt failed:', secondError);
+              }
+            }, 300);
+          }
+          
+          showSuccess('Signed in successfully!');
         }
       } else {
-        showError('Please verify your email to access all features.');
+        // Email not verified
+        console.log('🔍 DEBUG: User needs to verify email');
+        showError('Please verify your email before signing in.');
       }
     } catch (error) {
-      showError(error instanceof Error ? error.message : 'Failed to sign in');
-      throw error;
+      console.error('🔍 DEBUG: Sign in process error:', error);
+    } finally {
+      setState(prev => ({ ...prev, isLoading: false }));
     }
   };
 
   const resendVerificationEmail = async (email: string) => {
     try {
-      // For mobile, we'll use a custom redirect URL with our app scheme
-      const redirectTo = Platform.OS === 'web' 
-        ? window.location.origin + '/verify-email'
-        : 'daily-glow://confirm-email';
-        
-      console.log('[AuthContext] Resending verification email with redirectTo:', redirectTo);
+      // Use the redirectUrl that's already imported at the top of the file
+      console.log('[AuthContext] Resending verification email with redirectTo:', redirectUrl);
         
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email,
         options: {
-          emailRedirectTo: redirectTo
+          emailRedirectTo: redirectUrl
         }
       });
       
@@ -291,8 +372,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const forgotPassword = async (email: string) => {
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email);
+      console.log('[AuthContext] Sending password reset email with redirectTo:', redirectUrl);
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl
+      });
+      
       if (error) throw error;
+      
+      showSuccess('Password reset email sent! Please check your inbox.');
     } catch (error) {
       showError(error instanceof Error ? error.message : 'Failed to send reset password email');
       throw error;

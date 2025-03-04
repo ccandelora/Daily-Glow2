@@ -178,6 +178,50 @@ We welcome contributions to Daily Glow! Here's how you can help:
 
 ## 🔧 Troubleshooting Guide
 
+### Debugging Tools
+
+We've created several debugging tools to help diagnose and fix issues:
+
+1. **Run with Debug Mode**
+   ```bash
+   # Make the script executable
+   chmod +x run_with_debug.sh
+   
+   # Run the app in debug mode
+   ./run_with_debug.sh
+   ```
+
+2. **Master Debug Script**
+   ```bash
+   # Make the script executable
+   chmod +x debug_all.sh
+   
+   # Run all debugging tools in sequence
+   ./debug_all.sh
+   ```
+
+3. **Individual Debug Scripts**
+   ```bash
+   # Fix onboarding issues
+   node fix_onboarding.js
+   
+   # Reset onboarding for testing
+   node reset_onboarding_for_testing.js
+   
+   # Debug badge issues
+   node debug_badges.js
+   
+   # Fix missing welcome badges
+   node fix_welcome_badges.js
+   ```
+
+4. **In-App Debug Tools**
+   - Go to Settings screen
+   - Tap on the version number
+   - Use the debug options that appear
+
+For detailed documentation on the onboarding system and debugging tools, see [README_ONBOARDING.md](README_ONBOARDING.md).
+
 ### Common Issues
 
 #### Build Errors

@@ -336,50 +336,43 @@ export class BadgeService {
 
   // Check streak counts and award appropriate badges
   public static async checkStreakBadges(streaks: CheckInStreak, addUserBadge: (badgeName: string) => Promise<void>): Promise<void> {
-    try {
-      if (!streaks) {
-        console.log('No streaks data provided, skipping badge check');
-        return;
-      }
-      
-      // Helper function to award badge and handle errors
-      const awardBadge = async (badgeName: string) => {
-        try {
-          await addUserBadge(badgeName);
-        } catch (e) {
-          // Just log the error but don't show to user
-          console.error('Error awarding badge:', e);
-        }
-      };
-      
-      // Check morning streaks
-      const morningStreak = streaks.morning || 0;
-      if (morningStreak >= 3) await awardBadge(BADGE_IDS.STREAKS.MORNING['3']);
-      if (morningStreak >= 7) await awardBadge(BADGE_IDS.STREAKS.MORNING['7']);
-      if (morningStreak >= 14) await awardBadge(BADGE_IDS.STREAKS.MORNING['14']);
-      if (morningStreak >= 30) await awardBadge(BADGE_IDS.STREAKS.MORNING['30']);
-      if (morningStreak >= 60) await awardBadge(BADGE_IDS.STREAKS.MORNING['60']);
-      if (morningStreak >= 90) await awardBadge(BADGE_IDS.STREAKS.MORNING['90']);
-      
-      // Check afternoon streaks
-      const afternoonStreak = streaks.afternoon || 0;
-      if (afternoonStreak >= 3) await awardBadge(BADGE_IDS.STREAKS.AFTERNOON['3']);
-      if (afternoonStreak >= 7) await awardBadge(BADGE_IDS.STREAKS.AFTERNOON['7']);
-      if (afternoonStreak >= 14) await awardBadge(BADGE_IDS.STREAKS.AFTERNOON['14']);
-      if (afternoonStreak >= 30) await awardBadge(BADGE_IDS.STREAKS.AFTERNOON['30']);
-      if (afternoonStreak >= 60) await awardBadge(BADGE_IDS.STREAKS.AFTERNOON['60']);
-      if (afternoonStreak >= 90) await awardBadge(BADGE_IDS.STREAKS.AFTERNOON['90']);
-      
-      // Check evening streaks
-      const eveningStreak = streaks.evening || 0;
-      if (eveningStreak >= 3) await awardBadge(BADGE_IDS.STREAKS.EVENING['3']);
-      if (eveningStreak >= 7) await awardBadge(BADGE_IDS.STREAKS.EVENING['7']);
-      if (eveningStreak >= 14) await awardBadge(BADGE_IDS.STREAKS.EVENING['14']);
-      if (eveningStreak >= 30) await awardBadge(BADGE_IDS.STREAKS.EVENING['30']);
-      if (eveningStreak >= 60) await awardBadge(BADGE_IDS.STREAKS.EVENING['60']);
-      if (eveningStreak >= 90) await awardBadge(BADGE_IDS.STREAKS.EVENING['90']);
-    } catch (error) {
-      console.error('Error checking streak badges:', error);
+    console.log('Checking streak badges with streaks:', streaks);
+    
+    // Check morning streak
+    if (streaks.morning >= 3) {
+      console.log('User has morning streak of 3 or more, awarding Morning Person badge');
+      await addUserBadge('Morning Person');
+    }
+    
+    // Check afternoon streak
+    if (streaks.afternoon >= 3) {
+      console.log('User has afternoon streak of 3 or more, awarding Afternoon Delight badge');
+      await addUserBadge('Afternoon Delight');
+    }
+    
+    // Check evening streak
+    if (streaks.evening >= 3) {
+      console.log('User has evening streak of 3 or more, awarding Night Owl badge');
+      await addUserBadge('Night Owl');
+    }
+    
+    // Check overall streak
+    const totalStreak = Math.max(
+      streaks.morning,
+      streaks.afternoon,
+      streaks.evening
+    );
+    
+    console.log(`User's highest streak is ${totalStreak}`);
+    
+    if (totalStreak >= 7) {
+      console.log('User has streak of 7 or more, awarding Week Warrior badge');
+      await addUserBadge('Week Warrior');
+    }
+    
+    if (totalStreak >= 30) {
+      console.log('User has streak of 30 or more, awarding Monthly Master badge');
+      await addUserBadge('Monthly Master');
     }
   }
 
@@ -481,5 +474,141 @@ export class BadgeService {
 }
 
 export const initializeBadges = async () => {
-  await BadgeService.initializeBadges();
+  try {
+    console.log('Initializing badges...');
+    
+    // Check if badges table exists
+    const { data: tableExists, error: tableError } = await supabase
+      .from('badges')
+      .select('id')
+      .limit(1);
+      
+    if (tableError) {
+      console.error('Error checking badges table:', tableError);
+      return;
+    }
+    
+    // If badges already exist, don't recreate them
+    if (tableExists && tableExists.length > 0) {
+      console.log('Badges already exist, skipping initialization');
+      return;
+    }
+    
+    console.log('Creating badges...');
+    
+    // Define all badges
+    const badges = [
+      // Welcome badge
+      {
+        name: 'Welcome Badge',
+        description: 'Welcome to Daily Glow! You\'ve taken the first step on your wellness journey.',
+        icon_name: 'star',
+        category: 'completion',
+      },
+      
+      // Check-in badges
+      {
+        name: 'First Check-in',
+        description: 'You completed your first check-in. Keep going!',
+        icon_name: 'check',
+        category: 'completion',
+      },
+      {
+        name: 'Morning Person',
+        description: 'Complete 3 morning check-ins in a row.',
+        icon_name: 'sun',
+        category: 'streak',
+      },
+      {
+        name: 'Afternoon Delight',
+        description: 'Complete 3 afternoon check-ins in a row.',
+        icon_name: 'coffee',
+        category: 'streak',
+      },
+      {
+        name: 'Night Owl',
+        description: 'Complete 3 evening check-ins in a row.',
+        icon_name: 'moon',
+        category: 'streak',
+      },
+      
+      // Streak badges
+      {
+        name: 'Week Warrior',
+        description: 'Maintain a 7-day streak in any time period.',
+        icon_name: 'fire',
+        category: 'streak',
+      },
+      {
+        name: 'Monthly Master',
+        description: 'Maintain a 30-day streak in any time period.',
+        icon_name: 'crown',
+        category: 'streak',
+      },
+      
+      // Journal badges
+      {
+        name: 'Reflection Rookie',
+        description: 'Write your first journal entry.',
+        icon_name: 'book',
+        category: 'beginner',
+      },
+      {
+        name: 'Consistent Journaler',
+        description: 'Write 5 journal entries.',
+        icon_name: 'pen',
+        category: 'intermediate',
+      },
+      {
+        name: 'Journaling Pro',
+        description: 'Write 20 journal entries.',
+        icon_name: 'book-open',
+        category: 'advanced',
+      },
+      
+      // Mood tracking badges
+      {
+        name: 'Mood Tracker',
+        description: 'Track your mood for 5 consecutive days.',
+        icon_name: 'smile',
+        category: 'beginner',
+      },
+      {
+        name: 'Emotion Expert',
+        description: 'Track your mood for 15 consecutive days.',
+        icon_name: 'heart',
+        category: 'intermediate',
+      },
+      
+      // Achievement badges
+      {
+        name: 'Goal Setter',
+        description: 'Set your first wellness goal.',
+        icon_name: 'bullseye',
+        category: 'beginner',
+      },
+      {
+        name: 'Goal Achiever',
+        description: 'Complete your first wellness goal.',
+        icon_name: 'trophy',
+        category: 'intermediate',
+      },
+    ];
+    
+    // Insert badges into database
+    for (const badge of badges) {
+      console.log(`Creating badge: ${badge.name}`);
+      const { error } = await supabase
+        .from('badges')
+        .insert([badge]);
+        
+      if (error) {
+        console.error(`Error creating badge ${badge.name}:`, error);
+      }
+    }
+    
+    console.log('Badge initialization complete');
+  } catch (error) {
+    console.error('Error initializing badges:', error);
+  }
 }; 

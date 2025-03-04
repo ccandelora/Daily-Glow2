@@ -30,6 +30,7 @@ interface BadgeContextType {
   refreshBadges: () => Promise<void>;
   isLoading: boolean;
   setUserId: (userId: string | null) => void;
+  getBadgeCount: () => Promise<number>;
 }
 
 const BadgeContext = createContext<BadgeContextType | undefined>(undefined);
@@ -173,20 +174,171 @@ export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         await initializeBadgesTables();
       }
       
+      console.log(`Fetching badges for user: ${userId}`);
+      
+      // First, check if user has any badges directly
+      const { data: directBadges, error: directError } = await supabase
+        .from('user_badges')
+        .select('id, badge_id, created_at, user_id')
+        .eq('user_id', userId);
+        
+      if (directError) {
+        console.error('Error fetching user badges directly:', directError);
+      } else if (directBadges && directBadges.length > 0) {
+        console.log(`Found ${directBadges.length} user badges directly`);
+        
+        // Now fetch the badge details for each badge
+        const badgePromises = directBadges.map(async (userBadge) => {
+          const { data: badgeData, error: badgeError } = await supabase
+            .from('badges')
+            .select('*')
+            .eq('id', userBadge.badge_id)
+            .single();
+            
+          if (badgeError) {
+            console.error(`Error fetching badge details for badge_id ${userBadge.badge_id}:`, badgeError);
+            return { ...userBadge, badge: null };
+          }
+          
+          return { ...userBadge, badge: badgeData };
+        });
+        
+        const userBadgesWithDetails = await Promise.all(badgePromises);
+        console.log(`Fetched details for ${userBadgesWithDetails.filter(ub => ub.badge).length} badges`);
+        
+        // Update the state with the fetched badges - CRITICAL FIX HERE
+        const validBadges = userBadgesWithDetails.filter(ub => ub.badge !== null);
+        console.log(`Setting ${validBadges.length} valid badges to state`);
+        
+        if (validBadges.length > 0) {
+          // Create proper UserBadge objects with all required fields
+          const properUserBadges: UserBadge[] = validBadges.map(badge => ({
+            id: badge.id,
+            created_at: badge.created_at,
+            user_id: badge.user_id,
+            badge_id: badge.badge_id,
+            badge: badge.badge as Badge
+          }));
+          
+          setUserBadges(properUserBadges);
+          console.log(`Successfully set ${properUserBadges.length} badges from direct query`);
+        }
+        
+        // If we successfully found badges directly, don't continue with the join query
+        if (validBadges.length > 0) {
+          setIsLoading(false);
+          return;
+        }
+      }
+      
+      // If no direct badges found or all badge details failed to load, try the join query
+      console.log('Trying join query for badges');
       const { data, error } = await supabase
         .from('user_badges')
         .select('*, badge:badges(*)')
         .eq('user_id', userId);
         
       if (error) {
-        console.error('Error fetching user badges:', error);
-        return;
+        console.error('Error fetching user badges with join:', error);
+        
+        // As a fallback, try to get just the user_badges without the join
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('user_badges')
+          .select('*')
+          .eq('user_id', userId);
+          
+        if (fallbackError) {
+          console.error('Error fetching user badges fallback:', fallbackError);
+          // If we've already set badges from the direct query, don't clear them
+          if (userBadges.length === 0) {
+            setUserBadges([]);
+          }
+        } else if (fallbackData && fallbackData.length > 0) {
+          console.log(`Found ${fallbackData.length} user badges in fallback query`);
+          
+          // If we have fallback data but no badge details, try to fetch them
+          if (fallbackData.length > 0 && userBadges.length === 0) {
+            console.log('Fetching badge details for fallback data');
+            const badgePromises = fallbackData.map(async (userBadge) => {
+              const { data: badgeData, error: badgeError } = await supabase
+                .from('badges')
+                .select('*')
+                .eq('id', userBadge.badge_id)
+                .single();
+                
+              if (badgeError) {
+                console.error(`Error fetching badge details for badge_id ${userBadge.badge_id}:`, badgeError);
+                return { ...userBadge, badge: null };
+              }
+              
+              return { ...userBadge, badge: badgeData };
+            });
+            
+            const userBadgesWithDetails = await Promise.all(badgePromises);
+            console.log(`Fetched details for ${userBadgesWithDetails.filter(ub => ub.badge).length} badges from fallback`);
+            
+            // Update the state with the fetched badges - CRITICAL FIX
+            const validBadges = userBadgesWithDetails.filter(ub => ub.badge !== null);
+            
+            if (validBadges.length > 0) {
+              // Create proper UserBadge objects with all required fields
+              const properUserBadges: UserBadge[] = validBadges.map(badge => ({
+                id: badge.id,
+                created_at: badge.created_at || new Date().toISOString(),
+                user_id: badge.user_id || userId,
+                badge_id: badge.badge_id,
+                badge: badge.badge as Badge
+              }));
+              
+              console.log(`Setting ${properUserBadges.length} valid badges to state from fallback`);
+              setUserBadges(properUserBadges);
+            }
+          } else {
+            // CRITICAL FIX: Don't set badges without proper structure
+            console.log('Not updating state with fallback data as it lacks badge details');
+          }
+        } else {
+          console.log('No user badges found in fallback query');
+          // If we've already set badges from the direct query, don't clear them
+          if (userBadges.length === 0) {
+            setUserBadges([]);
+          }
+        }
+      } else if (data && data.length > 0) {
+        console.log(`Found ${data.length} user badges with join query`);
+        
+        // CRITICAL FIX: Properly format the data from the join query
+        const validBadges = data.filter(item => item.badge !== null);
+        
+        if (validBadges.length > 0) {
+          // Create proper UserBadge objects with all required fields
+          const properUserBadges: UserBadge[] = validBadges.map(badge => ({
+            id: badge.id,
+            created_at: badge.created_at,
+            user_id: badge.user_id,
+            badge_id: badge.badge_id,
+            badge: badge.badge as Badge
+          }));
+          
+          console.log(`Setting ${properUserBadges.length} valid badges to state from join query`);
+          setUserBadges(properUserBadges);
+        } else {
+          console.log('Join query returned data but no valid badges with details');
+          // Don't clear existing badges if we have them
+          if (userBadges.length === 0) {
+            setUserBadges([]);
+          }
+        }
+      } else {
+        console.log('No user badges found with join query');
+        // Don't clear existing badges if we have them
+        if (userBadges.length === 0) {
+          setUserBadges([]);
+        }
       }
       
-      setUserBadges(data || []);
-      
       // Check if user has any badges, if not and they have check-ins, award first badge
-      if (!firstBadgeCheckedRef.current && (!data || data.length === 0)) {
+      if (!firstBadgeCheckedRef.current && (!userBadges || userBadges.length === 0)) {
         firstBadgeCheckedRef.current = true;
         await checkAndAwardFirstBadge();
       }
@@ -194,6 +346,7 @@ export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       console.error('Error fetching user badges:', error.message);
     } finally {
       setIsLoading(false);
+      console.log(`After fetchUserBadges: Found ${userBadges.length} user badges in state`);
     }
   };
   
@@ -244,7 +397,7 @@ export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       );
       
       if (badge) {
-        console.log(`Found Welcome Badge: ${badge.name}`);
+        console.log(`Found Welcome Badge: ${badge.name} (ID: ${badge.id})`);
       } else {
         // If Welcome Badge not found, try to find First Check-in badge
         const firstCheckInBadgeName = 'First Check-in';
@@ -302,7 +455,10 @@ export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           } else {
             console.log(`Successfully added "${badge.name}" badge to user`);
             showSuccess(`🏅 Badge Unlocked: ${badge.name}`);
+            
+            // Explicitly fetch user badges again to ensure the UI updates
             await fetchUserBadges();
+            console.log(`After awarding badge: Found ${userBadges.length} user badges`);
           }
         }
       } catch (awardError) {
@@ -359,13 +515,310 @@ export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const refreshBadges = async () => {
     setIsLoading(true);
     try {
+      console.log('Starting badge refresh process...');
       await fetchBadges();
       await fetchUserBadges();
+      
+      // Force a re-fetch of user badges to ensure we have the latest data
+      if (userId) {
+        console.log('Performing direct badge check...');
+        const { data: directCheck, error: directError } = await supabase
+          .from('user_badges')
+          .select('id, badge_id, created_at, user_id')
+          .eq('user_id', userId);
+          
+        if (directError) {
+          console.error('Error in direct badge check:', directError);
+        } else {
+          console.log(`Direct badge check found ${directCheck?.length || 0} badges`);
+          
+          // If we found badges directly but our state doesn't have them,
+          // update our state with the direct badges
+          if (directCheck && directCheck.length > 0) {
+            if (userBadges.length === 0) {
+              console.log('Discrepancy detected: Direct check found badges but state has none. Forcing refresh...');
+              
+              // Instead of just calling fetchUserBadges, let's directly update our state
+              // with the badges we just found to avoid any race conditions
+              const badgePromises = directCheck.map(async (userBadge) => {
+                const { data: badgeData, error: badgeError } = await supabase
+                  .from('badges')
+                  .select('*')
+                  .eq('id', userBadge.badge_id)
+                  .single();
+                  
+                if (badgeError) {
+                  console.error(`Error fetching badge details for badge_id ${userBadge.badge_id}:`, badgeError);
+                  return { ...userBadge, badge: null };
+                }
+                
+                return { ...userBadge, badge: badgeData };
+              });
+              
+              const userBadgesWithDetails = await Promise.all(badgePromises);
+              console.log(`Fetched details for ${userBadgesWithDetails.filter(ub => ub.badge).length} badges during discrepancy fix`);
+              
+              // CRITICAL FIX: Create proper UserBadge objects and update state
+              const validBadges = userBadgesWithDetails.filter(ub => ub.badge !== null);
+              
+              if (validBadges.length > 0) {
+                // Create proper UserBadge objects with all required fields
+                const properUserBadges: UserBadge[] = validBadges.map(badge => ({
+                  id: badge.id,
+                  created_at: badge.created_at,
+                  user_id: badge.user_id,
+                  badge_id: badge.badge_id,
+                  badge: badge.badge as Badge
+                }));
+                
+                console.log(`Setting ${properUserBadges.length} valid badges to state during discrepancy fix`);
+                setUserBadges(properUserBadges);
+              }
+            } else {
+              // Check if we have any badges in directCheck that aren't in userBadges
+              const missingBadges = directCheck.filter(
+                directBadge => !userBadges.some(ub => ub.badge_id === directBadge.badge_id)
+              );
+              
+              if (missingBadges.length > 0) {
+                console.log(`Found ${missingBadges.length} badges in database that aren't in state, fetching details...`);
+                
+                // Fetch details for missing badges
+                const badgePromises = missingBadges.map(async (userBadge) => {
+                  const { data: badgeData, error: badgeError } = await supabase
+                    .from('badges')
+                    .select('*')
+                    .eq('id', userBadge.badge_id)
+                    .single();
+                    
+                  if (badgeError) {
+                    console.error(`Error fetching badge details for badge_id ${userBadge.badge_id}:`, badgeError);
+                    return { ...userBadge, badge: null };
+                  }
+                  
+                  return { ...userBadge, badge: badgeData };
+                });
+                
+                const missingBadgesWithDetails = await Promise.all(badgePromises);
+                console.log(`Fetched details for ${missingBadgesWithDetails.filter(ub => ub.badge).length} missing badges`);
+                
+                // CRITICAL FIX: Properly format the missing badges before adding to state
+                const validMissingBadges = missingBadgesWithDetails.filter(ub => ub.badge !== null);
+                
+                if (validMissingBadges.length > 0) {
+                  // Create proper UserBadge objects with all required fields
+                  const properMissingBadges: UserBadge[] = validMissingBadges.map(badge => ({
+                    id: badge.id,
+                    created_at: badge.created_at,
+                    user_id: badge.user_id,
+                    badge_id: badge.badge_id,
+                    badge: badge.badge as Badge
+                  }));
+                  
+                  console.log(`Adding ${properMissingBadges.length} missing badges to state`);
+                  
+                  // Update the state with the combined badges
+                  setUserBadges([...userBadges, ...properMissingBadges]);
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      console.log(`After refresh: Found ${userBadges.length} user badges in state`);
+      
+      // If user has no badges, try to award the welcome badge
+      if (userBadges.length === 0) {
+        console.log('No badges found after refresh, attempting to award welcome badge...');
+        await checkAndAwardFirstBadge();
+        // Fetch user badges again after attempting to award welcome badge
+        await fetchUserBadges();
+        console.log(`After welcome badge check: Found ${userBadges.length} user badges`);
+        
+        // If still no badges, try direct insertion
+        if (userBadges.length === 0 && userId) {
+          console.log('Still no badges after welcome badge check, attempting direct insertion...');
+          
+          // Try to use an RPC function first if available (this can bypass RLS)
+          try {
+            console.log('Attempting to award welcome badge via RPC function...');
+            const { data: rpcResult, error: rpcError } = await supabase
+              .rpc('award_welcome_badge', { user_id_param: userId });
+              
+            if (rpcError) {
+              console.log('RPC function not available or failed:', rpcError);
+              // Fall back to direct insertion
+            } else if (rpcResult) {
+              console.log('Successfully awarded welcome badge via RPC function:', rpcResult);
+              
+              // Fetch the badge details to update the state
+              const { data: welcomeBadge, error: welcomeError } = await supabase
+                .from('badges')
+                .select('*')
+                .eq('name', 'Welcome Badge')
+                .single();
+                
+              if (welcomeError) {
+                console.error('Error finding welcome badge:', welcomeError);
+              } else if (welcomeBadge) {
+                // Fetch the user badge record
+                const { data: userBadgeRecord, error: recordError } = await supabase
+                  .from('user_badges')
+                  .select('*')
+                  .eq('user_id', userId)
+                  .eq('badge_id', welcomeBadge.id)
+                  .single();
+                  
+                if (recordError) {
+                  console.error('Error fetching user badge record:', recordError);
+                } else if (userBadgeRecord) {
+                  // Update the state with the welcome badge
+                  setUserBadges([{
+                    ...userBadgeRecord,
+                    badge: welcomeBadge
+                  } as UserBadge]);
+                  
+                  console.log('Updated state with welcome badge from RPC function');
+                  return; // Exit early since we've successfully updated the state
+                }
+              }
+            }
+          } catch (rpcError) {
+            console.error('Error calling RPC function:', rpcError);
+            // Continue with fallback methods
+          }
+          
+          // First check if the user already has the welcome badge to avoid duplicate key error
+          const { data: existingWelcomeBadge, error: existingError } = await supabase
+            .from('user_badges')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('badge_id', '3fb5c984-ff9f-4d13-a1fe-681da56b311d') // Known welcome badge ID
+            .maybeSingle();
+            
+          if (existingError) {
+            console.error('Error checking for existing welcome badge:', existingError);
+          } else if (existingWelcomeBadge) {
+            console.log('User already has welcome badge, updating state...');
+            
+            // Fetch the badge details
+            const { data: welcomeBadgeDetails, error: detailsError } = await supabase
+              .from('badges')
+              .select('*')
+              .eq('id', '3fb5c984-ff9f-4d13-a1fe-681da56b311d')
+              .single();
+              
+            if (detailsError) {
+              console.error('Error fetching welcome badge details:', detailsError);
+            } else if (welcomeBadgeDetails) {
+              // Update the state with the welcome badge
+              setUserBadges([{
+                id: existingWelcomeBadge.id,
+                badge_id: '3fb5c984-ff9f-4d13-a1fe-681da56b311d',
+                user_id: userId,
+                created_at: new Date().toISOString(),
+                badge: welcomeBadgeDetails
+              } as UserBadge]);
+              
+              console.log('Updated state with existing welcome badge');
+            }
+          } else {
+            // Find the welcome badge
+            const { data: welcomeBadge, error: welcomeError } = await supabase
+              .from('badges')
+              .select('id')
+              .eq('name', 'Welcome Badge')
+              .single();
+              
+            if (welcomeError) {
+              console.error('Error finding welcome badge:', welcomeError);
+            } else if (welcomeBadge) {
+              console.log(`Found welcome badge with ID: ${welcomeBadge.id}, inserting directly...`);
+              
+              // Insert the badge directly
+              const { data: insertData, error: insertError } = await supabase
+                .from('user_badges')
+                .insert([
+                  { user_id: userId, badge_id: welcomeBadge.id }
+                ])
+                .select();
+                
+              if (insertError) {
+                if (insertError.code === '23505') {
+                  console.log('User already has welcome badge (duplicate key error), fetching it directly...');
+                  
+                  // Fetch the existing badge
+                  const { data: existingBadge, error: fetchError } = await supabase
+                    .from('user_badges')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .eq('badge_id', welcomeBadge.id)
+                    .single();
+                    
+                  if (fetchError) {
+                    console.error('Error fetching existing welcome badge:', fetchError);
+                  } else if (existingBadge) {
+                    // Fetch the badge details
+                    const { data: badgeDetails, error: detailsError } = await supabase
+                      .from('badges')
+                      .select('*')
+                      .eq('id', welcomeBadge.id)
+                      .single();
+                      
+                    if (detailsError) {
+                      console.error('Error fetching welcome badge details:', detailsError);
+                    } else if (badgeDetails) {
+                      // Update the state with the welcome badge
+                      setUserBadges([{
+                        ...existingBadge,
+                        badge: badgeDetails
+                      } as UserBadge]);
+                      
+                      console.log('Updated state with existing welcome badge after duplicate key error');
+                    }
+                  }
+                } else {
+                  console.error('Error inserting welcome badge directly:', insertError);
+                }
+              } else if (insertData && insertData.length > 0) {
+                console.log('Successfully inserted welcome badge directly');
+                
+                // Fetch the badge details
+                const { data: badgeDetails, error: detailsError } = await supabase
+                  .from('badges')
+                  .select('*')
+                  .eq('id', welcomeBadge.id)
+                  .single();
+                  
+                if (detailsError) {
+                  console.error('Error fetching welcome badge details after insertion:', detailsError);
+                } else if (badgeDetails) {
+                  // Update the state with the welcome badge
+                  setUserBadges([{
+                    ...insertData[0],
+                    badge: badgeDetails
+                  } as UserBadge]);
+                  
+                  console.log('Updated state with newly inserted welcome badge');
+                }
+              }
+            }
+          }
+        }
+      } else {
+        console.log('User has badges, no need to award welcome badge');
+        // Log the badges the user has for debugging
+        userBadges.forEach(badge => {
+          console.log(`User has badge: ${badge.badge?.name || 'Unknown'} (ID: ${badge.badge_id})`);
+        });
+      }
     } catch (error) {
       console.error('Error refreshing badges:', error);
       // Don't show error to user, just log it
     } finally {
       setIsLoading(false);
+      console.log(`Final badge count in state after refresh: ${userBadges.length}`);
     }
   };
 
@@ -503,17 +956,45 @@ export const BadgeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     await BadgeService.checkStreakBadges(streaks, addUserBadge);
   };
 
+  // Add a new method to directly get badge count from the database
+  const getBadgeCount = async (): Promise<number> => {
+    if (!userId) return 0;
+    
+    try {
+      console.log(`Getting badge count for user: ${userId}`);
+      
+      const { data, error } = await supabase
+        .from('user_badges')
+        .select('id')
+        .eq('user_id', userId);
+        
+      if (error) {
+        console.error('Error getting badge count:', error);
+        return 0;
+      }
+      
+      console.log(`Direct badge count query found ${data?.length || 0} badges`);
+      return data?.length || 0;
+    } catch (error) {
+      console.error('Error in getBadgeCount:', error);
+      return 0;
+    }
+  };
+
   return (
-    <BadgeContext.Provider value={{
-      badges,
-      userBadges,
-      addUserBadge,
-      getBadgeById,
-      getBadgeByName,
-      refreshBadges,
-      isLoading,
-      setUserId,
-    }}>
+    <BadgeContext.Provider
+      value={{
+        badges,
+        userBadges,
+        addUserBadge,
+        getBadgeById,
+        getBadgeByName,
+        refreshBadges,
+        isLoading,
+        setUserId,
+        getBadgeCount,
+      }}
+    >
       {children}
     </BadgeContext.Provider>
   );

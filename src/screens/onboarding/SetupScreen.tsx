@@ -75,7 +75,7 @@ export const SetupScreen = () => {
       showError('Please enter a valid time (HH:MM)');
       return;
     }
-    router.push('/(onboarding)/first-check-in');
+    router.push('/challenges');
   };
 
   return (

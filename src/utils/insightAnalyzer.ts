@@ -53,6 +53,12 @@ export interface EmotionalBalance {
  * Analyzes journal entries to identify common emotional triggers
  */
 export const analyzeEmotionalTriggers = async (entries: JournalEntry[]): Promise<EmotionalTrigger[]> => {
+  // Return sample data if no entries are provided
+  if (!entries || entries.length === 0) {
+    console.log('No entries provided to analyzeEmotionalTriggers, returning sample data');
+    return generateSampleTriggers([]);
+  }
+  
   // This would normally use Gemini API to analyze entries
   // For now, we'll use a mock implementation
   
@@ -182,7 +188,29 @@ const generateSampleTriggers = (entries: JournalEntry[]): EmotionalTrigger[] => 
  * Generates personalized recommendations based on emotional patterns
  */
 export const generatePersonalizedRecommendations = async (entries: JournalEntry[]): Promise<PersonalizedRecommendation[]> => {
-  // This would normally use Gemini API to generate recommendations
+  // Return general recommendations if no entries are provided
+  if (!entries || entries.length === 0) {
+    console.log('No entries provided to generatePersonalizedRecommendations, returning general recommendations');
+    return [
+      {
+        title: "Daily Mindfulness",
+        description: "Take 5 minutes each day for mindful breathing to center yourself and reduce stress.",
+        icon: "brain"
+      },
+      {
+        title: "Gratitude Practice",
+        description: "Write down three things you're grateful for each morning to improve your outlook.",
+        icon: "hands-holding-heart"
+      },
+      {
+        title: "Digital Detox",
+        description: "Set aside 30 minutes before bed as screen-free time to improve sleep quality.",
+        icon: "mobile-screen-off"
+      }
+    ];
+  }
+  
+  // This would normally use Gemini API to generate personalized recommendations
   // For now, we'll use a mock implementation
   
   // Count emotions to determine dominant patterns
@@ -280,7 +308,29 @@ export const generatePersonalizedRecommendations = async (entries: JournalEntry[
  * Analyzes correlations between activities mentioned in entries and emotional states
  */
 export const analyzeActivityCorrelations = async (entries: JournalEntry[]): Promise<ActivityCorrelation[]> => {
-  // This would normally use Gemini API to identify correlations
+  // Return general correlations if no entries are provided
+  if (!entries || entries.length === 0) {
+    console.log('No entries provided to analyzeActivityCorrelations, returning sample correlations');
+    return [
+      {
+        activity: "Exercise",
+        impact: 8,
+        description: "Physical activity generally improves mood and energy levels."
+      },
+      {
+        activity: "Social Connection",
+        impact: 7,
+        description: "Spending time with loved ones often boosts positive emotions."
+      },
+      {
+        activity: "Nature",
+        impact: 6,
+        description: "Time outdoors typically reduces stress and increases calm."
+      }
+    ];
+  }
+  
+  // This would normally use ML to analyze activity patterns
   // For now, we'll use a mock implementation
   
   // Common activities to look for
@@ -345,8 +395,19 @@ export const analyzeActivityCorrelations = async (entries: JournalEntry[]): Prom
  * Predicts likely emotional states based on historical patterns
  */
 export const predictEmotionalState = async (entries: JournalEntry[]): Promise<PredictedEmotion[]> => {
-  // This would normally use Gemini API with ML to predict emotions
-  // For now, we'll use a simple frequency-based approach
+  // Return sample data if no entries are provided
+  if (!entries || entries.length === 0) {
+    console.log('No entries provided to predictEmotionalState, returning sample data');
+    return [
+      { id: 'happy', label: 'Happy', color: '#2E7D32', probability: 0.4 },
+      { id: 'peaceful', label: 'Peaceful', color: '#1976D2', probability: 0.3 },
+      { id: 'optimistic', label: 'Optimistic', color: '#FFA000', probability: 0.2 },
+      { id: 'sad', label: 'Sad', color: '#1565C0', probability: 0.1 }
+    ];
+  }
+  
+  // In a real implementation, this would analyze patterns
+  // For demonstration, return fixed predictions
   
   // Count emotions by day of week
   const dayEmotions: Record<number, Record<string, number>> = {};
@@ -405,10 +466,12 @@ export const predictEmotionalState = async (entries: JournalEntry[]): Promise<Pr
  * Calculates emotional balance score and provides a description
  */
 export const calculateEmotionalBalance = (entries: JournalEntry[]): EmotionalBalance => {
-  if (entries.length === 0) {
+  // Return balanced data if no entries are provided
+  if (!entries || entries.length === 0) {
+    console.log('No entries provided to calculateEmotionalBalance, returning default balance');
     return {
       score: 0,
-      description: "Start tracking your emotions to see your emotional balance."
+      description: "Your emotional state appears balanced. As you log more entries, we'll provide more detailed insights."
     };
   }
   

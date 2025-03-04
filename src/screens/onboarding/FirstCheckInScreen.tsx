@@ -76,7 +76,7 @@ export const FirstCheckInScreen = () => {
     }
 
     setFirstCheckIn(initialEmotion, gratitude.trim());
-    router.push('/(onboarding)/complete');
+    router.push('/complete');
   };
 
   return (
@@ -89,7 +89,7 @@ export const FirstCheckInScreen = () => {
             Let's Check In
           </Typography>
           <Typography variant="body" style={styles.subtitle} glow="soft">
-            Take a moment to reflect on how you're feeling right now
+            Take a moment to reflect on how you're feeling right now. Regular check-ins help you build emotional awareness and track your well-being journey.
           </Typography>
         </Animated.View>
 

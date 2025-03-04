@@ -5,14 +5,55 @@ import { useRouter } from 'expo-router';
 import theme from '@/constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/contexts/AuthContext';
+import { useOnboarding } from '@/contexts/OnboardingContext';
 
 export const WelcomeScreen = () => {
   const router = useRouter();
   const { user, isEmailVerified, resendVerificationEmail } = useAuth();
+  const { resetOnboarding } = useOnboarding();
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   const scaleAnim = React.useRef(new Animated.Value(0.9)).current;
 
   useEffect(() => {
+    console.log('🔍 DEBUG: CRITICAL FIX - WelcomeScreen mounted with state (new structure):', {
+      isEmailVerified,
+      userEmail: user?.email
+    });
+    
+    // Log the current route for debugging
+    try {
+      const { useSegments, usePathname } = require('expo-router');
+      const segments = useSegments();
+      const pathname = usePathname();
+      console.log('🔍 DEBUG: CRITICAL FIX - Current route info (new structure):', { 
+        segments, 
+        pathname,
+        isArray: Array.isArray(segments),
+        segmentsJoined: segments.join('/') 
+      });
+    } catch (error) {
+      console.error('🔍 DEBUG: CRITICAL FIX - Error getting route segments:', error);
+    }
+    
+    // Log the screen dimensions and platform info
+    try {
+      const { Dimensions, Platform } = require('react-native');
+      const window = Dimensions.get('window');
+      console.log('🔍 DEBUG: CRITICAL FIX - Screen dimensions:', window);
+      console.log('🔍 DEBUG: CRITICAL FIX - Platform:', Platform.OS, Platform.Version);
+    } catch (error) {
+      console.error('🔍 DEBUG: CRITICAL FIX - Error getting device info:', error);
+    }
+    
+    // Ensure onboarding state is reset when welcome screen is shown
+    resetOnboarding()
+      .then(() => {
+        console.log('🔍 DEBUG: CRITICAL FIX - Onboarding state reset in WelcomeScreen');
+      })
+      .catch((error) => {
+        console.error('🔍 DEBUG: CRITICAL FIX - Error resetting onboarding state:', error);
+      });
+    
     Animated.parallel([
       Animated.timing(fadeAnim, {
         toValue: 1,
@@ -58,7 +99,7 @@ export const WelcomeScreen = () => {
         ]}
       >
         <View style={styles.logoContainer}>
-          <Logo size="large" />
+          <Logo size="xxlarge" />
         </View>
 
         <Typography variant="h1" style={styles.title} glow="strong">
@@ -94,7 +135,10 @@ export const WelcomeScreen = () => {
       >
         <Button
           title="Get Started"
-          onPress={() => router.push('/(onboarding)/first-check-in')}
+          onPress={() => {
+            console.log('🔍 DEBUG: CRITICAL FIX - Get Started button pressed, navigating to first-check-in');
+            router.push('/(onboarding)/first-check-in');
+          }}
           style={styles.button}
           variant="primary"
         />
@@ -121,7 +165,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(65, 105, 225, 0.15)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: theme.SPACING.xl,
+    marginBottom: 0,
     borderWidth: 2,
     borderColor: theme.COLORS.ui.accent,
     shadowColor: theme.COLORS.ui.accent,
@@ -132,7 +176,7 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: 'center',
-    marginBottom: theme.SPACING.lg,
+    marginBottom: 0,
     color: theme.COLORS.ui.text,
     fontSize: theme.FONTS.sizes.xxxl,
     textShadowColor: theme.COLORS.ui.accent,
@@ -145,6 +189,7 @@ const styles = StyleSheet.create({
     maxWidth: '90%',
     lineHeight: 28,
     fontSize: theme.FONTS.sizes.md,
+    marginTop: 5,
   },
   bannerContainer: {
     width: '100%',

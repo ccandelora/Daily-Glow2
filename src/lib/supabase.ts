@@ -4,6 +4,7 @@ import * as SecureStore from 'expo-secure-store';
 import { Platform, AppState } from 'react-native';
 import * as Linking from 'expo-linking';
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
+import Constants from 'expo-constants';
 
 const ExpoSecureStoreAdapter = {
   getItem: async (key: string) => {
@@ -66,23 +67,47 @@ const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
 
 // Get the URL scheme from Expo
-const scheme = Linking.createURL('');
-const prefix = scheme.split('://')[0];
+let scheme = 'daily-glow://';
+try {
+  // Try to get the scheme from Expo Constants
+  const expoScheme = Constants.expoConfig?.scheme;
+  if (expoScheme) {
+    scheme = `${expoScheme}://`;
+    console.log('Using Expo scheme:', scheme);
+  }
+} catch (error) {
+  console.log('Error getting scheme from Constants, using default:', error);
+}
 
 // Create a redirect URL that works for both platforms
 const getRedirectUrl = () => {
-  // For Expo Go in development
+  // For development (Expo Go or development build)
   if (__DEV__) {
-    // Get the current URL from Expo
-    const redirectUrl = Linking.createURL('confirm-email');
-    console.log('DEV Redirect URL:', redirectUrl);
+    try {
+      // First try to use Linking.createURL if available
+      if (Linking && typeof Linking.createURL === 'function') {
+        // Use auth/callback instead of confirm-email for consistency
+        const redirectUrl = Linking.createURL('auth/callback');
+        console.log('DEV Redirect URL (Linking.createURL):', redirectUrl);
+        return redirectUrl;
+      }
+    } catch (error) {
+      console.log('Error using Linking.createURL:', error);
+    }
+    
+    // Fallback to manual construction
+    const redirectUrl = `${scheme}auth/callback`;
+    console.log('DEV Redirect URL (manual fallback):', redirectUrl);
     return redirectUrl;
   }
   
   // For production builds
-  return Platform.OS === 'web'
-    ? window.location.origin + '/confirm-email'
-    : 'daily-glow://confirm-email';
+  const prodUrl = Platform.OS === 'web'
+    ? window.location.origin + '/auth/callback'
+    : `${scheme}auth/callback`;
+  
+  console.log('PROD Redirect URL:', prodUrl);
+  return prodUrl;
 };
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {

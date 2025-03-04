@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     streak INTEGER DEFAULT 0,
     last_check_in TIMESTAMP WITH TIME ZONE,
     points INTEGER DEFAULT 0,
+    has_completed_onboarding BOOLEAN DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
