@@ -6,6 +6,44 @@
 
 Daily Glow is a modern, beautifully designed mindfulness and gratitude journaling app that helps users cultivate positive habits and track their emotional well-being. Through daily check-ins, challenges, and achievements, users can develop a more mindful and grateful perspective on life.
 
+## 📋 Dependency Management
+
+### Recent Updates
+We've recently performed a dependency cleanup and update process:
+
+1. **Removed Unused Packages:**
+   - `@shopify/react-native-skia` - Not used in any visualizations
+   - `react-native-app-onboard` - Replaced with `react-native-onboarding-swiper`
+   - Other unused packages identified by `npx depcheck`
+
+2. **Updated to Latest Versions:**
+   - Major update to React 19.0.0 and React Native 0.78.0
+   - Updated navigation libraries (react-native-gesture-handler, react-native-safe-area-context)
+   - Minor version updates to Expo SDK 52
+   - Security patches and bug fixes for core dependencies
+   - Optimized build configuration for EAS
+
+3. **Build System Modernization:**
+   - Configured EAS Build for iOS and Android
+   - Updated project configuration 
+   - Standardized build profiles
+
+### Ongoing Maintenance
+To keep dependencies up to date:
+```bash
+# Check outdated packages
+npm outdated
+
+# Identify unused dependencies
+npx depcheck
+
+# Update non-breaking changes
+npm update
+
+# Handle major version updates with legacy peer deps
+npm install package@latest --legacy-peer-deps
+```
+
 ## 📱 Screenshots
 
 <p align="center">
