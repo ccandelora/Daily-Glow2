@@ -1,123 +1,154 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { createContext, useContext, ReactNode, useState, useEffect } from 'react';
+import { useAuth } from './AuthContext';
+import { supabase } from '@/lib/supabase';
+import { useAppState } from './AppStateContext';
 
-interface OnboardingState {
-  purpose: string | null;
-  notifications: boolean;
-  reminderTime: string;
-  firstMood: string | null;
-  firstGratitude: string;
-  isComplete: boolean;
-}
-
-interface OnboardingContextType {
-  state: OnboardingState;
-  setPurpose: (purpose: string) => void;
-  setNotificationPreferences: (enabled: boolean, time?: string) => void;
-  setFirstCheckIn: (mood: string, gratitude: string) => void;
+// Define the context type
+type OnboardingContextType = {
+  hasCompletedOnboarding: boolean | null;
+  loading: boolean;
   completeOnboarding: () => Promise<void>;
-  currentStep: number;
-  totalSteps: number;
-  hasCompletedOnboarding: boolean;
-}
-
-const ONBOARDING_STATE_KEY = '@onboarding_state';
-
-const initialState: OnboardingState = {
-  purpose: null,
-  notifications: true,
-  reminderTime: '20:00',
-  firstMood: null,
-  firstGratitude: '',
-  isComplete: false,
 };
 
-const OnboardingContext = createContext<OnboardingContextType | undefined>(undefined);
+// Create the context with default values
+const OnboardingContext = createContext<OnboardingContextType>({
+  hasCompletedOnboarding: null,
+  loading: true,
+  completeOnboarding: async () => {},
+});
 
-export function OnboardingProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<OnboardingState>(initialState);
-  const totalSteps = 4;
+// Provider component
+export const OnboardingProvider = ({ children }: { children: ReactNode }) => {
+  const { session, user } = useAuth();
+  const { setLoading, showError } = useAppState();
+  // TEMPORARY: Set default to false to force onboarding to show for testing
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean | null>(false);
+  const [loading, setLocalLoading] = useState<boolean>(false);
 
-  // Load saved state on mount
-  useEffect(() => {
-    loadState();
-  }, []);
+  console.log('🔍 OnboardingProvider initialized with user:', user?.id);
 
-  const loadState = async () => {
+  // Check the user's onboarding status
+  const checkOnboardingStatus = async () => {
+    setLocalLoading(true);
+    console.log('🔍 Checking onboarding status for user ID:', user?.id);
+
+    if (!user) {
+      console.log('⚠️ No user found, cannot check onboarding status');
+      setHasCompletedOnboarding(false);
+      setLocalLoading(false);
+      return;
+    }
+
     try {
-      const savedState = await AsyncStorage.getItem(ONBOARDING_STATE_KEY);
-      if (savedState) {
-        setState(JSON.parse(savedState));
+      // Try to use the RPC function first
+      const { data: rpcData, error: rpcError } = await supabase
+        .rpc('check_user_onboarding', { user_id_param: user.id });
+
+      if (rpcError) {
+        console.error('🔴 Error using RPC function:', rpcError.message);
+        
+        // Fall back to direct query
+        const { data, error } = await supabase
+          .from('user_profiles')
+          .select('has_completed_onboarding')
+          .eq('user_id', user.id)
+          .single();
+
+        if (error) {
+          console.error('🔴 Error fetching onboarding status:', error.message);
+          // TEMPORARY: Force to false for testing
+          setHasCompletedOnboarding(false);
+        } else if (data) {
+          console.log('✅ Retrieved onboarding status:', data.has_completed_onboarding);
+          // TEMPORARY: Force to false for testing
+          setHasCompletedOnboarding(false);
+        } else {
+          console.log('⚠️ No user profile found, creating one with default onboarding status');
+          // Create a user profile record with default onboarding status
+          const { error: insertError } = await supabase
+            .from('user_profiles')
+            .insert({ 
+              user_id: user.id, 
+              has_completed_onboarding: false 
+            });
+
+          if (insertError) {
+            console.error('🔴 Error creating user profile:', insertError.message);
+          }
+          setHasCompletedOnboarding(false);
+        }
+      } else {
+        console.log('✅ Retrieved onboarding status via RPC:', rpcData);
+        // TEMPORARY: Force to false for testing
+        setHasCompletedOnboarding(false);
       }
     } catch (error) {
-      console.error('Error loading onboarding state:', error);
+      console.error('🔴 Unexpected error checking onboarding status:', error);
+      setHasCompletedOnboarding(false);
+    } finally {
+      setLocalLoading(false);
     }
   };
 
-  const saveState = async (newState: OnboardingState) => {
-    try {
-      await AsyncStorage.setItem(ONBOARDING_STATE_KEY, JSON.stringify(newState));
-      setState(newState);
-    } catch (error) {
-      console.error('Error saving onboarding state:', error);
-    }
-  };
-
-  const setPurpose = (purpose: string) => {
-    saveState({ ...state, purpose });
-  };
-
-  const setNotificationPreferences = (enabled: boolean, time?: string) => {
-    saveState({
-      ...state,
-      notifications: enabled,
-      reminderTime: time || state.reminderTime,
-    });
-  };
-
-  const setFirstCheckIn = (mood: string, gratitude: string) => {
-    saveState({
-      ...state,
-      firstMood: mood,
-      firstGratitude: gratitude,
-    });
-  };
-
+  // Complete the onboarding process
   const completeOnboarding = async () => {
-    await saveState({ ...state, isComplete: true });
+    if (!user) {
+      console.log('⚠️ No user found, cannot complete onboarding');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from('user_profiles')
+        .update({ has_completed_onboarding: true })
+        .eq('user_id', user.id);
+
+      if (error) {
+        showError('Failed to update onboarding status');
+        console.error('🔴 Error completing onboarding:', error.message);
+      } else {
+        console.log('✅ Successfully completed onboarding');
+        setHasCompletedOnboarding(true);
+      }
+    } catch (error) {
+      showError('An unexpected error occurred');
+      console.error('🔴 Unexpected error in completeOnboarding:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Calculate current step based on state
-  const getCurrentStep = (): number => {
-    if (!state.purpose) return 1;
-    if (!state.notifications && !state.reminderTime) return 2;
-    if (!state.firstMood) return 3;
-    if (!state.isComplete) return 4;
-    return 4;
-  };
+  // Check onboarding status when user changes
+  useEffect(() => {
+    console.log('🔍 OnboardingProvider user effect triggered:', user?.id);
+    if (user) {
+      console.log('🔍 User found, checking onboarding status');
+      checkOnboardingStatus();
+    } else {
+      console.log('⚠️ No user, resetting onboarding status');
+      setHasCompletedOnboarding(null);
+      setLocalLoading(false);
+    }
+  }, [user]);
 
-  const value = {
-    state,
-    setPurpose,
-    setNotificationPreferences,
-    setFirstCheckIn,
-    completeOnboarding,
-    currentStep: getCurrentStep(),
-    totalSteps,
-    hasCompletedOnboarding: state.isComplete,
-  };
+  // Log state changes for debugging
+  useEffect(() => {
+    console.log('🔍 OnboardingContext state:', { hasCompletedOnboarding, loading });
+  }, [hasCompletedOnboarding, loading]);
 
   return (
-    <OnboardingContext.Provider value={value}>
+    <OnboardingContext.Provider
+      value={{
+        hasCompletedOnboarding,
+        loading,
+        completeOnboarding,
+      }}
+    >
       {children}
     </OnboardingContext.Provider>
   );
-}
+};
 
-export function useOnboarding() {
-  const context = useContext(OnboardingContext);
-  if (context === undefined) {
-    throw new Error('useOnboarding must be used within an OnboardingProvider');
-  }
-  return context;
-} 
+// Custom hook to use the onboarding context
+export const useOnboarding = () => useContext(OnboardingContext); 

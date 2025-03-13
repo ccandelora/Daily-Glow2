@@ -23,7 +23,7 @@ export const VerificationInstructionsScreen = () => {
   };
 
   const handleContinue = () => {
-    router.replace('/(onboarding)/welcome');
+    router.replace('/(app)');
   };
 
   return (

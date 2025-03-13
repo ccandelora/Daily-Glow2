@@ -21,7 +21,10 @@
       "associatedDomains": [
         "applinks:daily-glow.app",
         "applinks:*.supabase.co"
-      ]
+      ],
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -48,7 +51,10 @@
               "pathPrefix": "/auth/v1/verify"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
@@ -57,8 +63,7 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store",
-      "expo-video"
+      "expo-secure-store"
     ],
     "newArchEnabled": true,
     "extra": {
@@ -66,15 +71,15 @@
         "origin": false
       },
       "eas": {
-        "projectId": "dailyglow"
+        "projectId": "63152758-fdae-4d0e-94b6-4cbb3d8d697f"
       }
     },
-    "owner": "dailyglow",
+    "owner": "ccandelora",
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/dailyglow"
+      "url": "https://u.expo.dev/ccandelora/daily-glow"
     }
   }
 }

@@ -1,21 +1,23 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Stack } from 'expo-router';
-import { AnimatedBackground } from '@/components/common';
+import theme from '@/constants/theme';
 
 export default function OnboardingLayout() {
+  console.log('📱 Rendering OnboardingLayout');
+
   return (
     <View style={styles.container}>
-      <AnimatedBackground intensity="medium" />
-      
       <Stack
         screenOptions={{
           headerShown: false,
-          contentStyle: {
-            backgroundColor: 'transparent',
-          },
+          contentStyle: { backgroundColor: theme.COLORS.ui.background },
+          animation: 'fade',
+          presentation: 'card',
         }}
-      />
+      >
+        <Stack.Screen name="index" options={{ gestureEnabled: false }} />
+      </Stack>
     </View>
   );
 }
@@ -23,6 +25,6 @@ export default function OnboardingLayout() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: theme.COLORS.ui.background,
   },
 }); 

@@ -1,5 +1,5 @@
 import React, { useEffect, useCallback } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Platform } from 'react-native';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import '@/utils/cryptoPolyfill';
 import { AppStateProvider } from '@/contexts/AppStateContext';
@@ -54,42 +54,37 @@ function CheckInStreakWithBadges({ children }: { children: React.ReactNode }) {
 }
 
 function RootLayoutNav() {
-  const { session } = useAuth();
-  const { hasCompletedOnboarding } = useOnboarding();
+  const { session, user } = useAuth();
+  const { hasCompletedOnboarding, loading: onboardingLoading } = useOnboarding();
   const segments = useSegments();
   const router = useRouter();
+
+  console.log('🚀 RootLayoutNav rendered with segments:', segments);
 
   useEffect(() => {
     const inAuthGroup = segments[0] === '(auth)';
     const inAppGroup = segments[0] === '(app)';
     const inOnboardingGroup = segments[0] === '(onboarding)';
 
-    console.log('Root layout navigation check:', {
-      session: !!session,
-      hasCompletedOnboarding,
-      currentSegment: segments[0],
+    console.log('🧭 Navigation check:', {
       inAuthGroup,
       inAppGroup,
-      inOnboardingGroup
+      inOnboardingGroup,
+      hasSession: !!session,
+      currentSegment: segments[0]
     });
 
-    if (!session) {
-      // Not authenticated
-      if (!inAuthGroup) {
-        console.log('Not authenticated, redirecting to login');
-        router.replace('/(auth)/login');
-      }
-    } else {
-      // Authenticated
-      if (!hasCompletedOnboarding && !inOnboardingGroup) {
-        console.log('Onboarding incomplete, redirecting to welcome');
-        router.replace('/(onboarding)/welcome');
-      } else if (hasCompletedOnboarding && !inAppGroup) {
-        console.log('Onboarding complete, redirecting to app');
-        router.replace('/(app)');
-      }
+    // Skip all complicated checks, use simple navigation logic:
+    
+    // If not authenticated and not in auth group, go to sign-in
+    if (!session && !inAuthGroup) {
+      console.log('🔀 Not authenticated, redirecting to sign-in');
+      router.replace('/(auth)/sign-in');
+      return;
     }
-  }, [session, hasCompletedOnboarding, segments]);
+    
+    // The rest of the navigation will be handled by the signin screen itself
+  }, [session, segments]);
 
   return (
     <>
@@ -105,13 +100,6 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
-  const { refreshSession } = useAuth();
-  const { session } = useAuth();
-  const { hasCompletedOnboarding } = useOnboarding();
-  const segments = useSegments();
-  const router = useRouter();
-  const { showError, showSuccess } = useAppState();
-
   console.log('Root layout rendering');
 
   return (
