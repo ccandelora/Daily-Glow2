@@ -1,0 +1,111 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AnimatedMoodIcon renders correctly when active 1`] = `
+<View
+  collapsable={false}
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "#FF5733",
+      "borderRadius": 999,
+      "height": 60,
+      "justifyContent": "center",
+      "opacity": 0.6,
+      "overflow": "hidden",
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+      "width": 60,
+    }
+  }
+>
+  <Text>
+    😊
+  </Text>
+</View>
+`;
+
+exports[`AnimatedMoodIcon renders correctly with custom size 1`] = `
+<View
+  collapsable={false}
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "#FF5733",
+      "borderRadius": 999,
+      "height": 100,
+      "justifyContent": "center",
+      "opacity": 0.6,
+      "overflow": "hidden",
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+      "width": 100,
+    }
+  }
+>
+  <Text>
+    😊
+  </Text>
+</View>
+`;
+
+exports[`AnimatedMoodIcon renders correctly with custom style 1`] = `
+<View
+  collapsable={false}
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "#FF5733",
+      "borderRadius": 999,
+      "elevation": 5,
+      "height": 60,
+      "justifyContent": "center",
+      "marginTop": 10,
+      "opacity": 0.6,
+      "overflow": "hidden",
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+      "width": 60,
+    }
+  }
+>
+  <Text>
+    😊
+  </Text>
+</View>
+`;
+
+exports[`AnimatedMoodIcon renders correctly with default props 1`] = `
+<View
+  collapsable={false}
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "#FF5733",
+      "borderRadius": 999,
+      "height": 60,
+      "justifyContent": "center",
+      "opacity": 0.6,
+      "overflow": "hidden",
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+      "width": 60,
+    }
+  }
+>
+  <Text>
+    😊
+  </Text>
+</View>
+`;

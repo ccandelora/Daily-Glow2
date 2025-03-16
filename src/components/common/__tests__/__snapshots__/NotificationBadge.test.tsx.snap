@@ -1,0 +1,291 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NotificationBadge Component applies custom color prop 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "justifyContent": "center",
+      "position": "relative",
+    }
+  }
+>
+  <FontAwesome6
+    color="red"
+    name="bell"
+    size={24}
+  />
+  <View
+    collapsable={false}
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#FF6B6B",
+        "borderColor": "rgba(28, 14, 45, 0.95)",
+        "borderRadius": 9,
+        "borderWidth": 1.5,
+        "height": 18,
+        "justifyContent": "center",
+        "minWidth": 18,
+        "paddingHorizontal": 4,
+        "position": "absolute",
+        "right": -8,
+        "top": -5,
+        "transform": [
+          {
+            "scale": 0,
+          },
+        ],
+      }
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "#FFFFFF",
+            "fontFamily": "System",
+            "fontSize": 16,
+          },
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 14,
+            "fontWeight": "400",
+          },
+          undefined,
+          null,
+          {
+            "color": "rgba(28, 14, 45, 0.95)",
+            "fontSize": 10,
+            "fontWeight": "bold",
+          },
+        ]
+      }
+    >
+      5
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`NotificationBadge Component applies custom size prop 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "justifyContent": "center",
+      "position": "relative",
+    }
+  }
+>
+  <FontAwesome6
+    color="#FFFFFF"
+    name="bell"
+    size={32}
+  />
+  <View
+    collapsable={false}
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#FF6B6B",
+        "borderColor": "rgba(28, 14, 45, 0.95)",
+        "borderRadius": 9,
+        "borderWidth": 1.5,
+        "height": 18,
+        "justifyContent": "center",
+        "minWidth": 18,
+        "paddingHorizontal": 4,
+        "position": "absolute",
+        "right": -8,
+        "top": -5,
+        "transform": [
+          {
+            "scale": 0,
+          },
+        ],
+      }
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "#FFFFFF",
+            "fontFamily": "System",
+            "fontSize": 16,
+          },
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 14,
+            "fontWeight": "400",
+          },
+          undefined,
+          null,
+          {
+            "color": "rgba(28, 14, 45, 0.95)",
+            "fontSize": 10,
+            "fontWeight": "bold",
+          },
+        ]
+      }
+    >
+      5
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`NotificationBadge Component renders 99+ when unread notifications exceed 99 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "justifyContent": "center",
+      "position": "relative",
+    }
+  }
+>
+  <FontAwesome6
+    color="#FFFFFF"
+    name="bell"
+    size={24}
+  />
+  <View
+    collapsable={false}
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#FF6B6B",
+        "borderColor": "rgba(28, 14, 45, 0.95)",
+        "borderRadius": 9,
+        "borderWidth": 1.5,
+        "height": 18,
+        "justifyContent": "center",
+        "minWidth": 18,
+        "paddingHorizontal": 4,
+        "position": "absolute",
+        "right": -8,
+        "top": -5,
+        "transform": [
+          {
+            "scale": 0,
+          },
+        ],
+      }
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "#FFFFFF",
+            "fontFamily": "System",
+            "fontSize": 16,
+          },
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 14,
+            "fontWeight": "400",
+          },
+          undefined,
+          null,
+          {
+            "color": "rgba(28, 14, 45, 0.95)",
+            "fontSize": 10,
+            "fontWeight": "bold",
+          },
+        ]
+      }
+    >
+      99+
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`NotificationBadge Component renders correctly with unread notifications 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "justifyContent": "center",
+      "position": "relative",
+    }
+  }
+>
+  <FontAwesome6
+    color="#FFFFFF"
+    name="bell"
+    size={24}
+  />
+  <View
+    collapsable={false}
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "#FF6B6B",
+        "borderColor": "rgba(28, 14, 45, 0.95)",
+        "borderRadius": 9,
+        "borderWidth": 1.5,
+        "height": 18,
+        "justifyContent": "center",
+        "minWidth": 18,
+        "paddingHorizontal": 4,
+        "position": "absolute",
+        "right": -8,
+        "top": -5,
+        "transform": [
+          {
+            "scale": 0,
+          },
+        ],
+      }
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "#FFFFFF",
+            "fontFamily": "System",
+            "fontSize": 16,
+          },
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 14,
+            "fontWeight": "400",
+          },
+          undefined,
+          null,
+          {
+            "color": "rgba(28, 14, 45, 0.95)",
+            "fontSize": 10,
+            "fontWeight": "bold",
+          },
+        ]
+      }
+    >
+      5
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`NotificationBadge Component renders correctly with zero unread notifications 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "justifyContent": "center",
+      "position": "relative",
+    }
+  }
+>
+  <FontAwesome6
+    color="#FFFFFF"
+    name="bell"
+    size={24}
+  />
+</View>
+`;

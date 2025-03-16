@@ -1,0 +1,414 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DailyChallenge Component renders correctly when daily limit is reached: daily-limit-reached 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "width": "100%",
+    }
+  }
+>
+  <CardMock
+    style={
+      {
+        "backgroundColor": "rgba(38, 20, 60, 0.85)",
+        "padding": 24,
+        "width": "100%",
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "padding": 32,
+          "paddingVertical": 48,
+        }
+      }
+    >
+      <FontAwesome6Mock
+        color="#00C853"
+        name="circle-check"
+        size={48}
+        style={
+          {
+            "marginBottom": 24,
+          }
+        }
+      />
+      <TypographyMock
+        style={
+          {
+            "color": "#00C853",
+            "fontSize": 28,
+            "fontWeight": "600",
+            "marginBottom": 16,
+            "textAlign": "center",
+          }
+        }
+        variant="h2"
+      >
+        Daily Challenges Complete!
+      </TypographyMock>
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 16,
+            "lineHeight": 24,
+            "marginBottom": 48,
+            "textAlign": "center",
+          }
+        }
+      >
+        Great job! You've completed your daily challenges. Come back tomorrow for new challenges and more opportunities to earn points.
+      </TypographyMock>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "marginBottom": 48,
+          }
+        }
+      >
+        <TypographyMock
+          style={
+            {
+              "color": "#00C853",
+              "fontSize": 72,
+              "fontWeight": "700",
+              "lineHeight": 80,
+              "marginBottom": 4,
+              "textAlign": "center",
+            }
+          }
+          variant="h1"
+        >
+          350
+        </TypographyMock>
+        <TypographyMock
+          style={
+            {
+              "color": "rgba(255, 255, 255, 0.7)",
+              "fontSize": 22,
+              "textAlign": "center",
+            }
+          }
+        >
+          Total Points
+        </TypographyMock>
+      </View>
+      <ButtonMock
+        onPress={[Function]}
+        style={
+          {
+            "marginTop": 16,
+            "paddingVertical": 16,
+            "width": "100%",
+          }
+        }
+        title="View Your Achievements"
+        variant="secondary"
+      />
+    </View>
+  </CardMock>
+</View>
+`;
+
+exports[`DailyChallenge Component renders correctly with daily challenge 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "width": "100%",
+    }
+  }
+>
+  <CardMock
+    style={
+      {
+        "backgroundColor": "rgba(38, 20, 60, 0.85)",
+        "padding": 24,
+        "width": "100%",
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "flex-start",
+          "flexDirection": "row",
+          "flexWrap": "wrap",
+          "gap": 16,
+          "justifyContent": "space-between",
+          "marginBottom": 16,
+          "width": "100%",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flex": 1,
+            "flexDirection": "row",
+            "gap": 8,
+            "minWidth": 150,
+          }
+        }
+      >
+        <FontAwesome6Mock
+          color="#00C853"
+          name="face-smile"
+          size={24}
+        />
+        <TypographyMock
+          style={
+            {
+              "color": "#FFFFFF",
+              "flexShrink": 1,
+              "marginLeft": 4,
+              "textShadowColor": "#4169E1",
+              "textShadowOffset": {
+                "height": 0,
+                "width": 0,
+              },
+              "textShadowRadius": 8,
+            }
+          }
+          variant="h3"
+        >
+          Daily Challenge
+        </TypographyMock>
+      </View>
+      <View
+        style={
+          {
+            "alignItems": "flex-end",
+            "flexShrink": 0,
+            "minWidth": 100,
+          }
+        }
+      >
+        <TypographyMock
+          color="rgba(255, 255, 255, 0.7)"
+          variant="caption"
+        >
+          Level 
+          3
+        </TypographyMock>
+        <TypographyMock
+          color="#00C853"
+          style={
+            {
+              "color": "#00C853",
+              "flexShrink": 0,
+              "flexWrap": "wrap",
+              "fontWeight": "700",
+              "marginTop": 4,
+              "minWidth": 100,
+              "textAlign": "right",
+              "textShadowColor": "#00C853",
+              "textShadowOffset": {
+                "height": 0,
+                "width": 0,
+              },
+              "textShadowRadius": 4,
+            }
+          }
+          variant="h3"
+        >
+          350
+           pts
+        </TypographyMock>
+      </View>
+    </View>
+    <TypographyMock
+      style={
+        {
+          "color": "#FFFFFF",
+          "marginBottom": 8,
+          "textShadowColor": "#4169E1",
+          "textShadowOffset": {
+            "height": 0,
+            "width": 0,
+          },
+          "textShadowRadius": 6,
+        }
+      }
+      variant="h3"
+    >
+      Daily Gratitude
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "marginBottom": 24,
+        }
+      }
+      variant="body"
+    >
+      Write down three things you are grateful for today
+    </TypographyMock>
+    <InputMock
+      maxLength={500}
+      multiline={true}
+      onChangeText={[Function]}
+      placeholder="Share what you're grateful for today..."
+      style={
+        {
+          "backgroundColor": "rgba(28, 14, 45, 0.3)",
+          "borderColor": "rgba(82, 67, 194, 0.3)",
+          "height": 120,
+          "marginBottom": 24,
+          "textAlignVertical": "top",
+        }
+      }
+      value=""
+    />
+    <View
+      style={
+        {
+          "marginBottom": 16,
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "flexDirection": "row",
+            "gap": 4,
+            "justifyContent": "center",
+          }
+        }
+      >
+        <FontAwesome6Mock
+          color="#00C853"
+          name="star"
+          size={16}
+          style={
+            {
+              "marginRight": 8,
+            }
+          }
+        />
+        <TypographyMock
+          style={
+            {
+              "color": "#00C853",
+            }
+          }
+          variant="caption"
+        >
+          +
+          50
+           points
+        </TypographyMock>
+      </View>
+    </View>
+    <ButtonMock
+      disabled={false}
+      onPress={[Function]}
+      style={
+        {
+          "backgroundColor": "rgba(65, 105, 225, 0.15)",
+          "borderColor": "#4169E1",
+          "borderWidth": 1,
+          "elevation": 4,
+          "marginTop": 16,
+          "shadowColor": "#4169E1",
+          "shadowOffset": {
+            "height": 0,
+            "width": 0,
+          },
+          "shadowOpacity": 0.3,
+          "shadowRadius": 8,
+          "width": "100%",
+        }
+      }
+      textStyle={
+        {
+          "color": "#00C853",
+        }
+      }
+      title="Complete Challenge"
+      variant="secondary"
+    />
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "borderTopColor": "rgba(82, 67, 194, 0.3)",
+          "borderTopWidth": 1,
+          "flexDirection": "row",
+          "marginTop": 16,
+          "paddingTop": 16,
+        }
+      }
+    >
+      <FontAwesome6Mock
+        color="#FF5252"
+        name="flame"
+        size={16}
+        style={
+          {
+            "marginRight": 8,
+          }
+        }
+      />
+      <TypographyMock
+        style={
+          {
+            "color": "#FF5252",
+            "fontWeight": "700",
+          }
+        }
+        variant="caption"
+      >
+        7
+         day streak
+      </TypographyMock>
+    </View>
+  </CardMock>
+</View>
+`;
+
+exports[`DailyChallenge Component renders correctly with no daily challenge: no-challenge 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "width": "100%",
+    }
+  }
+>
+  <CardMock
+    style={
+      {
+        "backgroundColor": "rgba(38, 20, 60, 0.85)",
+        "padding": 24,
+        "width": "100%",
+      }
+    }
+  >
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "lineHeight": 24,
+          "marginBottom": 32,
+          "paddingHorizontal": 24,
+          "textAlign": "center",
+          "width": "100%",
+        }
+      }
+      variant="body"
+    >
+      No challenges available right now. Please check back later.
+    </TypographyMock>
+  </CardMock>
+</View>
+`;

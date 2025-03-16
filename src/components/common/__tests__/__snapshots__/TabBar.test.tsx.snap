@@ -1,0 +1,295 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TabBar highlights the active tab 1`] = `
+<View
+  style={
+    {
+      "backgroundColor": "rgba(38, 20, 60, 0.85)",
+      "borderTopColor": "rgba(82, 67, 194, 0.3)",
+      "borderTopWidth": 1,
+      "paddingBottom": 32,
+      "paddingTop": 16,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+      }
+    }
+  >
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "flex": 1,
+          "justifyContent": "center",
+          "opacity": 1,
+          "paddingHorizontal": 4,
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "color": "#FFFFFF",
+              "fontFamily": "System",
+              "fontSize": 16,
+            },
+            {
+              "color": "rgba(255, 255, 255, 0.7)",
+              "fontSize": 16,
+              "fontWeight": "400",
+              "lineHeight": 24,
+            },
+            {
+              "color": "rgba(255, 255, 255, 0.7)",
+            },
+            null,
+            {
+              "fontSize": 22,
+              "marginBottom": 4,
+            },
+          ]
+        }
+      >
+        🏠
+      </Text>
+      <Text
+        numberOfLines={1}
+        style={
+          [
+            {
+              "color": "#FFFFFF",
+              "fontFamily": "System",
+              "fontSize": 16,
+            },
+            {
+              "color": "rgba(255, 255, 255, 0.7)",
+              "fontSize": 14,
+              "fontWeight": "400",
+            },
+            {
+              "color": "rgba(255, 255, 255, 0.7)",
+            },
+            null,
+            undefined,
+          ]
+        }
+      >
+        Home
+      </Text>
+    </View>
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "backgroundColor": "transparent",
+          "flex": 1,
+          "justifyContent": "center",
+          "opacity": 1,
+          "paddingHorizontal": 4,
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "color": "#FFFFFF",
+              "fontFamily": "System",
+              "fontSize": 16,
+            },
+            {
+              "color": "rgba(255, 255, 255, 0.7)",
+              "fontSize": 16,
+              "fontWeight": "400",
+              "lineHeight": 24,
+            },
+            {
+              "color": "#00C853",
+            },
+            null,
+            {
+              "fontSize": 22,
+              "marginBottom": 4,
+            },
+          ]
+        }
+      >
+        👤
+      </Text>
+      <Text
+        numberOfLines={1}
+        style={
+          [
+            {
+              "color": "#FFFFFF",
+              "fontFamily": "System",
+              "fontSize": 16,
+            },
+            {
+              "color": "rgba(255, 255, 255, 0.7)",
+              "fontSize": 14,
+              "fontWeight": "400",
+            },
+            {
+              "color": "#00C853",
+            },
+            null,
+            undefined,
+          ]
+        }
+      >
+        Profile
+      </Text>
+    </View>
+    <View
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onClick={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "alignItems": "center",
+          "flex": 1,
+          "justifyContent": "center",
+          "opacity": 1,
+          "paddingHorizontal": 4,
+        }
+      }
+    >
+      <Text
+        style={
+          [
+            {
+              "color": "#FFFFFF",
+              "fontFamily": "System",
+              "fontSize": 16,
+            },
+            {
+              "color": "rgba(255, 255, 255, 0.7)",
+              "fontSize": 16,
+              "fontWeight": "400",
+              "lineHeight": 24,
+            },
+            {
+              "color": "rgba(255, 255, 255, 0.7)",
+            },
+            null,
+            {
+              "fontSize": 22,
+              "marginBottom": 4,
+            },
+          ]
+        }
+      >
+        ⚙️
+      </Text>
+      <Text
+        numberOfLines={1}
+        style={
+          [
+            {
+              "color": "#FFFFFF",
+              "fontFamily": "System",
+              "fontSize": 16,
+            },
+            {
+              "color": "rgba(255, 255, 255, 0.7)",
+              "fontSize": 14,
+              "fontWeight": "400",
+            },
+            {
+              "color": "rgba(255, 255, 255, 0.7)",
+            },
+            null,
+            undefined,
+          ]
+        }
+      >
+        Settings
+      </Text>
+    </View>
+  </View>
+</View>
+`;

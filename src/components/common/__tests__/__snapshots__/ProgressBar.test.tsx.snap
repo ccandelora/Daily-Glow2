@@ -1,0 +1,389 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ProgressBar Component applies correct progress width: progress-bar-width-0% 1`] = `
+<View
+  style={
+    [
+      {
+        "backgroundColor": "rgba(82, 67, 194, 0.3)",
+        "borderRadius": 999,
+        "overflow": "hidden",
+        "width": "100%",
+      },
+      {
+        "height": 4,
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    style={
+      [
+        {
+          "borderRadius": 999,
+          "height": "100%",
+        },
+        {
+          "backgroundColor": "#00C853",
+          "height": 4,
+          "width": "0%",
+        },
+      ]
+    }
+  />
+</View>
+`;
+
+exports[`ProgressBar Component applies correct progress width: progress-bar-width-25% 1`] = `
+<View
+  style={
+    [
+      {
+        "backgroundColor": "rgba(82, 67, 194, 0.3)",
+        "borderRadius": 999,
+        "overflow": "hidden",
+        "width": "100%",
+      },
+      {
+        "height": 4,
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    style={
+      [
+        {
+          "borderRadius": 999,
+          "height": "100%",
+        },
+        {
+          "backgroundColor": "#00C853",
+          "height": 4,
+          "width": "25%",
+        },
+      ]
+    }
+  />
+</View>
+`;
+
+exports[`ProgressBar Component applies correct progress width: progress-bar-width-50% 1`] = `
+<View
+  style={
+    [
+      {
+        "backgroundColor": "rgba(82, 67, 194, 0.3)",
+        "borderRadius": 999,
+        "overflow": "hidden",
+        "width": "100%",
+      },
+      {
+        "height": 4,
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    style={
+      [
+        {
+          "borderRadius": 999,
+          "height": "100%",
+        },
+        {
+          "backgroundColor": "#00C853",
+          "height": 4,
+          "width": "50%",
+        },
+      ]
+    }
+  />
+</View>
+`;
+
+exports[`ProgressBar Component applies correct progress width: progress-bar-width-75% 1`] = `
+<View
+  style={
+    [
+      {
+        "backgroundColor": "rgba(82, 67, 194, 0.3)",
+        "borderRadius": 999,
+        "overflow": "hidden",
+        "width": "100%",
+      },
+      {
+        "height": 4,
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    style={
+      [
+        {
+          "borderRadius": 999,
+          "height": "100%",
+        },
+        {
+          "backgroundColor": "#00C853",
+          "height": 4,
+          "width": "75%",
+        },
+      ]
+    }
+  />
+</View>
+`;
+
+exports[`ProgressBar Component applies correct progress width: progress-bar-width-100% 1`] = `
+<View
+  style={
+    [
+      {
+        "backgroundColor": "rgba(82, 67, 194, 0.3)",
+        "borderRadius": 999,
+        "overflow": "hidden",
+        "width": "100%",
+      },
+      {
+        "height": 4,
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    style={
+      [
+        {
+          "borderRadius": 999,
+          "height": "100%",
+        },
+        {
+          "backgroundColor": "#00C853",
+          "height": 4,
+          "width": "100%",
+        },
+      ]
+    }
+  />
+</View>
+`;
+
+exports[`ProgressBar Component applies custom color: progress-bar-color-#FF0000 1`] = `
+<View
+  style={
+    [
+      {
+        "backgroundColor": "rgba(82, 67, 194, 0.3)",
+        "borderRadius": 999,
+        "overflow": "hidden",
+        "width": "100%",
+      },
+      {
+        "height": 4,
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    style={
+      [
+        {
+          "borderRadius": 999,
+          "height": "100%",
+        },
+        {
+          "backgroundColor": "#FF0000",
+          "height": 4,
+          "width": "50%",
+        },
+      ]
+    }
+  />
+</View>
+`;
+
+exports[`ProgressBar Component applies custom height: progress-bar-height-8 1`] = `
+<View
+  style={
+    [
+      {
+        "backgroundColor": "rgba(82, 67, 194, 0.3)",
+        "borderRadius": 999,
+        "overflow": "hidden",
+        "width": "100%",
+      },
+      {
+        "height": 8,
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    style={
+      [
+        {
+          "borderRadius": 999,
+          "height": "100%",
+        },
+        {
+          "backgroundColor": "#00C853",
+          "height": 8,
+          "width": "50%",
+        },
+      ]
+    }
+  />
+</View>
+`;
+
+exports[`ProgressBar Component applies custom style: progress-bar-custom-style 1`] = `
+<View
+  style={
+    [
+      {
+        "backgroundColor": "rgba(82, 67, 194, 0.3)",
+        "borderRadius": 999,
+        "overflow": "hidden",
+        "width": "100%",
+      },
+      {
+        "height": 4,
+      },
+      {
+        "marginBottom": 10,
+        "marginTop": 10,
+      },
+    ]
+  }
+>
+  <View
+    style={
+      [
+        {
+          "borderRadius": 999,
+          "height": "100%",
+        },
+        {
+          "backgroundColor": "#00C853",
+          "height": 4,
+          "width": "50%",
+        },
+      ]
+    }
+  />
+</View>
+`;
+
+exports[`ProgressBar Component clamps progress values outside 0-1 range: progress-bar-negative-value 1`] = `
+<View
+  style={
+    [
+      {
+        "backgroundColor": "rgba(82, 67, 194, 0.3)",
+        "borderRadius": 999,
+        "overflow": "hidden",
+        "width": "100%",
+      },
+      {
+        "height": 4,
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    style={
+      [
+        {
+          "borderRadius": 999,
+          "height": "100%",
+        },
+        {
+          "backgroundColor": "#00C853",
+          "height": 4,
+          "width": "0%",
+        },
+      ]
+    }
+  />
+</View>
+`;
+
+exports[`ProgressBar Component clamps progress values outside 0-1 range: progress-bar-over-value 1`] = `
+<View
+  style={
+    [
+      {
+        "backgroundColor": "rgba(82, 67, 194, 0.3)",
+        "borderRadius": 999,
+        "overflow": "hidden",
+        "width": "100%",
+      },
+      {
+        "height": 4,
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    style={
+      [
+        {
+          "borderRadius": 999,
+          "height": "100%",
+        },
+        {
+          "backgroundColor": "#00C853",
+          "height": 4,
+          "width": "100%",
+        },
+      ]
+    }
+  />
+</View>
+`;
+
+exports[`ProgressBar Component renders correctly with default props: default-progress-bar 1`] = `
+<View
+  style={
+    [
+      {
+        "backgroundColor": "rgba(82, 67, 194, 0.3)",
+        "borderRadius": 999,
+        "overflow": "hidden",
+        "width": "100%",
+      },
+      {
+        "height": 4,
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    style={
+      [
+        {
+          "borderRadius": 999,
+          "height": "100%",
+        },
+        {
+          "backgroundColor": "#00C853",
+          "height": 4,
+          "width": "50%",
+        },
+      ]
+    }
+  />
+</View>
+`;

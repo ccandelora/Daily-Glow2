@@ -1,0 +1,637 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Button Component renders with correct size styles: compact-button 1`] = `
+<View
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": false,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onClick={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "#4169E1",
+      "borderRadius": 16,
+      "borderWidth": 0,
+      "elevation": 4,
+      "flexDirection": "row",
+      "justifyContent": "center",
+      "minWidth": 0,
+      "opacity": 1,
+      "paddingHorizontal": 16,
+      "paddingVertical": 8,
+      "shadowColor": "#4169E1",
+      "shadowOffset": {
+        "height": 2,
+        "width": 0,
+      },
+      "shadowOpacity": 0.5,
+      "shadowRadius": 12,
+    }
+  }
+>
+  <Text
+    adjustsFontSizeToFit={true}
+    numberOfLines={1}
+    style={
+      [
+        {
+          "color": "#FFFFFF",
+          "fontFamily": "System",
+          "fontSize": 16,
+        },
+        {
+          "fontSize": 16,
+          "fontWeight": "600",
+          "textAlign": "center",
+        },
+        undefined,
+        null,
+        [
+          {
+            "textAlign": "center",
+          },
+          {
+            "color": "#FFFFFF",
+            "textShadowColor": "rgba(0, 0, 0, 0.2)",
+            "textShadowOffset": {
+              "height": 1,
+              "width": 0,
+            },
+            "textShadowRadius": 2,
+          },
+          {
+            "fontSize": 14,
+          },
+        ],
+      ]
+    }
+  >
+    Compact Button
+  </Text>
+</View>
+`;
+
+exports[`Button Component renders with correct size styles: large-button 1`] = `
+<View
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": false,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onClick={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "#4169E1",
+      "borderRadius": 16,
+      "borderWidth": 0,
+      "elevation": 4,
+      "flexDirection": "row",
+      "justifyContent": "center",
+      "minWidth": 200,
+      "opacity": 1,
+      "paddingHorizontal": 48,
+      "paddingVertical": 24,
+      "shadowColor": "#4169E1",
+      "shadowOffset": {
+        "height": 2,
+        "width": 0,
+      },
+      "shadowOpacity": 0.5,
+      "shadowRadius": 12,
+    }
+  }
+>
+  <Text
+    adjustsFontSizeToFit={true}
+    numberOfLines={1}
+    style={
+      [
+        {
+          "color": "#FFFFFF",
+          "fontFamily": "System",
+          "fontSize": 16,
+        },
+        {
+          "fontSize": 16,
+          "fontWeight": "600",
+          "textAlign": "center",
+        },
+        undefined,
+        null,
+        [
+          {
+            "textAlign": "center",
+          },
+          {
+            "color": "#FFFFFF",
+            "textShadowColor": "rgba(0, 0, 0, 0.2)",
+            "textShadowOffset": {
+              "height": 1,
+              "width": 0,
+            },
+            "textShadowRadius": 2,
+          },
+        ],
+      ]
+    }
+  >
+    Large Button
+  </Text>
+</View>
+`;
+
+exports[`Button Component renders with correct size styles: medium-button 1`] = `
+<View
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": false,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onClick={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "#4169E1",
+      "borderRadius": 16,
+      "borderWidth": 0,
+      "elevation": 4,
+      "flexDirection": "row",
+      "justifyContent": "center",
+      "minWidth": 150,
+      "opacity": 1,
+      "paddingHorizontal": 32,
+      "paddingVertical": 16,
+      "shadowColor": "#4169E1",
+      "shadowOffset": {
+        "height": 2,
+        "width": 0,
+      },
+      "shadowOpacity": 0.5,
+      "shadowRadius": 12,
+    }
+  }
+>
+  <Text
+    adjustsFontSizeToFit={true}
+    numberOfLines={1}
+    style={
+      [
+        {
+          "color": "#FFFFFF",
+          "fontFamily": "System",
+          "fontSize": 16,
+        },
+        {
+          "fontSize": 16,
+          "fontWeight": "600",
+          "textAlign": "center",
+        },
+        undefined,
+        null,
+        [
+          {
+            "textAlign": "center",
+          },
+          {
+            "color": "#FFFFFF",
+            "textShadowColor": "rgba(0, 0, 0, 0.2)",
+            "textShadowOffset": {
+              "height": 1,
+              "width": 0,
+            },
+            "textShadowRadius": 2,
+          },
+        ],
+      ]
+    }
+  >
+    Medium Button
+  </Text>
+</View>
+`;
+
+exports[`Button Component renders with correct size styles: small-button 1`] = `
+<View
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": false,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onClick={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "#4169E1",
+      "borderRadius": 16,
+      "borderWidth": 0,
+      "elevation": 4,
+      "flexDirection": "row",
+      "justifyContent": "center",
+      "minWidth": 100,
+      "opacity": 1,
+      "paddingHorizontal": 24,
+      "paddingVertical": 8,
+      "shadowColor": "#4169E1",
+      "shadowOffset": {
+        "height": 2,
+        "width": 0,
+      },
+      "shadowOpacity": 0.5,
+      "shadowRadius": 12,
+    }
+  }
+>
+  <Text
+    adjustsFontSizeToFit={true}
+    numberOfLines={1}
+    style={
+      [
+        {
+          "color": "#FFFFFF",
+          "fontFamily": "System",
+          "fontSize": 16,
+        },
+        {
+          "fontSize": 16,
+          "fontWeight": "600",
+          "textAlign": "center",
+        },
+        undefined,
+        null,
+        [
+          {
+            "textAlign": "center",
+          },
+          {
+            "color": "#FFFFFF",
+            "textShadowColor": "rgba(0, 0, 0, 0.2)",
+            "textShadowOffset": {
+              "height": 1,
+              "width": 0,
+            },
+            "textShadowRadius": 2,
+          },
+        ],
+      ]
+    }
+  >
+    Small Button
+  </Text>
+</View>
+`;
+
+exports[`Button Component renders with correct variant styles: outline-button 1`] = `
+<View
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": false,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onClick={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "transparent",
+      "borderColor": "rgba(82, 67, 194, 0.3)",
+      "borderRadius": 16,
+      "borderWidth": 1,
+      "elevation": 4,
+      "flexDirection": "row",
+      "justifyContent": "center",
+      "minWidth": 150,
+      "opacity": 1,
+      "paddingHorizontal": 32,
+      "paddingVertical": 16,
+      "shadowColor": "#4169E1",
+      "shadowOffset": {
+        "height": 2,
+        "width": 0,
+      },
+      "shadowOpacity": 0.3,
+      "shadowRadius": 8,
+    }
+  }
+>
+  <Text
+    adjustsFontSizeToFit={true}
+    numberOfLines={1}
+    style={
+      [
+        {
+          "color": "#FFFFFF",
+          "fontFamily": "System",
+          "fontSize": 16,
+        },
+        {
+          "fontSize": 16,
+          "fontWeight": "600",
+          "textAlign": "center",
+        },
+        undefined,
+        null,
+        [
+          {
+            "textAlign": "center",
+          },
+          {
+            "color": "#FFFFFF",
+          },
+        ],
+      ]
+    }
+  >
+    Outline Button
+  </Text>
+</View>
+`;
+
+exports[`Button Component renders with correct variant styles: primary-button 1`] = `
+<View
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": false,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onClick={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "#4169E1",
+      "borderRadius": 16,
+      "borderWidth": 0,
+      "elevation": 4,
+      "flexDirection": "row",
+      "justifyContent": "center",
+      "minWidth": 150,
+      "opacity": 1,
+      "paddingHorizontal": 32,
+      "paddingVertical": 16,
+      "shadowColor": "#4169E1",
+      "shadowOffset": {
+        "height": 2,
+        "width": 0,
+      },
+      "shadowOpacity": 0.5,
+      "shadowRadius": 12,
+    }
+  }
+>
+  <Text
+    adjustsFontSizeToFit={true}
+    numberOfLines={1}
+    style={
+      [
+        {
+          "color": "#FFFFFF",
+          "fontFamily": "System",
+          "fontSize": 16,
+        },
+        {
+          "fontSize": 16,
+          "fontWeight": "600",
+          "textAlign": "center",
+        },
+        undefined,
+        null,
+        [
+          {
+            "textAlign": "center",
+          },
+          {
+            "color": "#FFFFFF",
+            "textShadowColor": "rgba(0, 0, 0, 0.2)",
+            "textShadowOffset": {
+              "height": 1,
+              "width": 0,
+            },
+            "textShadowRadius": 2,
+          },
+        ],
+      ]
+    }
+  >
+    Primary Button
+  </Text>
+</View>
+`;
+
+exports[`Button Component renders with correct variant styles: secondary-button 1`] = `
+<View
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": false,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onClick={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "rgba(65, 105, 225, 0.1)",
+      "borderColor": "#4169E1",
+      "borderRadius": 16,
+      "borderWidth": 1,
+      "elevation": 4,
+      "flexDirection": "row",
+      "justifyContent": "center",
+      "minWidth": 150,
+      "opacity": 1,
+      "paddingHorizontal": 32,
+      "paddingVertical": 16,
+      "shadowColor": "#4169E1",
+      "shadowOffset": {
+        "height": 2,
+        "width": 0,
+      },
+      "shadowOpacity": 0.3,
+      "shadowRadius": 8,
+    }
+  }
+>
+  <Text
+    adjustsFontSizeToFit={true}
+    numberOfLines={1}
+    style={
+      [
+        {
+          "color": "#FFFFFF",
+          "fontFamily": "System",
+          "fontSize": 16,
+        },
+        {
+          "fontSize": 16,
+          "fontWeight": "600",
+          "textAlign": "center",
+        },
+        undefined,
+        null,
+        [
+          {
+            "textAlign": "center",
+          },
+          {
+            "color": "#4169E1",
+            "textShadowColor": "#4169E1",
+            "textShadowOffset": {
+              "height": 0,
+              "width": 0,
+            },
+            "textShadowRadius": 4,
+          },
+        ],
+      ]
+    }
+  >
+    Secondary Button
+  </Text>
+</View>
+`;

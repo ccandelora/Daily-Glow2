@@ -5,10 +5,10 @@
     "scheme": "daily-glow",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon-square.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splash-square.png",
       "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
@@ -28,7 +28,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon-square.png",
         "backgroundColor": "#000000"
       },
       "package": "com.dailyglow.app",
@@ -59,11 +59,12 @@
       ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/icon-square.png"
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-video"
     ],
     "newArchEnabled": true,
     "extra": {

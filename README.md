@@ -1,7 +1,7 @@
 # Daily Glow: Mindfulness & Gratitude Journal
 
 <p align="center">
-  <img src="assets/icon.png" alt="Daily Glow Logo" width="120" height="120" />
+  <img src="assets/default_transparent_353x345.png" alt="Daily Glow Logo" width="120" height="120" />
 </p>
 
 Daily Glow is a modern, beautifully designed mindfulness and gratitude journaling app that helps users cultivate positive habits and track their emotional well-being. Through daily check-ins, challenges, and achievements, users can develop a more mindful and grateful perspective on life.
@@ -26,6 +26,15 @@ We've recently performed a dependency cleanup and update process:
    - Updated project configuration 
    - Standardized build profiles
 
+### Version Compatibility
+For Expo SDK 52, the following package versions are required:
+- React: 18.3.1 (React 19 is not yet compatible)
+- React Native: 0.76.7
+- React Navigation related packages: 
+  - react-native-gesture-handler: 2.20.2
+  - react-native-safe-area-context: 4.12.0
+  - react-native-screens: 4.4.0
+
 ### Ongoing Maintenance
 To keep dependencies up to date:
 ```bash
@@ -37,6 +46,9 @@ npx depcheck
 
 # Update non-breaking changes
 npm update
+
+# Check compatibility with Expo SDK
+expo doctor
 ```
 
 ## 📱 Screenshots
@@ -94,7 +106,8 @@ npm update
 
 ## 🛠 Technical Stack
 
-- **Frontend**: React Native with TypeScript
+- **Frontend**: React Native 0.76.7 with TypeScript
+- **React**: v18.3.1
 - **Navigation**: Expo Router v4 with file-based routing
 - **State Management**: React Context API
 - **Database**: Supabase with PostgreSQL
@@ -103,7 +116,7 @@ npm update
 - **Animations**: React Native Animated and Reanimated
 - **Styling**: StyleSheet with custom theming
 - **Onboarding**: react-native-onboarding-swiper
-- **Data Visualization**: React Native Skia
+- **Visualizations**: react-native-svg for charts and graphs
 - **Notifications**: Expo Notifications
 - **Storage**: Expo SecureStore for tokens and sensitive data
 
