@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>16/16</span>
+                <span class='fraction'>0/16</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">91.66% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>11/12</span>
+                <span class='fraction'>0/12</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>1/1</span>
+                <span class='fraction'>0/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>16/16</span>
+                <span class='fraction'>0/16</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -111,33 +111,33 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">2x</span>
-<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -149,34 +149,34 @@
  * Logs environment variables and other critical configurations
  * to help diagnose startup issues
  */
-export function logAppStartupInfo(): void {
-  try {
+export function <span class="fstat-no" title="function not covered" >logAppStartupInfo(</span>): void {
+<span class="cstat-no" title="statement not covered" >  try {</span>
     // Log environment variable status (without exposing actual values)
-    const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-    const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+    const supabaseUrl = <span class="cstat-no" title="statement not covered" >process.env.EXPO_PUBLIC_SUPABASE_URL;</span>
+    const supabaseKey = <span class="cstat-no" title="statement not covered" >process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;</span>
     
-    console.log('=== APP STARTUP DEBUG INFO ===');
-    console.log(`Supabase URL defined: ${!!supabaseUrl}`);
-    console.log(`Supabase Key defined: ${!!supabaseKey}`);
-    console.log(`Supabase URL length: ${supabaseUrl?.length || 0}`);
-    console.log(`Supabase Key starts with: ${supabaseKey?.substring(0, 10)}...`);
+<span class="cstat-no" title="statement not covered" >    console.log('=== APP STARTUP DEBUG INFO ===');</span>
+<span class="cstat-no" title="statement not covered" >    console.log(`Supabase URL defined: ${!!supabaseUrl}`);</span>
+<span class="cstat-no" title="statement not covered" >    console.log(`Supabase Key defined: ${!!supabaseKey}`);</span>
+<span class="cstat-no" title="statement not covered" >    console.log(`Supabase URL length: ${supabaseUrl?.length || 0}`);</span>
+<span class="cstat-no" title="statement not covered" >    console.log(`Supabase Key starts with: ${supabaseKey?.substring(0, 10)}...`);</span>
     
     // Log platform info
-    console.log(`Platform: ${Platform.OS}`);
-    console.log(`OS Version: ${Platform.Version}`);
-    console.log(`Is Dev: ${__DEV__ ? 'Yes' : 'No'}`);
+<span class="cstat-no" title="statement not covered" >    console.log(`Platform: ${Platform.OS}`);</span>
+<span class="cstat-no" title="statement not covered" >    console.log(`OS Version: ${Platform.Version}`);</span>
+<span class="cstat-no" title="statement not covered" >    console.log(`Is Dev: ${__DEV__ ? 'Yes' : 'No'}`);</span>
     
     // Log memory info - only available in some environments
-    if (typeof performance !== 'undefined' &amp;&amp; 'memory' in performance) {
+<span class="cstat-no" title="statement not covered" >    if (typeof performance !== 'undefined' &amp;&amp; 'memory' in performance) {</span>
       // @ts-ignore - memory exists in some JS environments but not in the standard type
-      console.log(`Memory available: ${performance.memory?.jsHeapSizeLimit || <span class="branch-1 cbranch-no" title="branch not covered" >'Unknown'}</span>`);
+<span class="cstat-no" title="statement not covered" >      console.log(`Memory available: ${performance.memory?.jsHeapSizeLimit || 'Unknown'}`);</span>
     } else {
-      console.log('Memory info not available in this environment');
+<span class="cstat-no" title="statement not covered" >      console.log('Memory info not available in this environment');</span>
     }
     
   } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error('Error in startup diagnostics:', errorMessage);
+    const errorMessage = <span class="cstat-no" title="statement not covered" >error instanceof Error ? error.message : String(error);</span>
+<span class="cstat-no" title="statement not covered" >    console.error('Error in startup diagnostics:', errorMessage);</span>
   }
 }
 &nbsp;
@@ -187,7 +187,7 @@ import { Platform } from 'react-native'; </pre></td></tr></table></pre>
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-03-16T01:34:36.740Z
+                at 2025-03-16T03:30:23.770Z
             </div>
         <script src="../prettify.js"></script>
         <script>

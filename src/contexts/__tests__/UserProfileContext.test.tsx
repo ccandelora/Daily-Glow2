@@ -2,6 +2,8 @@ import React, { ReactNode } from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react-native';
 import { UserProfileProvider, useProfile } from '../UserProfileContext';
 import { Alert } from 'react-native';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAppState } from '@/contexts/AppStateContext';
 
 // Mock values
 const mockUser = { id: 'test-user-id', email: 'test@example.com' };
@@ -28,6 +30,10 @@ jest.mock('@/contexts/AppStateContext', () => ({
 
 // Create a proper mockup of Supabase
 const mockTableCountResponse = { data: { count: 1 }, error: null };
+const mockTableNotExistResponse = { 
+  data: null, 
+  error: { message: 'relation "profiles" does not exist' } 
+};
 const mockProfileResponse = {
   data: {
     id: 'profile-id',
@@ -282,5 +288,58 @@ describe('UserProfileContext', () => {
     expect(supabase.from).toHaveBeenCalledWith('profiles');
     expect(supabase.from().select).toHaveBeenCalledWith('count');
     expect(supabase.from().select).toHaveBeenCalledWith('*');
+  });
+  
+  it('handles case when profiles table does not exist', async () => {
+    // Mock the table check to return a "table does not exist" error
+    const mockFrom = supabase.from;
+    const mockSelect = mockFrom().select;
+    const mockLimit = mockSelect().limit;
+    const mockSingle = mockLimit().single;
+    
+    mockSingle.mockResolvedValueOnce(mockTableNotExistResponse);
+    
+    const { result } = renderHook(() => useProfile(), { wrapper });
+
+    // Wait for loading to complete
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+    
+    // Verify that a temporary profile was created
+    expect(result.current.userProfile).not.toBeNull();
+    expect(result.current.userProfile?.id).toBe('temp-id');
+    expect(result.current.userProfile?.user_id).toBe('test-user-id');
+    
+    // Verify temp profile was created with expected properties
+    expect(result.current.userProfile?.streak).toBe(0);
+    expect(result.current.userProfile?.points).toBe(0);
+  });
+  
+  it('handles case when user is not available', async () => {
+    // Mock auth context to return null for user
+    (useAuth as jest.Mock).mockReturnValue({
+      user: null,
+      session: null,
+      isLoading: false,
+    });
+    
+    // Mock app state context
+    (useAppState as jest.Mock).mockReturnValue({
+      isOnline: true,
+      isAppReady: true,
+    });
+
+    const { result } = renderHook(() => useProfile(), {
+      wrapper: UserProfileProvider,
+    });
+
+    // Wait for the component to update
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+    
+    // Verify that userProfile is null when no user is available
+    expect(result.current.userProfile).toBeNull();
   });
 }); 

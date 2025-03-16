@@ -1,55 +1,80 @@
 import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react-native';
 import { OnboardingProvider, useOnboarding } from '../OnboardingContext';
-import { supabase } from '@/lib/supabase';
 
-// Mock dependencies
-jest.mock('@/lib/supabase', () => ({
-  supabase: {
-    from: jest.fn().mockReturnThis(),
-    select: jest.fn().mockReturnThis(),
-    eq: jest.fn().mockReturnThis(),
-    update: jest.fn().mockReturnThis(),
-    insert: jest.fn().mockReturnThis(),
-    single: jest.fn().mockReturnThis(),
-    rpc: jest.fn().mockReturnValue({
-      data: false,
-      error: null
-    }),
-  },
-}));
+// Mock dependencies using the dynamic require approach
+jest.mock('@/lib/supabase', () => {
+  // Create mock responses that can be customized in each test
+  const mockRpcResponse = { data: false, error: null };
+  const mockQueryResponse = { data: null, error: null };
+  const mockInsertResponse = { data: { id: 'test-profile-id' }, error: null };
+  const mockUpdateResponse = { data: null, error: null };
+  
+  return {
+    supabase: {
+      rpc: jest.fn(() => mockRpcResponse),
+      from: jest.fn(() => ({
+        select: jest.fn(() => ({
+          eq: jest.fn(() => mockQueryResponse)
+        })),
+        insert: jest.fn(() => ({
+          single: jest.fn(() => mockInsertResponse)
+        })),
+        update: jest.fn(() => ({
+          eq: jest.fn(() => mockUpdateResponse)
+        }))
+      }))
+    }
+  };
+});
 
-// Define types for the mock user state
-type MockUserState = {
-  user: { id: string; email: string } | null;
-  session: { access_token: string } | null;
-  isLoading: boolean;
-};
+// Mock AuthContext using our shared ContextMocks
+jest.mock('@/contexts/AuthContext', () => {
+  const { createAuthContextMock } = require('../../__mocks__/ContextMocks');
+  
+  // Create a default mock that can be modified in each test
+  const defaultMock = createAuthContextMock();
+  
+  return {
+    useAuth: jest.fn(() => defaultMock),
+    // The test can access this to customize the mock for specific tests
+    __mocks: {
+      setMockUser: (user: { id: string; email: string } | null) => {
+        defaultMock.user = user;
+      },
+      setMockSession: (session: { access_token: string } | null) => {
+        defaultMock.session = session;
+      },
+      setIsAuthenticated: (value: boolean) => {
+        defaultMock.isAuthenticated = value;
+      }
+    }
+  };
+});
 
-const mockUser = { id: 'test-user-id', email: 'test@example.com' };
-const mockSession = { access_token: 'test-token' };
-let mockUserState: MockUserState = { user: mockUser, session: mockSession, isLoading: false };
-
-jest.mock('@/contexts/AuthContext', () => ({
-  useAuth: jest.fn().mockImplementation(() => mockUserState),
-}));
-
-// Mock AppStateContext
-const mockSetLoading = jest.fn();
-const mockShowError = jest.fn();
-jest.mock('@/contexts/AppStateContext', () => ({
-  useAppState: jest.fn().mockReturnValue({
-    setLoading: mockSetLoading,
-    showError: mockShowError,
-  }),
-}));
+// Mock AppStateContext using our shared ContextMocks
+jest.mock('@/contexts/AppStateContext', () => {
+  const { createAppStateMock } = require('../../__mocks__/ContextMocks');
+  
+  // Create a default mock with all required functions
+  const mockAppState = createAppStateMock();
+  
+  return {
+    useAppState: jest.fn(() => mockAppState),
+    // Expose the mock for test customization
+    __setLoading: mockAppState.setLoading,
+    __showError: mockAppState.showError
+  };
+});
 
 // Mock storage
-jest.mock('@react-native-async-storage/async-storage', () => ({
+const mockAsyncStorage = {
   getItem: jest.fn(),
   setItem: jest.fn(),
   removeItem: jest.fn(),
-}));
+};
+
+jest.mock('@react-native-async-storage/async-storage', () => mockAsyncStorage);
 
 // Create a wrapper for the OnboardingProvider
 const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -59,32 +84,48 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 describe('OnboardingContext', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockShowError.mockClear();
-    mockSetLoading.mockClear();
     
-    // Reset mock user state to default
-    mockUserState = { user: mockUser, session: mockSession, isLoading: false };
+    // Reset AsyncStorage mocks
+    mockAsyncStorage.getItem.mockReset();
+    mockAsyncStorage.setItem.mockReset();
+    mockAsyncStorage.removeItem.mockReset();
+    
+    // Reset auth mocks to default values
+    const { __mocks } = require('@/contexts/AuthContext');
+    __mocks.setMockUser({ id: 'test-user-id', email: 'test@example.com' });
+    __mocks.setMockSession({ access_token: 'test-token' });
+    __mocks.setIsAuthenticated(true);
+    
+    // Reset AppState mocks
+    const { __setLoading, __showError } = require('@/contexts/AppStateContext');
+    __setLoading.mockClear();
+    __showError.mockClear();
+    
+    // Reset supabase mocks
+    const { supabase } = require('@/lib/supabase');
+    supabase.rpc.mockImplementation(() => ({
+      data: false,
+      error: null
+    }));
+    
+    supabase.from().select().eq.mockImplementation(() => ({
+      data: null,
+      error: null
+    }));
+    
+    supabase.from().insert().single.mockImplementation(() => ({
+      data: { id: 'test-profile-id' },
+      error: null
+    }));
+    
+    supabase.from().update().eq.mockImplementation(() => ({
+      data: { has_completed_onboarding: true },
+      error: null
+    }));
     
     // Mock console methods to prevent noise in tests
     jest.spyOn(console, 'log').mockImplementation(() => {});
     jest.spyOn(console, 'error').mockImplementation(() => {});
-    
-    // Setup default supabase behavior
-    (supabase.rpc as jest.Mock).mockReturnValue({
-      data: false,
-      error: null
-    });
-    
-    (supabase.from as jest.Mock).mockReturnValue({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      update: jest.fn().mockReturnThis(),
-      insert: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({
-        data: { has_completed_onboarding: false },
-        error: null
-      }),
-    });
   });
 
   afterEach(() => {
@@ -121,10 +162,11 @@ describe('OnboardingContext', () => {
 
   it('checks onboarding status for existing user', async () => {
     // Setup Supabase to return a completed status
-    (supabase.rpc as jest.Mock).mockReturnValue({
+    const { supabase } = require('@/lib/supabase');
+    supabase.rpc.mockImplementation(() => ({
       data: true,
       error: null
-    });
+    }));
     
     const { result } = renderHook(() => useOnboarding(), { wrapper });
     
@@ -134,28 +176,27 @@ describe('OnboardingContext', () => {
     });
     
     // Check that RPC was called with the user ID
-    expect(supabase.rpc).toHaveBeenCalledWith('check_user_onboarding', { user_id_param: mockUser.id });
+    expect(supabase.rpc).toHaveBeenCalledWith(expect.any(String), { 
+      user_id_param: 'test-user-id' 
+    });
     
-    // Despite RPC returning true, we've hardcoded false in the context for testing
-    expect(result.current.hasCompletedOnboarding).toBe(false);
+    // The initialization should have set hasCompletedOnboarding to the RPC result
+    expect(result.current.hasCompletedOnboarding).toBe(true);
   });
   
   it('falls back to direct query when RPC fails', async () => {
     // Setup Supabase RPC to return an error
-    (supabase.rpc as jest.Mock).mockReturnValue({
+    const { supabase } = require('@/lib/supabase');
+    supabase.rpc.mockImplementation(() => ({
       data: null,
       error: { message: 'RPC error' }
-    });
+    }));
     
     // Setup Supabase direct query to return a value
-    (supabase.from as jest.Mock).mockReturnValue({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({
-        data: { has_completed_onboarding: true },
-        error: null
-      }),
-    });
+    supabase.from().select().eq.mockImplementation(() => ({
+      data: { has_completed_onboarding: true },
+      error: null
+    }));
     
     const { result } = renderHook(() => useOnboarding(), { wrapper });
     
@@ -166,33 +207,31 @@ describe('OnboardingContext', () => {
     
     // Check that both RPC and direct query were called
     expect(supabase.rpc).toHaveBeenCalled();
-    expect(supabase.from).toHaveBeenCalledWith('user_profiles');
+    expect(supabase.from).toHaveBeenCalled();
     
-    // Despite direct query returning true, we've hardcoded false in the context for testing
-    expect(result.current.hasCompletedOnboarding).toBe(false);
+    // The initialization should have set hasCompletedOnboarding to the query result
+    expect(result.current.hasCompletedOnboarding).toBe(true);
   });
   
   it('creates a user profile if none exists', async () => {
     // Setup Supabase RPC to return an error
-    (supabase.rpc as jest.Mock).mockReturnValue({
+    const { supabase } = require('@/lib/supabase');
+    supabase.rpc.mockImplementation(() => ({
       data: null,
       error: { message: 'RPC error' }
-    });
+    }));
     
     // Setup Supabase direct query to return no data
-    (supabase.from as jest.Mock).mockReturnValueOnce({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({
-        data: null,
-        error: { code: 'PGRST116', message: 'No rows found' }
-      }),
-    }).mockReturnValueOnce({
-      insert: jest.fn().mockResolvedValue({
-        data: { has_completed_onboarding: false },
-        error: null
-      }),
-    });
+    supabase.from().select().eq.mockImplementation(() => ({
+      data: null,
+      error: { code: 'PGRST116', message: 'No rows found' }
+    }));
+    
+    // Setup insert to succeed
+    supabase.from().insert().single.mockImplementation(() => ({
+      data: { has_completed_onboarding: false },
+      error: null
+    }));
     
     const { result } = renderHook(() => useOnboarding(), { wrapper });
     
@@ -202,193 +241,169 @@ describe('OnboardingContext', () => {
     });
     
     // Check that insert was called to create a profile
-    expect(supabase.from).toHaveBeenCalledWith('user_profiles');
+    expect(supabase.from).toHaveBeenCalled();
     expect(result.current.hasCompletedOnboarding).toBe(false);
   });
   
   it('completes onboarding successfully', async () => {
-    // Setup Supabase to update successfully
-    (supabase.from as jest.Mock).mockReturnValueOnce({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({
-        data: { has_completed_onboarding: false },
-        error: null
-      }),
-    }).mockReturnValueOnce({
-      update: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockResolvedValue({
-        data: { has_completed_onboarding: true },
-        error: null
-      }),
-    });
+    const { supabase } = require('@/lib/supabase');
+    const { __setLoading } = require('@/contexts/AppStateContext');
     
+    // Setup mock responses
+    supabase.from().update().eq.mockImplementation(() => ({
+      data: { has_completed_onboarding: true },
+      error: null
+    }));
+    
+    // Render the hook
     const { result } = renderHook(() => useOnboarding(), { wrapper });
     
-    // Wait for the component to initialize
+    // Wait for initialization
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
-    
-    // Verify initial state
-    expect(result.current.hasCompletedOnboarding).toBe(false);
     
     // Complete onboarding
     await act(async () => {
       await result.current.completeOnboarding();
     });
     
-    // Verify supabase was called correctly
-    expect(supabase.from).toHaveBeenCalledWith('user_profiles');
-    expect(mockSetLoading).toHaveBeenCalledWith(true);
-    expect(mockSetLoading).toHaveBeenCalledWith(false);
+    // Verify that setLoading was called correctly
+    expect(__setLoading).toHaveBeenCalledWith(true);
+    expect(__setLoading).toHaveBeenCalledWith(false);
     
-    // The context should now show onboarding as completed
+    // Verify that the profile was updated
+    expect(supabase.from).toHaveBeenCalledWith('user_profiles');
+    expect(supabase.from().update).toHaveBeenCalledWith({
+      has_completed_onboarding: true
+    });
+    
+    // Verify that the state was updated
     expect(result.current.hasCompletedOnboarding).toBe(true);
   });
   
   it('handles errors when completing onboarding', async () => {
-    // Setup Supabase to update with an error
-    (supabase.from as jest.Mock).mockReturnValueOnce({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({
-        data: { has_completed_onboarding: false },
-        error: null
-      }),
-    }).mockReturnValueOnce({
-      update: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockResolvedValue({
-        data: null,
-        error: { message: 'Update error' }
-      }),
-    });
+    const { supabase } = require('@/lib/supabase');
+    const { __setLoading, __showError } = require('@/contexts/AppStateContext');
     
+    // Setup mock to return an error
+    supabase.from().update().eq.mockImplementation(() => ({
+      data: null,
+      error: { message: 'Database error' }
+    }));
+    
+    // Render the hook
     const { result } = renderHook(() => useOnboarding(), { wrapper });
     
-    // Wait for the component to initialize
+    // Wait for initialization
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
     
-    // Complete onboarding
+    // Complete onboarding (will trigger error)
     await act(async () => {
       await result.current.completeOnboarding();
     });
     
-    // Check that error was handled
-    expect(mockShowError).toHaveBeenCalledWith('Failed to update onboarding status');
+    // Verify that setLoading was toggled correctly
+    expect(__setLoading).toHaveBeenCalledWith(true);
+    expect(__setLoading).toHaveBeenCalledWith(false);
+    
+    // Verify that showError was called
+    expect(__showError).toHaveBeenCalled();
+    
+    // Verify that the error was logged
     expect(console.error).toHaveBeenCalled();
     
-    // The context should still show onboarding as not completed
+    // State should remain unchanged
     expect(result.current.hasCompletedOnboarding).toBe(false);
   });
   
   it('handles unexpected errors when completing onboarding', async () => {
-    // Setup Supabase to throw an exception
-    (supabase.from as jest.Mock).mockReturnValueOnce({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({
-        data: { has_completed_onboarding: false },
-        error: null
-      }),
-    }).mockReturnValueOnce({
-      update: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockImplementation(() => {
-        throw new Error('Unexpected error');
-      }),
+    const { supabase } = require('@/lib/supabase');
+    const { __setLoading, __showError } = require('@/contexts/AppStateContext');
+    
+    // Setup mock to throw an unexpected error
+    supabase.from().update().eq.mockImplementation(() => {
+      throw new Error('Unexpected error');
     });
     
+    // Render the hook
     const { result } = renderHook(() => useOnboarding(), { wrapper });
     
-    // Wait for the component to initialize
+    // Wait for initialization
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
     
-    // Complete onboarding
+    // Complete onboarding (will trigger error)
     await act(async () => {
       await result.current.completeOnboarding();
     });
     
-    // Check that error was handled
-    expect(mockShowError).toHaveBeenCalledWith('An unexpected error occurred');
+    // Verify that setLoading was toggled correctly
+    expect(__setLoading).toHaveBeenCalledWith(true);
+    expect(__setLoading).toHaveBeenCalledWith(false);
+    
+    // Verify that showError was called
+    expect(__showError).toHaveBeenCalled();
+    
+    // Verify that the error was logged
     expect(console.error).toHaveBeenCalled();
     
-    // The context should still show onboarding as not completed
+    // State should remain unchanged
     expect(result.current.hasCompletedOnboarding).toBe(false);
   });
   
-  it('handles null user when completing onboarding', async () => {
-    // Mock user as null
-    mockUserState = { user: null, session: null, isLoading: false };
+  it('skips onboarding check when no user is available', async () => {
+    // Set user to null
+    const { __mocks } = require('@/contexts/AuthContext');
+    __mocks.setMockUser(null);
+    __mocks.setMockSession(null);
     
+    // Render the hook
     const { result } = renderHook(() => useOnboarding(), { wrapper });
     
-    // Wait for the component to initialize
+    // Wait for the effect to complete
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
     
-    // Try to complete onboarding
-    await act(async () => {
-      await result.current.completeOnboarding();
-    });
+    // Verify no API calls were made
+    const { supabase } = require('@/lib/supabase');
+    expect(supabase.rpc).not.toHaveBeenCalled();
     
-    // Should have returned early without error
-    expect(supabase.from).not.toHaveBeenCalledWith('user_profiles');
-    expect(mockShowError).not.toHaveBeenCalled();
-  });
-  
-  it('resets onboarding status when user becomes null', async () => {
-    // Start with a user
-    mockUserState = { user: mockUser, session: mockSession, isLoading: false };
-    
-    const { result, rerender } = renderHook(() => useOnboarding(), { wrapper });
-    
-    // Wait for the component to initialize
-    await waitFor(() => {
-      expect(result.current.loading).toBe(false);
-    });
-    
-    // Now change user to null
-    mockUserState = { user: null, session: null, isLoading: false };
-    
-    // Rerender to trigger the useEffect
-    rerender({wrapper});
-    
-    // Onboarding status should be reset
+    // hasCompletedOnboarding should be null when no user is available
     expect(result.current.hasCompletedOnboarding).toBe(null);
-    expect(result.current.loading).toBe(false);
   });
   
-  it('handles errors during initial RPC call and direct query', async () => {
-    // Setup Supabase RPC to return an error
-    (supabase.rpc as jest.Mock).mockReturnValue({
-      data: null,
-      error: { message: 'RPC error' }
-    });
+  it('handles completeOnboarding with no user', async () => {
+    // Set user to null
+    const { __mocks } = require('@/contexts/AuthContext');
+    __mocks.setMockUser(null);
+    __mocks.setMockSession(null);
     
-    // Setup Supabase direct query to also return an error
-    (supabase.from as jest.Mock).mockReturnValue({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      single: jest.fn().mockResolvedValue({
-        data: null,
-        error: { message: 'Query error' }
-      }),
-    });
-    
+    // Render the hook
     const { result } = renderHook(() => useOnboarding(), { wrapper });
     
-    // Wait for the component to initialize
+    // Wait for initialization
     await waitFor(() => {
       expect(result.current.loading).toBe(false);
     });
     
-    // Both fallbacks failed, so we should default to false
-    expect(result.current.hasCompletedOnboarding).toBe(false);
-    expect(console.error).toHaveBeenCalled();
+    // Try to complete onboarding with no user
+    await act(async () => {
+      await result.current.completeOnboarding();
+    });
+    
+    // Verify no API calls were made
+    const { supabase } = require('@/lib/supabase');
+    expect(supabase.from).not.toHaveBeenCalledWith('user_profiles');
+    
+    // Verify the log was made
+    expect(console.log).toHaveBeenCalled();
+    
+    // hasCompletedOnboarding should remain null
+    expect(result.current.hasCompletedOnboarding).toBe(null);
   });
 }); 

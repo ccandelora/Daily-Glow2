@@ -1,111 +1,73 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import { View, TouchableOpacity, Animated } from 'react-native';
+import { View } from 'react-native';
 import { EntryDetailScreen } from '../EntryDetailScreen';
 
-// Mock Animated
-jest.mock('react-native/Libraries/Animated/Animated', () => {
-  const ActualAnimated = jest.requireActual('react-native/Libraries/Animated/Animated');
-  return {
-    ...ActualAnimated,
-    timing: jest.fn(() => ({
-      start: jest.fn(callback => callback && callback()),
-    })),
-    spring: jest.fn(() => ({
-      start: jest.fn(callback => callback && callback()),
-    })),
-    parallel: jest.fn(() => ({
-      start: jest.fn(callback => callback && callback()),
-    })),
-    Value: jest.fn(() => ({
-      interpolate: jest.fn(),
-      setValue: jest.fn(),
-    })),
-  };
-});
+// Import mocks from separate files
+import { 
+  Typography, 
+  Card, 
+  Button, 
+  VideoBackground 
+} from './__mocks__/ComponentMocks';
 
-// Mock dependencies
-const mockRouterBack = jest.fn();
+import { 
+  mockJournalEntries,
+  setupJournalContextMock,
+  mockRouterBack,
+  setupRouterMock,
+  setupSearchParamsMock
+} from './__mocks__/ContextMocks';
+
+import {
+  mockEmotions,
+  mockGetEmotionById,
+  mockGetAllEmotions,
+  mockColors,
+  mockSpacing
+} from './__mocks__/UtilityMocks';
+
+import { setupAnimatedMocks } from './__mocks__/AnimationMocks';
+
+// Setup mocks for external dependencies
+jest.mock('react-native/Libraries/Animated/Animated', () => setupAnimatedMocks());
+
+// Mock expo-router
 jest.mock('expo-router', () => ({
   useRouter: jest.fn(() => ({
     back: mockRouterBack,
   })),
-  useLocalSearchParams: jest.fn(() => ({
-    id: 'test-entry-id',
-  })),
+  useLocalSearchParams: jest.fn(() => setupSearchParamsMock()),
 }));
 
 // Mock emotions
-const mockEmotions = [
-  { id: 'happy', label: 'Happy', color: '#FFDE7D', category: 'joy' },
-  { id: 'excited', label: 'Excited', color: '#FFC107', category: 'joy' },
-  { id: 'calm', label: 'Calm', color: '#81D4FA', category: 'peace' },
-  { id: 'sad', label: 'Sad', color: '#90CAF9', category: 'sadness' },
-];
-
-// Mock getEmotionById implementation
-const mockGetEmotionById = (id) => {
-  return mockEmotions.find(e => e.id === id);
-};
-
 jest.mock('@/constants/emotions', () => ({
   getEmotionById: jest.fn(id => mockGetEmotionById(id)),
-  getAllEmotions: jest.fn(() => mockEmotions),
+  getAllEmotions: jest.fn(() => mockGetAllEmotions()),
 }));
 
-// Mock entry data
-const mockEntry = {
-  id: 'test-entry-id',
-  date: new Date('2023-05-15T10:00:00'),
-  time_period: 'MORNING',
-  initial_emotion: 'happy',
-  secondary_emotion: 'excited',
-  emotional_shift: 0.2,
-  gratitude: 'I am grateful for my health',
-  note: 'Today is a good day',
-  user_id: 'user1',
-  created_at: '2023-05-15T10:00:00',
-};
+// Entry for testing
+const mockEntry = mockJournalEntries[0];
 
 // Mock JournalContext
 jest.mock('@/contexts/JournalContext', () => ({
-  useJournal: jest.fn(() => ({
-    entries: [mockEntry],
+  useJournal: jest.fn(() => setupJournalContextMock({
+    entries: [mockEntry]
   })),
 }));
 
 // Mock common components
 jest.mock('@/components/common', () => ({
-  Typography: ({ children, variant, style, glow }: any) => (
-    <View testID={`typography-${variant || 'default'}`}>{children}</View>
-  ),
-  Card: ({ children, style, variant }: any) => (
-    <View testID={`card-${variant || 'default'}`}>{children}</View>
-  ),
-  Button: ({ title, onPress, variant, style }: any) => (
-    <TouchableOpacity testID={`button-${title}`} onPress={onPress}>
-      <View>{title}</View>
-    </TouchableOpacity>
-  ),
-  VideoBackground: () => <View testID="video-background" />,
+  Typography,
+  Card,
+  Button,
+  VideoBackground
 }));
 
 // Mock theme
 jest.mock('@/constants/theme', () => ({
-  COLORS: {
-    ui: {
-      background: '#121212',
-      card: '#1E1E1E',
-      text: '#FFFFFF',
-      accent: '#6200EE',
-    },
-  },
-  SPACING: {
-    sm: 8,
-    md: 16,
-    lg: 24,
-    xl: 32,
-  },
+  COLORS: mockColors,
+  SPACING: mockSpacing,
 }));
 
 // Console spy for debugging elements in tests
@@ -154,9 +116,9 @@ describe('EntryDetailScreen', () => {
 
   it('handles case when entry is not found', () => {
     // Mock useJournal to return no matching entry
-    require('@/contexts/JournalContext').useJournal.mockReturnValueOnce({
-      entries: [],
-    });
+    require('@/contexts/JournalContext').useJournal.mockReturnValueOnce(
+      setupJournalContextMock({ entries: [] })
+    );
     
     const { getByText, getByTestId } = render(<EntryDetailScreen />);
     
@@ -201,9 +163,9 @@ describe('EntryDetailScreen', () => {
     };
     
     // Mock useJournal to return entry without note
-    require('@/contexts/JournalContext').useJournal.mockReturnValueOnce({
-      entries: [entryWithoutNote],
-    });
+    require('@/contexts/JournalContext').useJournal.mockReturnValueOnce(
+      setupJournalContextMock({ entries: [entryWithoutNote] })
+    );
     
     const { getAllByTestId } = render(<EntryDetailScreen />);
     
@@ -234,27 +196,16 @@ describe('EntryDetailScreen', () => {
   it('handles different entry ID from search params', () => {
     // Mock different entry ID
     require('expo-router').useLocalSearchParams.mockReturnValueOnce({
-      id: 'different-id',
+      id: 'test-entry-id-2',
     });
     
-    // Add another entry
-    const anotherEntry = {
-      id: 'different-id',
-      date: new Date('2023-05-16T16:00:00'),
-      time_period: 'AFTERNOON',
-      initial_emotion: 'calm',
-      secondary_emotion: 'sad',
-      emotional_shift: -0.1,
-      gratitude: 'I am grateful for this test',
-      note: 'Another test',
-      user_id: 'user1',
-      created_at: '2023-05-16T16:00:00',
-    };
+    // Use the second entry from our mock entries
+    const anotherEntry = mockJournalEntries[1];
     
     // Mock useJournal to return both entries
-    require('@/contexts/JournalContext').useJournal.mockReturnValueOnce({
-      entries: [mockEntry, anotherEntry],
-    });
+    require('@/contexts/JournalContext').useJournal.mockReturnValueOnce(
+      setupJournalContextMock({ entries: [mockEntry, anotherEntry] })
+    );
     
     const { getByTestId } = render(<EntryDetailScreen />);
     

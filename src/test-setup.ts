@@ -26,6 +26,38 @@ jest.mock('expo-constants', () => ({
   },
 }));
 
+// Mock expo-router
+jest.mock('expo-router', () => ({
+  useRouter: jest.fn(() => ({
+    back: jest.fn(),
+    navigate: jest.fn(),
+    push: jest.fn(),
+    replace: jest.fn(),
+    setParams: jest.fn(),
+  })),
+  useLocalSearchParams: jest.fn(() => ({
+    id: 'test-id',
+  })),
+  useSegments: jest.fn(() => ['test-segment']),
+  useRootNavigationState: jest.fn(() => ({
+    key: 'root',
+    index: 0,
+    routeNames: ['home'],
+    history: [{ type: 'route', key: 'home' }],
+    stale: false,
+    type: 'stack',
+    routes: [{ key: 'home', name: 'home' }],
+  })),
+  Link: jest.fn().mockImplementation(() => 'Link'),
+  Stack: {
+    Screen: jest.fn().mockImplementation(() => 'Stack.Screen'),
+  },
+  Redirect: jest.fn().mockImplementation(() => 'Redirect'),
+  Tabs: {
+    Screen: jest.fn().mockImplementation(() => 'Tabs.Screen'),
+  },
+}));
+
 // Mock react-native-reanimated
 jest.mock('react-native-reanimated', () => {
   const Reanimated = require('react-native-reanimated/mock');

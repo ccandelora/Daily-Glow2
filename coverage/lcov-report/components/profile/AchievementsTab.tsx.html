@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>14/14</span>
+                <span class='fraction'>0/14</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">97.22% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>35/36</span>
+                <span class='fraction'>0/36</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>6/6</span>
+                <span class='fraction'>0/6</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">100% </span>
+                <span class="strong">0% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>13/13</span>
+                <span class='fraction'>0/13</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line high'></div>
+    <div class='status-line low'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -243,13 +243,13 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -311,11 +311,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
-<span class="cline-any cline-yes">18x</span>
-<span class="cline-any cline-yes">18x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">18x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -378,12 +378,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -401,8 +401,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">18x</span>
-<span class="cline-any cline-yes">15x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -415,13 +415,13 @@ import { useProfile } from '@/contexts/UserProfileContext';
 import theme from '@/constants/theme';
 import { FontAwesome6 } from '@expo/vector-icons';
 &nbsp;
-export const AchievementsTab = () =&gt; {
-  const { achievements, userAchievements } = useAchievements();
-  const { userProfile } = useProfile();
+export const AchievementsTab = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >()</span> =&gt; {</span>
+  const { achievements, userAchievements } = <span class="cstat-no" title="statement not covered" >useAchievements();</span>
+  const { userProfile } = <span class="cstat-no" title="statement not covered" >useProfile();</span>
   
-  const currentStreak = userProfile?.streak || 0;
+  const currentStreak = <span class="cstat-no" title="statement not covered" >userProfile?.streak || 0;</span>
 &nbsp;
-  const styles = StyleSheet.create({
+  const styles = <span class="cstat-no" title="statement not covered" >StyleSheet.create({</span>
     container: {
       flex: 1,
       padding: 16,
@@ -483,11 +483,11 @@ export const AchievementsTab = () =&gt; {
     }
   });
 &nbsp;
-  const renderAchievement = (achievement: any, isEarned: boolean) =&gt; {
-    const color = isEarned ? theme.COLORS.primary.teal : 'rgba(120, 120, 120, 0.5)';
-    const iconName = achievement.icon_name || <span class="branch-1 cbranch-no" title="branch not covered" >'medal';</span>
+  const renderAchievement = <span class="cstat-no" title="statement not covered" ><span class="fstat-no" title="function not covered" >(a</span>chievement: any, isEarned: boolean) =&gt; {</span>
+    const color = <span class="cstat-no" title="statement not covered" >isEarned ? theme.COLORS.primary.teal : 'rgba(120, 120, 120, 0.5)';</span>
+    const iconName = <span class="cstat-no" title="statement not covered" >achievement.icon_name || 'medal';</span>
 &nbsp;
-    return (
+<span class="cstat-no" title="statement not covered" >    return (</span>
       &lt;Card 
         key={achievement.id} 
         style={StyleSheet.flatten([
@@ -550,12 +550,12 @@ export const AchievementsTab = () =&gt; {
     );
   };
 &nbsp;
-  return (
+<span class="cstat-no" title="statement not covered" >  return (</span>
     &lt;ScrollView style={styles.container}&gt;
       {userAchievements.length &gt; 0 ? (
         &lt;View style={styles.achievementsContainer}&gt;
-          {userAchievements.map(ua =&gt; 
-            renderAchievement(ua.achievement, true)
+          {userAchievements.map(<span class="fstat-no" title="function not covered" >ua</span> =&gt; 
+<span class="cstat-no" title="statement not covered" >            renderAchievement(ua.achievement, true)</span>
           )}
         &lt;/View&gt;
       ) : (
@@ -573,8 +573,8 @@ export const AchievementsTab = () =&gt; {
       {/* Available achievements */}
       &lt;View style={styles.achievementsContainer}&gt;
         {achievements
-          .filter(a =&gt; !userAchievements.some(ua =&gt; ua.achievement_id === a.id))
-          .map(achievement =&gt; renderAchievement(achievement, false))
+          .filter(<span class="fstat-no" title="function not covered" >a </span>=&gt; <span class="cstat-no" title="statement not covered" >!userAchievements.some(<span class="fstat-no" title="function not covered" >ua</span> =&gt; <span class="cstat-no" title="statement not covered" >ua.achievement_id === a.id)</span>)</span>
+          .map(<span class="fstat-no" title="function not covered" >ac</span>hievement =&gt; <span class="cstat-no" title="statement not covered" >renderAchievement(achievement, false))</span>
         }
       &lt;/View&gt;
     &lt;/ScrollView&gt;
@@ -586,7 +586,7 @@ export const AchievementsTab = () =&gt; {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-03-16T01:34:36.740Z
+                at 2025-03-16T03:30:23.770Z
             </div>
         <script src="../../prettify.js"></script>
         <script>
