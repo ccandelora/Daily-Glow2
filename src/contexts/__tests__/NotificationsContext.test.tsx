@@ -396,4 +396,222 @@ describe('NotificationsContext', () => {
     expect(mockShowError).toHaveBeenCalled();
     expect(mockSetLoading).toHaveBeenCalledWith(false);
   });
+  
+  it('handles error when marking all notifications as read', async () => {
+    // Setup the mock to return an error for update
+    mockSupabase.from.mockReturnValueOnce({
+      update: jest.fn().mockReturnValue({
+        eq: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({ 
+            data: null, 
+            error: new Error('Failed to mark all notifications as read') 
+          })
+        })
+      })
+    });
+    
+    const { result } = renderHook(() => useNotifications(), { wrapper });
+    
+    // Allow component to initialize
+    await waitFor(() => {
+      expect(result.current).toBeDefined();
+    });
+    
+    // Mock the internal state by directly setting the notifications
+    act(() => {
+      // @ts-ignore - Accessing internal methods for testing
+      result.current._setNotifications?.(mockNotifications);
+    });
+    
+    // Call markAllAsRead
+    await act(async () => {
+      await result.current.markAllAsRead();
+    });
+    
+    // Verify error handling
+    expect(mockShowError).toHaveBeenCalled();
+    expect(mockSetLoading).toHaveBeenCalledWith(false);
+  });
+  
+  it('handles error when loading user badges', async () => {
+    // First mock gives successful response for notifications
+    mockSupabase.from.mockImplementationOnce(() => ({
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      order: jest.fn().mockResolvedValue({ data: mockNotifications, error: null })
+    }));
+    
+    // Second mock gives error for user_badges
+    mockSupabase.from.mockImplementationOnce(() => ({
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      order: jest.fn().mockResolvedValue({ data: null, error: new Error('Failed to load user badges') })
+    }));
+    
+    // Spy on console.error to verify it's not called (error is silently handled)
+    console.error = jest.fn();
+    
+    const { result } = renderHook(() => useNotifications(), { wrapper });
+    
+    // Allow component to initialize
+    await waitFor(() => {
+      expect(result.current).toBeDefined();
+    });
+    
+    // Verify userBadges is empty despite the error
+    expect(result.current.userBadges).toEqual([]);
+    
+    // Verify no error is shown to user and error is silently handled
+    expect(mockShowError).not.toHaveBeenCalled();
+    expect(console.error).not.toHaveBeenCalled();
+  });
+  
+  it('creates and removes subscription when user is available', async () => {
+    // Mock a channel function that returns subscription object
+    const mockChannel = {
+      on: jest.fn().mockReturnValue({
+        subscribe: jest.fn().mockImplementation((callback) => {
+          callback('SUBSCRIBED');
+          return mockChannel;
+        })
+      })
+    };
+    
+    mockSupabase.channel = jest.fn().mockReturnValue(mockChannel);
+    
+    const { result, unmount } = renderHook(() => useNotifications(), { wrapper });
+    
+    // Allow component to initialize
+    await waitFor(() => {
+      expect(result.current).toBeDefined();
+    });
+    
+    // Verify subscription was created
+    expect(mockSupabase.channel).toHaveBeenCalledWith('notifications');
+    expect(mockChannel.on).toHaveBeenCalledWith(
+      'postgres_changes',
+      expect.objectContaining({
+        event: 'INSERT',
+        table: 'notifications',
+      }),
+      expect.any(Function)
+    );
+    
+    // Unmount to trigger cleanup
+    unmount();
+    
+    // Verify unsubscribe was called
+    expect(mockSupabase.removeChannel).toHaveBeenCalledWith(mockChannel);
+  });
+  
+  it('handles incoming notification through subscription', async () => {
+    let subscriptionCallback: Function;
+    
+    // Mock a channel function that captures the callback
+    const mockChannel = {
+      on: jest.fn().mockImplementation((event, filter, callback) => {
+        subscriptionCallback = callback;
+        return {
+          subscribe: jest.fn().mockImplementation((statusCallback) => {
+            statusCallback('SUBSCRIBED');
+            return mockChannel;
+          })
+        };
+      })
+    };
+    
+    mockSupabase.channel = jest.fn().mockReturnValue(mockChannel);
+    
+    const { result } = renderHook(() => useNotifications(), { wrapper });
+    
+    // Allow component to initialize and capture initial state
+    await waitFor(() => {
+      expect(result.current).toBeDefined();
+    });
+    
+    // Get initial notifications count
+    const initialNotificationsCount = result.current.notifications.length;
+    
+    // Simulate a new notification coming in
+    const newNotification = {
+      id: 'new-id',
+      type: 'badge',
+      title: 'New Notification',
+      message: 'This is a new notification',
+      metadata: {},
+      read: false,
+      created_at: '2023-06-05T12:00:00Z',
+      user_id: 'test-user-id'
+    };
+    
+    // Trigger the subscription callback with the new notification
+    act(() => {
+      subscriptionCallback({ new: newNotification });
+    });
+    
+    // Verify that notification was added
+    expect(result.current.notifications.length).toBe(initialNotificationsCount + 1);
+    expect(result.current.notifications[0]).toEqual(newNotification);
+  });
+  
+  it('handles errors gracefully in the subscription callback', async () => {
+    let subscriptionCallback: Function;
+    
+    // Mock a channel function that captures the callback
+    const mockChannel = {
+      on: jest.fn().mockImplementation((event, filter, callback) => {
+        subscriptionCallback = callback;
+        return {
+          subscribe: jest.fn().mockImplementation((statusCallback) => {
+            statusCallback('SUBSCRIBED');
+            return mockChannel;
+          })
+        };
+      })
+    };
+    
+    mockSupabase.channel = jest.fn().mockReturnValue(mockChannel);
+    
+    // Mock console.error to track calls
+    console.error = jest.fn();
+    
+    const { result } = renderHook(() => useNotifications(), { wrapper });
+    
+    // Allow component to initialize
+    await waitFor(() => {
+      expect(result.current).toBeDefined();
+    });
+    
+    // Trigger the subscription callback with invalid data that will cause an error
+    act(() => {
+      // Call with null to force error in setNotifications
+      subscriptionCallback({ new: undefined });
+    });
+    
+    // Verify that error was logged
+    expect(console.error).toHaveBeenCalledWith('Error handling notification payload:', expect.any(Error));
+  });
+  
+  it('does not set up subscription when supabase client is not available', async () => {
+    // Replace supabase with undefined temporarily
+    const supabaseModule = require('@/lib/supabase');
+    const originalSupabase = supabaseModule.supabase;
+    supabaseModule.supabase = undefined;
+    
+    // Mock console.warn to track calls
+    console.warn = jest.fn();
+    
+    const { result } = renderHook(() => useNotifications(), { wrapper });
+    
+    // Allow component to initialize
+    await waitFor(() => {
+      expect(result.current).toBeDefined();
+    });
+    
+    // Verify warning was logged
+    expect(console.warn).toHaveBeenCalledWith('Supabase client not available - skipping notification subscription');
+    
+    // Restore original supabase
+    supabaseModule.supabase = originalSupabase;
+  });
 }); 

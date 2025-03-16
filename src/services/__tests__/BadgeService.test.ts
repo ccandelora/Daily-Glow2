@@ -805,4 +805,207 @@ describe('BadgeService', () => {
       initializeBadgesSpy.mockRestore();
     });
   });
+  
+  describe('error scenarios during badge table creation', () => {
+    it('should handle unexpected error during badges table check', async () => {
+      // Mock unexpected error when checking badges table
+      const mockErrorResponse = jest.fn().mockRejectedValue(new Error('Unexpected error'));
+      
+      (supabase.from as jest.Mock).mockImplementation((table) => {
+        if (table === 'badges') {
+          return {
+            select: jest.fn().mockReturnValue({
+              limit: mockErrorResponse
+            })
+          };
+        }
+        return { select: jest.fn() };
+      });
+      
+      console.error = jest.fn(); // Mock console.error to track calls
+      
+      // Call the method
+      await BadgeService.createBadgesTables();
+      
+      // Verify error was handled
+      expect(console.error).toHaveBeenCalledWith(
+        'Error checking if badges table exists:',
+        expect.any(Error)
+      );
+    });
+    
+    it('should handle error during table creation via RPC', async () => {
+      // Mock successful table check (table doesn't exist)
+      const mockBadgesLimit = jest.fn().mockResolvedValue({
+        data: null,
+        error: { code: 'PGRST116' }, // Table does not exist error
+      });
+      
+      const mockUserBadgesLimit = jest.fn().mockResolvedValue({
+        data: null,
+        error: { code: 'PGRST116' }, // Table does not exist error
+      });
+      
+      (supabase.from as jest.Mock).mockImplementation((table) => {
+        if (table === 'badges') {
+          return {
+            select: jest.fn().mockReturnValue({
+              limit: mockBadgesLimit
+            })
+          };
+        } else if (table === 'user_badges') {
+          return {
+            select: jest.fn().mockReturnValue({
+              limit: mockUserBadgesLimit
+            })
+          };
+        }
+        return { select: jest.fn() };
+      });
+      
+      // Mock RPC call with error
+      (supabase.rpc as jest.Mock).mockResolvedValue({
+        error: { message: 'RPC error' }
+      });
+      
+      console.error = jest.fn(); // Mock console.error to track calls
+      
+      // Call the method
+      await BadgeService.createBadgesTables();
+      
+      // Verify error was handled
+      expect(console.error).toHaveBeenCalledWith(
+        'Error creating badges table:',
+        expect.objectContaining({ message: 'RPC error' })
+      );
+    });
+  });
+  
+  describe('count and error handling in initialization', () => {
+    it('should handle errors during badge count check', async () => {
+      // Mock that badges exist but count fails
+      const mockExistingBadges = jest.fn().mockResolvedValue({
+        data: [{ id: '123', name: 'Test Badge' }],
+        error: null
+      });
+      
+      const mockCountError = jest.fn().mockResolvedValue({
+        count: null,
+        error: { message: 'Count error' }
+      });
+      
+      (supabase.from as jest.Mock).mockImplementation((table) => {
+        if (table === 'badges') {
+          return {
+            select: jest.fn().mockImplementation((columns, options) => {
+              if (options && options.count === 'exact') {
+                return mockCountError();
+              }
+              return {
+                limit: jest.fn().mockReturnValue(mockExistingBadges())
+              };
+            })
+          };
+        }
+        return { select: jest.fn() };
+      });
+      
+      console.error = jest.fn(); // Mock console.error to track calls
+      console.log = jest.fn(); // Mock console.log to avoid noise
+      
+      // Call the method
+      await BadgeService.initializeBadges();
+      
+      // Verify error was handled
+      expect(console.error).toHaveBeenCalledWith(
+        'Error counting badges:',
+        expect.objectContaining({ message: 'Count error' })
+      );
+    });
+    
+    it('should handle error when creating specific badge types', async () => {
+      // Mock that no badges exist so initialization continues
+      const mockNoBadges = jest.fn().mockResolvedValue({
+        data: [],
+        error: null
+      });
+      
+      (supabase.from as jest.Mock).mockImplementation((table) => {
+        if (table === 'badges') {
+          return {
+            select: jest.fn().mockImplementation((columns, options) => {
+              return {
+                limit: jest.fn().mockReturnValue(mockNoBadges())
+              };
+            }),
+            insert: jest.fn().mockResolvedValue({
+              error: { message: 'Insert error' }
+            })
+          };
+        }
+        return { 
+          select: jest.fn().mockReturnValue({
+            limit: jest.fn().mockResolvedValue({ data: null, error: null })
+          }),
+        };
+      });
+      
+      // Mock createBadgesTables to avoid testing that part
+      jest.spyOn(BadgeService, 'createBadgesTables').mockResolvedValue();
+      
+      console.error = jest.fn(); // Mock console.error to track calls
+      console.log = jest.fn(); // Mock console.log to avoid noise
+      
+      // Call the method
+      await BadgeService.initializeBadges();
+      
+      // Verify error was handled for at least one badge creation
+      expect(console.error).toHaveBeenCalledWith(
+        expect.stringContaining('Error creating badge'),
+        expect.objectContaining({ message: 'Insert error' })
+      );
+      
+      // Reset the spy
+      (BadgeService.createBadgesTables as jest.MockedFunction<any>).mockRestore();
+    });
+  });
+  
+  describe('edge cases in checkStreakBadges', () => {
+    it('should handle null or undefined periods in streaks', async () => {
+      // Create mock for the addUserBadge callback
+      const mockAddUserBadge = jest.fn().mockResolvedValue(undefined);
+      
+      // Define incomplete streaks with null/undefined values
+      const incompleteStreaks: Partial<CheckInStreak> = {
+        morning: undefined,
+        afternoon: null as any,
+        evening: 7,
+        lastMorningCheckIn: null,
+        lastAfternoonCheckIn: null,
+        lastEveningCheckIn: new Date().toISOString()
+      };
+      
+      // Call the method
+      await BadgeService.checkStreakBadges(incompleteStreaks as CheckInStreak, mockAddUserBadge);
+      
+      // Only evening badges should be awarded since the others are null/undefined
+      expect(mockAddUserBadge).toHaveBeenCalledWith(BADGE_IDS.STREAKS.EVENING['3']);
+      expect(mockAddUserBadge).toHaveBeenCalledWith(BADGE_IDS.STREAKS.EVENING['7']);
+      
+      // Morning/afternoon badges should not be awarded
+      expect(mockAddUserBadge).not.toHaveBeenCalledWith(BADGE_IDS.STREAKS.MORNING['3']);
+      expect(mockAddUserBadge).not.toHaveBeenCalledWith(BADGE_IDS.STREAKS.AFTERNOON['3']);
+    });
+    
+    it('should do nothing when streaks are empty object', async () => {
+      // Create mock for the addUserBadge callback
+      const mockAddUserBadge = jest.fn().mockResolvedValue(undefined);
+      
+      // Call with empty object
+      await BadgeService.checkStreakBadges({} as CheckInStreak, mockAddUserBadge);
+      
+      // No badges should be awarded
+      expect(mockAddUserBadge).not.toHaveBeenCalled();
+    });
+  });
 }); 

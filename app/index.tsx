@@ -23,7 +23,7 @@ export default function Index() {
 
   // TEMPORARY: Force showing onboarding regardless of state
   console.log('Root index: FORCING redirect to onboarding');
-  return <Redirect href="/(onboarding)" />;
+  return <Redirect href="/(onboarding)/index" />;
 }
 
 const styles = StyleSheet.create({

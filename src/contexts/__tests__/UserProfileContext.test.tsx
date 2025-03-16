@@ -342,4 +342,198 @@ describe('UserProfileContext', () => {
     // Verify that userProfile is null when no user is available
     expect(result.current.userProfile).toBeNull();
   });
+
+  it('handles non-existent profiles table', async () => {
+    // Override the mock to simulate profiles table not existing
+    const mockFrom = supabase.from;
+    const mockSelect = mockFrom().select;
+    const mockLimit = mockSelect().limit;
+    const mockSingle = mockLimit().single;
+    
+    mockSingle.mockResolvedValueOnce(mockTableNotExistResponse);
+    
+    const { result } = renderHook(() => useProfile(), { wrapper });
+
+    // Wait for loading to complete
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+    
+    // Verify a temporary profile was created
+    expect(result.current.userProfile).toBeDefined();
+    expect(result.current.userProfile?.user_id).toBe('test-user-id');
+    expect(result.current.userProfile?.id).toBe('temp-id');
+    
+    // Verify no insert was attempted since the table doesn't exist
+    expect(supabase.from().insert).not.toHaveBeenCalled();
+  });
+
+  it('handles update when profiles table does not exist', async () => {
+    // Override the mock to simulate profiles table not existing
+    const mockFrom = supabase.from;
+    const mockSelect = mockFrom().select;
+    const mockLimit = mockSelect().limit;
+    const mockSingle = mockLimit().single;
+    
+    mockSingle.mockResolvedValueOnce(mockTableNotExistResponse);
+    
+    const { result } = renderHook(() => useProfile(), { wrapper });
+
+    // Wait for loading to complete and confirm temporary profile is created
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.userProfile).toBeDefined();
+    });
+    
+    // Try updating the profile
+    const updates = { display_name: 'Local Update Only' };
+    
+    await act(async () => {
+      await result.current.updateProfile(updates);
+    });
+    
+    // Verify no actual update was attempted since the table doesn't exist
+    expect(supabase.from().update).not.toHaveBeenCalled();
+    
+    // But the local state should be updated
+    expect(result.current.userProfile?.display_name).toBe('Local Update Only');
+  });
+
+  it('handles duplicate key error during profile creation', async () => {
+    // Mock responses for the test scenario
+    const duplicateKeyError = { 
+      data: null, 
+      error: { code: '23505', message: 'duplicate key value violates unique constraint' }
+    };
+    
+    // First query returns no profile
+    const mockFrom = supabase.from;
+    const mockSelect = mockFrom().select;
+    const mockEq = mockSelect().eq;
+    const mockEqSingle = mockEq().single;
+    mockEqSingle.mockResolvedValueOnce(mockEmptyProfileResponse);
+    
+    // Insert attempt returns duplicate key error
+    const mockInsert = mockFrom().insert;
+    const mockInsertSelect = mockInsert().select;
+    const mockInsertSelectSingle = mockInsertSelect().single;
+    mockInsertSelectSingle.mockResolvedValueOnce(duplicateKeyError);
+    
+    // Second query returns the existing profile
+    mockEqSingle.mockResolvedValueOnce(mockProfileResponse);
+    
+    const { result } = renderHook(() => useProfile(), { wrapper });
+
+    // Wait for loading to complete
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+    
+    // Verify the fallback profile fetch was successful
+    expect(result.current.userProfile).toEqual(mockProfileResponse.data);
+    
+    // Verify the insert was attempted
+    expect(supabase.from().insert).toHaveBeenCalled();
+    
+    // Verify a second select was attempted after the insert failed
+    expect(supabase.from().select().eq().single).toHaveBeenCalledTimes(2);
+  });
+
+  it('refreshes profile data when refreshProfile is called', async () => {
+    const { result } = renderHook(() => useProfile(), { wrapper });
+
+    // Wait for initial loading to complete
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+    
+    // Clear the mock calls
+    jest.clearAllMocks();
+    
+    // Call refreshProfile
+    await act(async () => {
+      await result.current.refreshProfile();
+    });
+    
+    // Verify the profile was fetched again
+    expect(supabase.from).toHaveBeenCalledWith('profiles');
+    expect(supabase.from().select).toHaveBeenCalledWith('*');
+    expect(supabase.from().select().eq).toHaveBeenCalledWith('user_id', 'test-user-id');
+  });
+
+  it('does not fetch profile when user is null', async () => {
+    // Override the auth hook to return null user
+    (useAuth as jest.Mock).mockReturnValueOnce({
+      user: null,
+      isLoading: false
+    });
+    
+    const { result } = renderHook(() => useProfile(), { wrapper });
+
+    // Wait for loading to complete
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+    
+    // Verify profile is null and no API calls were made
+    expect(result.current.userProfile).toBeNull();
+    expect(supabase.from().select().eq).not.toHaveBeenCalled();
+  });
+
+  it('does not update profile when user is null', async () => {
+    // Override the auth hook to return null user
+    (useAuth as jest.Mock).mockReturnValueOnce({
+      user: null,
+      isLoading: false
+    });
+    
+    const { result } = renderHook(() => useProfile(), { wrapper });
+
+    // Wait for loading to complete
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+    
+    // Try to update profile
+    await act(async () => {
+      await result.current.updateProfile({ display_name: 'Should Not Update' });
+    });
+    
+    // Verify no API calls were made
+    expect(supabase.from().update).not.toHaveBeenCalled();
+  });
+
+  it('reports errors properly during profile fetch', async () => {
+    // Setup mock to return a generic error
+    const genericError = { 
+      data: null, 
+      error: { message: 'Database connection error' } 
+    };
+    
+    const mockFrom = supabase.from;
+    const mockSelect = mockFrom().select;
+    const mockLimit = mockSelect().limit;
+    const mockSingle = mockLimit().single;
+    
+    // First check for table existence succeeds
+    mockSingle.mockResolvedValueOnce(mockTableCountResponse);
+    
+    // But the profile fetch fails
+    const mockEq = mockSelect().eq;
+    const mockEqSingle = mockEq().single;
+    mockEqSingle.mockResolvedValueOnce(genericError);
+    
+    const { result } = renderHook(() => useProfile(), { wrapper });
+
+    // Wait for loading to complete
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+    
+    // Verify error was shown
+    expect(mockAppState.showError).toHaveBeenCalledWith('Failed to load profile');
+    
+    // Profile should still be null
+    expect(result.current.userProfile).toBeNull();
+  });
 }); 
