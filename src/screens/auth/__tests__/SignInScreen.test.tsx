@@ -11,39 +11,22 @@ jest.mock('expo-router', () => ({
   })),
 }));
 
-// Mock the common components
-jest.mock('@/components/common', () => ({
-  Typography: ({ children, variant, style, glow, color }: any) => (
-    <View testID={`typography-${variant || 'default'}`}>{children}</View>
-  ),
-  Input: ({ label, value, onChangeText, placeholder, secureTextEntry }: any) => (
-    <View testID={`input-${label}`}>
-      <View testID={`input-label-${label}`}>{label}</View>
-      <TextInput
-        testID={`input-field-${label}`}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        secureTextEntry={secureTextEntry}
-      />
-    </View>
-  ),
-  Button: ({ title, onPress, variant, style }: any) => (
-    <TouchableOpacity testID={`button-${variant}`} onPress={onPress}>
-      <View>{title}</View>
-    </TouchableOpacity>
-  ),
-  Card: ({ children, style, variant }: any) => (
-    <View testID={`card-${variant || 'default'}`}>{children}</View>
-  ),
-  VideoBackground: () => <View testID="video-background" />,
-  Logo: ({ size, style }: any) => <View testID={`logo-${size}`} />,
-}));
+// Mock the common components using the dynamic require approach
+jest.mock('@/components/common', () => {
+  const { createCommonComponentMocks } = require('../__mocks__/CommonComponentMocks');
+  return createCommonComponentMocks();
+});
 
 // Mock LinearGradient
-jest.mock('expo-linear-gradient', () => ({
-  LinearGradient: ({ children }: any) => <View testID="linear-gradient">{children}</View>,
-}));
+jest.mock('expo-linear-gradient', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  
+  return {
+    LinearGradient: ({ children }: { children: React.ReactNode }) => 
+      React.createElement(View, { testID: "linear-gradient" }, children)
+  };
+});
 
 // Mock Auth Context
 const mockSignIn = jest.fn();

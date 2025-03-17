@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, act, waitFor } from '@testing-library/react-native';
+import { render, act, waitFor, renderHook } from '@testing-library/react-native';
 import { Text } from 'react-native';
 import { CheckInStreakProvider, useCheckInStreak, CheckInStreak } from '@/contexts/CheckInStreakContext';
 import { supabase } from '@/lib/supabase';
@@ -7,55 +7,76 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { AppStateProvider } from '@/contexts/AppStateContext';
 
 // Mock the supabase client
+const mockSelect = jest.fn();
+const mockEq = jest.fn();
+const mockSingle = jest.fn();
+const mockInsert = jest.fn();
+const mockUpdate = jest.fn();
+
 jest.mock('@/lib/supabase', () => ({
   supabase: {
     from: jest.fn(() => ({
       select: jest.fn(() => ({
-        eq: jest.fn(() => ({
-          single: jest.fn(),
-        })),
+        eq: mockEq.mockReturnValue({
+          single: mockSingle
+        })
       })),
-      insert: jest.fn(() => ({
-        eq: jest.fn(),
-      })),
-      update: jest.fn(() => ({
-        eq: jest.fn(),
-      })),
-    })),
-  },
+      insert: mockInsert.mockReturnValue({
+        eq: mockEq
+      }),
+      update: mockUpdate.mockReturnValue({
+        eq: mockEq
+      })
+    }))
+  }
 }));
 
-// Mock the AuthContext
+// Mock AuthContext
 jest.mock('@/contexts/AuthContext', () => ({
-  useAuth: jest.fn().mockReturnValue({
-    user: { id: 'test-user-id' },
-  }),
-  AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  useAuth: jest.fn(() => ({
+    user: { id: 'test-user-id' }
+  })),
+  AuthProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>
 }));
 
-// Mock the AppStateContext
+// Mock AppStateContext
 jest.mock('@/contexts/AppStateContext', () => ({
-  useAppState: jest.fn().mockReturnValue({
+  useAppState: jest.fn(() => ({
     showError: jest.fn(),
-    showSuccess: jest.fn(),
-  }),
-  AppStateProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    showSuccess: jest.fn()
+  })),
+  AppStateProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>
 }));
 
-// Test component that uses the CheckInStreakContext
-const TestComponent = () => {
-  const { streaks, incrementStreak, refreshStreaks } = useCheckInStreak();
+// Define the context type interface since it's not exported from the context file
+interface CheckInStreakContextType {
+  streaks: CheckInStreak;
+  incrementStreak: (period: 'morning' | 'afternoon' | 'evening') => Promise<void>;
+  refreshStreaks: () => Promise<void>;
+  onStreakUpdated?: (streaks: CheckInStreak, isFirstCheckIn: boolean, allPeriodsCompleted: boolean) => void;
+}
+
+// Test component that uses the streak context
+interface TestComponentProps {
+  onContextUpdate?: (context: CheckInStreakContextType) => void;
+}
+
+const TestComponent = ({ onContextUpdate }: TestComponentProps) => {
+  const streakContext = useCheckInStreak();
+  
+  // Pass the context to the parent for direct access
+  React.useEffect(() => {
+    if (onContextUpdate) {
+      onContextUpdate(streakContext);
+    }
+  }, [streakContext, onContextUpdate]);
   
   return (
-    <>
-      <Text testID="morning-streak">{streaks.morning}</Text>
-      <Text testID="afternoon-streak">{streaks.afternoon}</Text>
-      <Text testID="evening-streak">{streaks.evening}</Text>
-      <Text testID="increment-morning" onPress={() => incrementStreak('morning')}>Increment Morning</Text>
-      <Text testID="increment-afternoon" onPress={() => incrementStreak('afternoon')}>Increment Afternoon</Text>
-      <Text testID="increment-evening" onPress={() => incrementStreak('evening')}>Increment Evening</Text>
-      <Text testID="refresh-streaks" onPress={() => refreshStreaks()}>Refresh Streaks</Text>
-    </>
+    <Text testID="test-component">
+      {JSON.stringify({
+        streaks: streakContext.streaks
+      })}
+    </Text>
   );
 };
 
@@ -64,639 +85,679 @@ describe('CheckInStreakContext', () => {
     jest.clearAllMocks();
   });
 
-  it('initializes with default streak values', async () => {
-    // Mock the supabase response for initial fetch
-    const mockSingle = jest.fn().mockResolvedValue({
-      data: null,
-      error: { code: 'PGRST116' },
-    });
-    
-    const mockEq = jest.fn().mockReturnValue({ single: mockSingle });
-    const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
-    
-    // Mock the insert response for creating a new streak record
-    const mockInsertEq = jest.fn().mockResolvedValue({
-      data: null,
-      error: null,
-    });
-    const mockInsert = jest.fn().mockReturnValue({ eq: mockInsertEq });
-    
-    (supabase.from as jest.Mock).mockImplementation((table) => {
-      if (table === 'user_streaks') {
-        return {
-          select: mockSelect,
-          insert: mockInsert,
-        };
-      }
-      return { select: mockSelect };
-    });
-
-    const { getByTestId } = render(
-      <AppStateProvider>
-        <AuthProvider>
-          <CheckInStreakProvider>
-            <TestComponent />
-          </CheckInStreakProvider>
-        </AuthProvider>
-      </AppStateProvider>
-    );
-
-    // Wait for the async operations to complete
-    await waitFor(() => {
-      expect(getByTestId('morning-streak').props.children).toBe(0);
-      expect(getByTestId('afternoon-streak').props.children).toBe(0);
-      expect(getByTestId('evening-streak').props.children).toBe(0);
-    });
-  });
-
-  it('fetches existing streak data from supabase', async () => {
-    // Mock the supabase response for existing data
-    const mockSingle = jest.fn().mockResolvedValue({
+  it('provides initial streak values', async () => {
+    mockSingle.mockResolvedValueOnce({
       data: {
         morning_streak: 5,
         afternoon_streak: 3,
-        evening_streak: 7,
-        last_morning_check_in: '2023-01-01',
-        last_afternoon_check_in: '2023-01-01',
-        last_evening_check_in: '2023-01-01',
+        evening_streak: 2,
+        last_morning_check_in: '2024-01-01',
+        last_afternoon_check_in: '2024-01-01',
+        last_evening_check_in: '2024-01-01'
       },
-      error: null,
+      error: null
     });
-    
-    const mockEq = jest.fn().mockReturnValue({ single: mockSingle });
-    const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
-    
-    (supabase.from as jest.Mock).mockImplementation(() => ({
-      select: mockSelect,
-    }));
 
     const { getByTestId } = render(
-      <AppStateProvider>
-        <AuthProvider>
-          <CheckInStreakProvider>
-            <TestComponent />
-          </CheckInStreakProvider>
-        </AuthProvider>
-      </AppStateProvider>
+      <CheckInStreakProvider>
+        <TestComponent />
+      </CheckInStreakProvider>
     );
 
-    // Wait for the async operations to complete
     await waitFor(() => {
-      expect(getByTestId('morning-streak').props.children).toBe(5);
-      expect(getByTestId('afternoon-streak').props.children).toBe(3);
-      expect(getByTestId('evening-streak').props.children).toBe(7);
+      const component = getByTestId('test-component');
+      const data = JSON.parse(component.props.children);
+      expect(data.streaks.morning).toBe(5);
+      expect(data.streaks.afternoon).toBe(3);
+      expect(data.streaks.evening).toBe(2);
     });
   });
 
-  it('increments streak when incrementStreak is called', async () => {
-    // Mock the initial fetch
-    const mockInitialSingle = jest.fn().mockResolvedValue({
-      data: {
-        morning_streak: 5,
-        afternoon_streak: 3,
-        evening_streak: 7,
-        last_morning_check_in: '2023-01-01',
-        last_afternoon_check_in: '2023-01-01',
-        last_evening_check_in: '2023-01-01',
-      },
-      error: null,
-    });
-    
-    const mockInitialEq = jest.fn().mockReturnValue({ single: mockInitialSingle });
-    const mockInitialSelect = jest.fn().mockReturnValue({ eq: mockInitialEq });
-    
-    // Mock the streak increment fetch
-    const mockIncrementSingle = jest.fn().mockResolvedValue({
-      data: {
-        morning_streak: 5,
-        afternoon_streak: 3,
-        evening_streak: 7,
-        last_morning_check_in: '2023-01-01',
-        last_afternoon_check_in: '2023-01-01',
-        last_evening_check_in: '2023-01-01',
-      },
-      error: null,
-    });
-    
-    const mockIncrementEq = jest.fn().mockReturnValue({ single: mockIncrementSingle });
-    const mockIncrementSelect = jest.fn().mockReturnValue({ eq: mockIncrementEq });
-    
-    // Mock the update response
-    const mockUpdateEq = jest.fn().mockResolvedValue({
+  it('creates new streak record if none exists', async () => {
+    // First call returns no record
+    mockSingle.mockResolvedValueOnce({
       data: null,
-      error: null,
+      error: { code: 'PGRST116' }
     });
-    const mockUpdate = jest.fn().mockReturnValue({ eq: mockUpdateEq });
-    
-    (supabase.from as jest.Mock).mockImplementation(() => ({
-      select: mockInitialSelect,
-      update: mockUpdate
-    }));
+
+    // Second call for insert succeeds
+    mockInsert.mockResolvedValueOnce({
+      error: null
+    });
 
     const { getByTestId } = render(
-      <AppStateProvider>
-        <AuthProvider>
-          <CheckInStreakProvider>
-            <TestComponent />
-          </CheckInStreakProvider>
-        </AuthProvider>
-      </AppStateProvider>
+      <CheckInStreakProvider>
+        <TestComponent />
+      </CheckInStreakProvider>
     );
 
-    // Wait for initial render
     await waitFor(() => {
-      expect(getByTestId('morning-streak').props.children).toBe(5);
+      expect(mockInsert).toHaveBeenCalledWith([{
+        user_id: 'test-user-id',
+        morning_streak: 0,
+        afternoon_streak: 0,
+        evening_streak: 0
+      }]);
     });
-
-    // Reset mocks for the next call
-    (supabase.from as jest.Mock).mockClear();
-    
-    // Mock for the increment call
-    (supabase.from as jest.Mock).mockImplementation(() => ({
-      select: mockIncrementSelect,
-      update: mockUpdate
-    }));
-
-    // Increment morning streak
-    await act(async () => {
-      getByTestId('increment-morning').props.onPress();
-    });
-
-    // Verify that the supabase update was called correctly
-    expect(supabase.from).toHaveBeenCalledWith('user_streaks');
-    expect(mockUpdate).toHaveBeenCalled();
   });
 
-  it('calls onStreakUpdated callback when provided', async () => {
-    const mockOnStreakUpdated = jest.fn();
-
-    // Mock the initial fetch
-    const mockSingle = jest.fn().mockResolvedValue({
-      data: {
-        morning_streak: 5,
-        afternoon_streak: 3,
-        evening_streak: 7,
-        last_morning_check_in: '2023-01-01',
-        last_afternoon_check_in: '2023-01-01',
-        last_evening_check_in: '2023-01-01',
-      },
-      error: null,
-    });
-    
-    const mockEq = jest.fn().mockReturnValue({ single: mockSingle });
-    const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
-    
-    // Mock the update response
-    const mockUpdateEq = jest.fn().mockResolvedValue({
+  it('handles duplicate key error when creating streak record', async () => {
+    // First call returns no record
+    mockSingle.mockResolvedValueOnce({
       data: null,
-      error: null,
+      error: { code: 'PGRST116' }
     });
-    const mockUpdate = jest.fn().mockReturnValue({ eq: mockUpdateEq });
-    
-    (supabase.from as jest.Mock).mockImplementation(() => ({
-      select: mockSelect,
-      update: mockUpdate
-    }));
+
+    // Insert fails with duplicate key
+    mockInsert.mockResolvedValueOnce({
+      error: { code: '23505' }
+    });
+
+    // Subsequent fetch succeeds
+    mockSingle.mockResolvedValueOnce({
+      data: {
+        morning_streak: 1,
+        afternoon_streak: 1,
+        evening_streak: 1
+      },
+      error: null
+    });
 
     const { getByTestId } = render(
-      <AppStateProvider>
-        <AuthProvider>
-          <CheckInStreakProvider onStreakUpdated={mockOnStreakUpdated}>
-            <TestComponent />
-          </CheckInStreakProvider>
-        </AuthProvider>
-      </AppStateProvider>
+      <CheckInStreakProvider>
+        <TestComponent />
+      </CheckInStreakProvider>
     );
 
-    // Wait for initial render
     await waitFor(() => {
-      expect(getByTestId('morning-streak')).toBeTruthy();
+      const component = getByTestId('test-component');
+      const data = JSON.parse(component.props.children);
+      expect(data.streaks.morning).toBe(1);
     });
-
-    // Increment morning streak
-    await act(async () => {
-      getByTestId('increment-morning').props.onPress();
-    });
-
-    // Verify that the callback was called
-    expect(mockOnStreakUpdated).toHaveBeenCalled();
   });
 
-  it('refreshes streaks when refreshStreaks is called', async () => {
-    // Mock the initial fetch
-    const mockInitialSingle = jest.fn().mockResolvedValue({
-      data: {
-        morning_streak: 5,
-        afternoon_streak: 3,
-        evening_streak: 7,
-        last_morning_check_in: '2023-01-01',
-        last_afternoon_check_in: '2023-01-01',
-        last_evening_check_in: '2023-01-01',
-      },
-      error: null,
+  describe('incrementStreak', () => {
+    it('increments streak when last check-in was yesterday', async () => {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      // Mock current streaks fetch
+      mockSingle.mockResolvedValueOnce({
+        data: {
+          morning_streak: 3,
+          last_morning_check_in: yesterday.toISOString()
+        },
+        error: null
+      });
+
+      // Mock streak update
+      mockUpdate.mockResolvedValueOnce({
+        error: null
+      });
+
+      let contextValue: CheckInStreakContextType | null = null;
+      
+      render(
+        <CheckInStreakProvider>
+          <TestComponent onContextUpdate={(context: CheckInStreakContextType) => { contextValue = context; }} />
+        </CheckInStreakProvider>
+      );
+
+      // Wait for context to be passed
+      await waitFor(() => expect(contextValue).not.toBeNull());
+
+      // Call incrementStreak
+      await act(async () => {
+        await contextValue!.incrementStreak('morning');
+      });
+
+      // Verify streak was incremented
+      expect(mockUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          morning_streak: 4
+        })
+      );
     });
-    
-    const mockInitialEq = jest.fn().mockReturnValue({ single: mockInitialSingle });
-    const mockInitialSelect = jest.fn().mockReturnValue({ eq: mockInitialEq });
-    
-    // Mock the refresh fetch with updated values
-    const mockRefreshSingle = jest.fn().mockResolvedValue({
-      data: {
-        morning_streak: 6,
-        afternoon_streak: 4,
-        evening_streak: 8,
-        last_morning_check_in: '2023-01-02',
-        last_afternoon_check_in: '2023-01-02',
-        last_evening_check_in: '2023-01-02',
-      },
-      error: null,
+
+    it('maintains streak when checking in same day', async () => {
+      const today = new Date().toISOString();
+      
+      // Mock current streaks fetch
+      mockSingle.mockResolvedValueOnce({
+        data: {
+          morning_streak: 3,
+          last_morning_check_in: today
+        },
+        error: null
+      });
+
+      // Mock streak update
+      mockUpdate.mockResolvedValueOnce({
+        error: null
+      });
+
+      let contextValue: CheckInStreakContextType | null = null;
+      
+      render(
+        <CheckInStreakProvider>
+          <TestComponent onContextUpdate={(context: CheckInStreakContextType) => { contextValue = context; }} />
+        </CheckInStreakProvider>
+      );
+
+      // Wait for context to be passed
+      await waitFor(() => expect(contextValue).not.toBeNull());
+
+      await act(async () => {
+        await contextValue!.incrementStreak('morning');
+      });
+
+      expect(mockUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          morning_streak: 3
+        })
+      );
     });
-    
-    const mockRefreshEq = jest.fn().mockReturnValue({ single: mockRefreshSingle });
-    const mockRefreshSelect = jest.fn().mockReturnValue({ eq: mockRefreshEq });
-    
-    (supabase.from as jest.Mock).mockImplementation(() => ({
-      select: mockInitialSelect
-    }));
+
+    it('resets streak when there is a gap', async () => {
+      const threeDaysAgo = new Date();
+      threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+      
+      // Mock current streaks fetch
+      mockSingle.mockResolvedValueOnce({
+        data: {
+          morning_streak: 5,
+          last_morning_check_in: threeDaysAgo.toISOString()
+        },
+        error: null
+      });
+
+      // Mock streak update
+      mockUpdate.mockResolvedValueOnce({
+        error: null
+      });
+
+      let contextValue: CheckInStreakContextType | null = null;
+      
+      render(
+        <CheckInStreakProvider>
+          <TestComponent onContextUpdate={(context: CheckInStreakContextType) => { contextValue = context; }} />
+        </CheckInStreakProvider>
+      );
+
+      // Wait for context to be passed
+      await waitFor(() => expect(contextValue).not.toBeNull());
+
+      await act(async () => {
+        await contextValue!.incrementStreak('morning');
+      });
+
+      expect(mockUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          morning_streak: 1
+        })
+      );
+    });
+
+    it('handles milestone streaks', async () => {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      
+      // Mock current streaks fetch
+      mockSingle.mockResolvedValueOnce({
+        data: {
+          morning_streak: 6,
+          last_morning_check_in: yesterday.toISOString()
+        },
+        error: null
+      });
+
+      // Mock streak update
+      mockUpdate.mockResolvedValueOnce({
+        error: null
+      });
+
+      const mockShowSuccess = jest.fn();
+      jest.spyOn(require('@/contexts/AppStateContext'), 'useAppState')
+        .mockImplementation(() => ({
+          showError: jest.fn(),
+          showSuccess: mockShowSuccess
+        }));
+
+      const { getByTestId } = render(
+        <CheckInStreakProvider>
+          <TestComponent />
+        </CheckInStreakProvider>
+      );
+
+      const component = getByTestId('test-component');
+      const streakContext = JSON.parse(component.props.children);
+
+      await act(async () => {
+        await streakContext.incrementStreak('morning');
+      });
+
+      expect(mockShowSuccess).toHaveBeenCalledWith(
+        expect.stringMatching(/7 day morning streak achieved/)
+      );
+    });
+  });
+
+  describe('refreshStreaks', () => {
+    it('updates streaks from the server', async () => {
+      // Mock initial streaks
+      mockSingle.mockResolvedValueOnce({
+        data: {
+          morning_streak: 1,
+          afternoon_streak: 2,
+          evening_streak: 3
+        },
+        error: null
+      });
+      
+      // Mock refreshed streaks
+      mockSingle.mockResolvedValueOnce({
+        data: {
+          morning_streak: 4,
+          afternoon_streak: 5,
+          evening_streak: 6
+        },
+        error: null
+      });
+
+      let contextValue: CheckInStreakContextType | null = null;
+      
+      const { getByTestId } = render(
+        <CheckInStreakProvider>
+          <TestComponent onContextUpdate={(context: CheckInStreakContextType) => { contextValue = context; }} />
+        </CheckInStreakProvider>
+      );
+
+      // Wait for context to be passed
+      await waitFor(() => expect(contextValue).not.toBeNull());
+
+      // Initial state
+      let component = getByTestId('test-component');
+      let initialData = JSON.parse(component.props.children);
+      expect(initialData.streaks.morning).toBe(1);
+      
+      await act(async () => {
+        await contextValue!.refreshStreaks();
+      });
+
+      // Check that the streaks were updated
+      expect(contextValue!.streaks.morning).toBe(4);
+      expect(contextValue!.streaks.afternoon).toBe(5);
+      expect(contextValue!.streaks.evening).toBe(6);
+    });
+
+    it('handles errors during refresh', async () => {
+      // Mock error response
+      mockSingle.mockRejectedValueOnce(new Error('Network error'));
+      
+      const mockShowError = jest.fn();
+      jest.spyOn(require('@/contexts/AppStateContext'), 'useAppState').mockReturnValueOnce({
+        showError: mockShowError,
+        showSuccess: jest.fn()
+      });
+
+      let contextValue: CheckInStreakContextType | null = null;
+      
+      render(
+        <CheckInStreakProvider>
+          <TestComponent onContextUpdate={(context: CheckInStreakContextType) => { contextValue = context; }} />
+        </CheckInStreakProvider>
+      );
+
+      // Wait for context to be passed
+      await waitFor(() => expect(contextValue).not.toBeNull());
+
+      await act(async () => {
+        await contextValue!.refreshStreaks();
+      });
+
+      expect(console.error).toHaveBeenCalledWith('Error fetching streaks:', expect.anything());
+    });
+  });
+
+  describe('streak callback handling', () => {
+    it('calls onStreakUpdated with correct parameters', async () => {
+      const mockCallback = jest.fn();
+      
+      // Mock current streaks
+      mockSingle.mockResolvedValueOnce({
+        data: {
+          morning_streak: 0,
+          afternoon_streak: 0,
+          evening_streak: 0
+        },
+        error: null
+      });
+      
+      // Mock update
+      mockUpdate.mockResolvedValueOnce({
+        error: null
+      });
+
+      let contextValue: CheckInStreakContextType | null = null;
+      
+      render(
+        <CheckInStreakProvider onStreakUpdated={mockCallback}>
+          <TestComponent onContextUpdate={(context: CheckInStreakContextType) => { contextValue = context; }} />
+        </CheckInStreakProvider>
+      );
+
+      // Wait for context to be passed
+      await waitFor(() => expect(contextValue).not.toBeNull());
+
+      await act(async () => {
+        await contextValue!.incrementStreak('morning');
+      });
+
+      expect(mockCallback).toHaveBeenCalledWith(
+        expect.objectContaining({
+          morning: 1
+        }),
+        true, // Should be first check-in
+        false // Not all periods completed
+      );
+    });
+
+    it('handles callback errors gracefully', async () => {
+      const mockCallback = jest.fn().mockImplementation(() => {
+        throw new Error('Callback error');
+      });
+
+      mockSingle.mockResolvedValueOnce({
+        data: {
+          morning_streak: 1,
+          afternoon_streak: 1,
+          evening_streak: 1
+        },
+        error: null
+      });
+
+      mockUpdate.mockResolvedValueOnce({
+        error: null
+      });
+
+      const { getByTestId } = render(
+        <CheckInStreakProvider onStreakUpdated={mockCallback}>
+          <TestComponent />
+        </CheckInStreakProvider>
+      );
+
+      const component = getByTestId('test-component');
+      const streakContext = JSON.parse(component.props.children);
+
+      // Should not throw
+      await act(async () => {
+        await streakContext.incrementStreak('morning');
+      });
+
+      expect(mockCallback).toHaveBeenCalled();
+    });
+  });
+
+  it('handles non-PGRST116 error when fetching streaks', async () => {
+    // Mock error that is not a "not found" error
+    mockSingle.mockResolvedValueOnce({
+      data: null,
+      error: { code: 'OTHER_ERROR', message: 'Database error' }
+    });
+
+    console.error = jest.fn();
 
     const { getByTestId } = render(
-      <AppStateProvider>
-        <AuthProvider>
-          <CheckInStreakProvider>
-            <TestComponent />
-          </CheckInStreakProvider>
-        </AuthProvider>
-      </AppStateProvider>
+      <CheckInStreakProvider>
+        <TestComponent />
+      </CheckInStreakProvider>
     );
 
-    // Wait for initial render
     await waitFor(() => {
-      expect(getByTestId('morning-streak').props.children).toBe(5);
-    });
-
-    // Reset the mock to track new calls
-    (supabase.from as jest.Mock).mockClear();
-    
-    // Mock for the refresh call
-    (supabase.from as jest.Mock).mockImplementation(() => ({
-      select: mockRefreshSelect
-    }));
-    
-    // Refresh streaks
-    await act(async () => {
-      getByTestId('refresh-streaks').props.onPress();
-    });
-
-    // Verify that supabase was called again
-    expect(supabase.from).toHaveBeenCalledWith('user_streaks');
-  });
-
-  it('handles errors when fetching streaks', async () => {
-    // Mock the supabase response with an error
-    const mockSingle = jest.fn().mockResolvedValue({
-      data: null,
-      error: { code: 'SOME_ERROR', message: 'Database error' },
-    });
-    
-    const mockEq = jest.fn().mockReturnValue({ single: mockSingle });
-    const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
-    
-    (supabase.from as jest.Mock).mockImplementation(() => ({
-      select: mockSelect
-    }));
-
-    console.error = jest.fn(); // Mock console.error to prevent test output noise
-
-    render(
-      <AppStateProvider>
-        <AuthProvider>
-          <CheckInStreakProvider>
-            <TestComponent />
-          </CheckInStreakProvider>
-        </AuthProvider>
-      </AppStateProvider>
-    );
-
-    // Wait for the error to be logged
-    await waitFor(() => {
-      expect(console.error).toHaveBeenCalled();
-    });
-  });
-  
-  it('creates streak record when no record exists and handles duplicate key error', async () => {
-    // First return no record exists error, then on second call return duplicate key error
-    const mockSingleNoRecord = jest.fn().mockResolvedValue({
-      data: null,
-      error: { code: 'PGRST116' }, // No record found error
-    });
-    
-    const mockInsertDuplicateError = jest.fn().mockResolvedValue({
-      data: null,
-      error: { code: '23505' }, // Duplicate key error
-    });
-    
-    const mockEq = jest.fn().mockReturnValue({ single: mockSingleNoRecord });
-    const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
-    const mockInsert = jest.fn().mockReturnValue(mockInsertDuplicateError);
-    
-    (supabase.from as jest.Mock).mockImplementation(() => ({
-      select: mockSelect,
-      insert: mockInsert
-    }));
-
-    console.log = jest.fn(); // Mock console.log to track messages
-
-    render(
-      <AppStateProvider>
-        <AuthProvider>
-          <CheckInStreakProvider>
-            <TestComponent />
-          </CheckInStreakProvider>
-        </AuthProvider>
-      </AppStateProvider>
-    );
-
-    // Verify that the correct console message was logged
-    await waitFor(() => {
-      expect(console.log).toHaveBeenCalledWith('Streak record already exists, fetching it instead');
-    });
-  });
-  
-  it('handles errors when creating streak record', async () => {
-    // First return no record exists error
-    const mockSingleNoRecord = jest.fn().mockResolvedValue({
-      data: null,
-      error: { code: 'PGRST116' }, // No record found error
-    });
-    
-    // Then return a non-duplicate error when inserting
-    const mockInsertError = jest.fn().mockResolvedValue({
-      data: null,
-      error: { code: 'OTHER_ERROR', message: 'Insert failed' },
-    });
-    
-    const mockEq = jest.fn().mockReturnValue({ single: mockSingleNoRecord });
-    const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
-    const mockInsert = jest.fn().mockReturnValue(mockInsertError);
-    
-    (supabase.from as jest.Mock).mockImplementation(() => ({
-      select: mockSelect,
-      insert: mockInsert
-    }));
-
-    console.error = jest.fn(); // Mock console.error to track error messages
-
-    render(
-      <AppStateProvider>
-        <AuthProvider>
-          <CheckInStreakProvider>
-            <TestComponent />
-          </CheckInStreakProvider>
-        </AuthProvider>
-      </AppStateProvider>
-    );
-
-    // Verify that the error was properly logged
-    await waitFor(() => {
-      expect(console.error).toHaveBeenCalledWith('Error creating streak record:', expect.any(Object));
-    });
-  });
-  
-  it('handles incrementStreak with no existing streak record', async () => {
-    // Mock initial fetch to return no record error
-    const mockSingleNoRecord = jest.fn().mockResolvedValue({
-      data: null,
-      error: { code: 'PGRST116' },
-    });
-    
-    // Mock insert response for creating a new streak record with initial values
-    const mockInsertSuccess = jest.fn().mockResolvedValue({
-      data: null,
-      error: null,
-    });
-    
-    const mockEq = jest.fn().mockReturnValue({ single: mockSingleNoRecord });
-    const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
-    const mockInsert = jest.fn().mockReturnValue(mockInsertSuccess);
-    
-    (supabase.from as jest.Mock).mockImplementation(() => ({
-      select: mockSelect,
-      insert: mockInsert
-    }));
-
-    const { getByTestId } = render(
-      <AppStateProvider>
-        <AuthProvider>
-          <CheckInStreakProvider>
-            <TestComponent />
-          </CheckInStreakProvider>
-        </AuthProvider>
-      </AppStateProvider>
-    );
-
-    // Reset mocks for the next call
-    (supabase.from as jest.Mock).mockClear();
-    mockSelect.mockClear();
-    mockInsert.mockClear();
-    
-    // Increment streak - should try to create a new record when none exists
-    await act(async () => {
-      getByTestId('increment-morning').props.onPress();
-    });
-
-    // Verify that insert was called after select found no record
-    await waitFor(() => {
-      expect(mockSelect).toHaveBeenCalled();
-      expect(mockInsert).toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalledWith('Error fetching streaks:', expect.anything());
     });
   });
 
-  it('shows success message for milestone streak values', async () => {
-    // Mock the useAppState hook to track showSuccess calls
-    const mockShowSuccess = jest.fn();
-    require('@/contexts/AppStateContext').useAppState.mockReturnValue({
-      showError: jest.fn(),
-      showSuccess: mockShowSuccess,
-    });
-    
-    // Mock streak data with a value that will become a milestone (7)
-    const mockSingle = jest.fn().mockResolvedValue({
-      data: {
-        morning_streak: 6, // One less than milestone 7
-        afternoon_streak: 3,
-        evening_streak: 7,
-        last_morning_check_in: new Date(Date.now() - 86400000).toISOString(), // Yesterday
-        last_afternoon_check_in: '2023-01-01',
-        last_evening_check_in: '2023-01-01',
-      },
-      error: null,
-    });
-    
-    const mockEq = jest.fn().mockReturnValue({ single: mockSingle });
-    const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
-    
-    // Mock the update response
-    const mockUpdateEq = jest.fn().mockResolvedValue({
-      data: null,
-      error: null,
-    });
-    const mockUpdate = jest.fn().mockReturnValue({ eq: mockUpdateEq });
-    
-    (supabase.from as jest.Mock).mockImplementation(() => ({
-      select: mockSelect,
-      update: mockUpdate
-    }));
-
-    const { getByTestId } = render(
-      <AppStateProvider>
-        <AuthProvider>
-          <CheckInStreakProvider>
-            <TestComponent />
-          </CheckInStreakProvider>
-        </AuthProvider>
-      </AppStateProvider>
-    );
-
-    // Increment morning streak (should become 7, a milestone)
-    await act(async () => {
-      getByTestId('increment-morning').props.onPress();
-    });
-
-    // Verify that showSuccess was called with a milestone message
-    expect(mockShowSuccess).toHaveBeenCalledWith('🔥 7 day morning streak achieved!');
-  });
-
-  it('handles user being null', async () => {
-    // Mock user as null
-    require('@/contexts/AuthContext').useAuth.mockReturnValueOnce({
-      user: null,
-    });
-    
-    const mockSelect = jest.fn();
-    const mockInsert = jest.fn();
-    
-    (supabase.from as jest.Mock).mockImplementation(() => ({
-      select: mockSelect,
-      insert: mockInsert
-    }));
-
-    render(
-      <AppStateProvider>
-        <AuthProvider>
-          <CheckInStreakProvider>
-            <TestComponent />
-          </CheckInStreakProvider>
-        </AuthProvider>
-      </AppStateProvider>
-    );
-
-    // Verify that supabase was not called because user is null
-    expect(mockSelect).not.toHaveBeenCalled();
-    expect(mockInsert).not.toHaveBeenCalled();
-  });
-
-  it('keeps the current streak when checking in on the same day', async () => {
-    // Current date for the test
-    const today = new Date();
-    const todayISOString = today.toISOString();
-    
-    // Mock streak data with today as the last check-in
-    const mockSingle = jest.fn().mockResolvedValue({
+  it('handles error when updating streak', async () => {
+    // Mock current streaks fetch
+    mockSingle.mockResolvedValueOnce({
       data: {
         morning_streak: 3,
-        afternoon_streak: 2,
-        evening_streak: 1,
-        last_morning_check_in: todayISOString, // Today
-        last_afternoon_check_in: todayISOString,
-        last_evening_check_in: '2023-01-01',
+        last_morning_check_in: new Date().toISOString()
       },
-      error: null,
+      error: null
     });
-    
-    const mockEq = jest.fn().mockReturnValue({ single: mockSingle });
-    const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
-    
-    // Mock the update response
-    const mockUpdateEq = jest.fn().mockResolvedValue({
-      data: null,
-      error: null,
+
+    // Mock streak update error
+    mockUpdate.mockResolvedValueOnce({
+      error: { message: 'Error updating streak' }
     });
-    const mockUpdate = jest.fn().mockReturnValue({ eq: mockUpdateEq });
-    
-    (supabase.from as jest.Mock).mockImplementation(() => ({
-      select: mockSelect,
-      update: mockUpdate
-    }));
+
+    console.error = jest.fn();
 
     const { getByTestId } = render(
-      <AppStateProvider>
-        <AuthProvider>
-          <CheckInStreakProvider>
-            <TestComponent />
-          </CheckInStreakProvider>
-        </AuthProvider>
-      </AppStateProvider>
+      <CheckInStreakProvider>
+        <TestComponent />
+      </CheckInStreakProvider>
     );
 
-    // Increment morning streak again on the same day
+    const component = getByTestId('test-component');
+    const streakContext = JSON.parse(component.props.children);
+
     await act(async () => {
-      getByTestId('increment-morning').props.onPress();
+      await streakContext.incrementStreak('morning');
     });
 
-    // Verify that update was called with the same streak value (not incremented)
-    expect(mockUpdate).toHaveBeenCalledWith(expect.objectContaining({
-      morning_streak: 3, // Same value, not incremented
-      last_morning_check_in: expect.any(String)
-    }));
+    expect(console.error).toHaveBeenCalledWith('Error updating streak:', expect.anything());
   });
 
-  it('handles errors during incrementStreak', async () => {
-    // Mock streak data
-    const mockSingle = jest.fn().mockResolvedValue({
-      data: {
-        morning_streak: 5,
-        afternoon_streak: 3,
-        evening_streak: 7,
-        last_morning_check_in: '2023-01-01',
-        last_afternoon_check_in: '2023-01-01',
-        last_evening_check_in: '2023-01-01',
-      },
-      error: null,
-    });
-    
-    const mockEq = jest.fn().mockReturnValue({ single: mockSingle });
-    const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
-    
-    // Mock the update response with an error
-    const mockUpdateEq = jest.fn().mockResolvedValue({
-      data: null,
-      error: { message: 'Update failed' },
-    });
-    const mockUpdate = jest.fn().mockReturnValue({ eq: mockUpdateEq });
-    
-    (supabase.from as jest.Mock).mockImplementation(() => ({
-      select: mockSelect,
-      update: mockUpdate
-    }));
-
-    console.error = jest.fn(); // Mock console.error to check if errors are logged
+  it('handles null user when incrementing streak', async () => {
+    // Mock Auth to return null user
+    jest.spyOn(require('@/contexts/AuthContext'), 'useAuth')
+      .mockImplementation(() => ({
+        user: null
+      }));
 
     const { getByTestId } = render(
-      <AppStateProvider>
-        <AuthProvider>
-          <CheckInStreakProvider>
-            <TestComponent />
-          </CheckInStreakProvider>
-        </AuthProvider>
-      </AppStateProvider>
+      <CheckInStreakProvider>
+        <TestComponent />
+      </CheckInStreakProvider>
     );
 
-    // Attempt to increment streak
+    const component = getByTestId('test-component');
+    const streakContext = JSON.parse(component.props.children);
+
+    // Should not throw
     await act(async () => {
-      getByTestId('increment-morning').props.onPress();
+      await streakContext.incrementStreak('morning');
     });
 
-    // Verify that the error was logged
-    expect(console.error).toHaveBeenCalledWith('Error updating streak:', expect.any(Object));
+    // Should not try to fetch streaks
+    expect(mockSingle).not.toHaveBeenCalled();
+  });
+
+  it('handles invalid date in lastCheckIn field', async () => {
+    // Mock current streaks fetch with invalid date
+    mockSingle.mockResolvedValueOnce({
+      data: {
+        morning_streak: 3,
+        last_morning_check_in: 'invalid-date'
+      },
+      error: null
+    });
+
+    // Mock streak update
+    mockUpdate.mockResolvedValueOnce({
+      error: null
+    });
+
+    const { getByTestId } = render(
+      <CheckInStreakProvider>
+        <TestComponent />
+      </CheckInStreakProvider>
+    );
+
+    const component = getByTestId('test-component');
+    const streakContext = JSON.parse(component.props.children);
+
+    await act(async () => {
+      await streakContext.incrementStreak('morning');
+    });
+
+    // Should reset to 1 when date is invalid
+    expect(mockUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        morning_streak: 1
+      })
+    );
+  });
+
+  it('creates new streak record when incrementing with no record', async () => {
+    // First streaks fetch returns no record
+    mockSingle.mockResolvedValueOnce({
+      data: null,
+      error: { code: 'PGRST116' }
+    });
+
+    // Insert for new streak record
+    mockInsert.mockResolvedValueOnce({
+      error: null
+    });
+
+    const { getByTestId } = render(
+      <CheckInStreakProvider>
+        <TestComponent />
+      </CheckInStreakProvider>
+    );
+
+    const component = getByTestId('test-component');
+    const streakContext = JSON.parse(component.props.children);
+
+    await act(async () => {
+      await streakContext.incrementStreak('evening');
+    });
+
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          evening_streak: 1
+        })
+      ])
+    );
+  });
+
+  it('handles error when creating streak record during increment', async () => {
+    // First streaks fetch returns no record
+    mockSingle.mockResolvedValueOnce({
+      data: null,
+      error: { code: 'PGRST116' }
+    });
+
+    // Insert for new streak record fails
+    mockInsert.mockResolvedValueOnce({
+      error: { message: 'Insert failed' }
+    });
+
+    console.error = jest.fn();
+
+    const { getByTestId } = render(
+      <CheckInStreakProvider>
+        <TestComponent />
+      </CheckInStreakProvider>
+    );
+
+    const component = getByTestId('test-component');
+    const streakContext = JSON.parse(component.props.children);
+
+    await act(async () => {
+      await streakContext.incrementStreak('morning');
+    });
+
+    expect(console.error).toHaveBeenCalledWith('Error creating streak:', expect.anything());
+  });
+
+  it('shows success message for all milestone streaks', async () => {
+    const milestones = [3, 7, 14, 30, 60, 90];
+    
+    // Test each milestone
+    for (const milestone of milestones) {
+      jest.clearAllMocks();
+      
+      // Mock streaks with one less than milestone
+      mockSingle.mockResolvedValueOnce({
+        data: {
+          morning_streak: milestone - 1,
+          last_morning_check_in: (() => {
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            return yesterday.toISOString();
+          })()
+        },
+        error: null
+      });
+      
+      mockUpdate.mockResolvedValueOnce({
+        error: null
+      });
+      
+      // Mock showSuccess
+      const mockShowSuccess = jest.fn();
+      jest.spyOn(require('@/contexts/AppStateContext'), 'useAppState')
+        .mockImplementation(() => ({
+          showError: jest.fn(),
+          showSuccess: mockShowSuccess
+        }));
+      
+      const { getByTestId } = render(
+        <CheckInStreakProvider>
+          <TestComponent />
+        </CheckInStreakProvider>
+      );
+      
+      const component = getByTestId('test-component');
+      const streakContext = JSON.parse(component.props.children);
+      
+      await act(async () => {
+        await streakContext.incrementStreak('morning');
+      });
+      
+      expect(mockShowSuccess).toHaveBeenCalledWith(`🔥 ${milestone} day morning streak achieved!`);
+    }
+  });
+
+  it('throws error when hook is used outside provider', () => {
+    console.error = jest.fn();
+    
+    expect(() => {
+      const { result } = renderHook(() => useCheckInStreak());
+    }).toThrow('useCheckInStreak must be used within a CheckInStreakProvider');
+  });
+
+  it('properly handles null fields in streak data', async () => {
+    // Mock with some null fields
+    mockSingle.mockResolvedValueOnce({
+      data: {
+        morning_streak: null,
+        afternoon_streak: 3,
+        evening_streak: null,
+        last_morning_check_in: null,
+        last_afternoon_check_in: '2023-01-01'
+      },
+      error: null
+    });
+
+    const { getByTestId } = render(
+      <CheckInStreakProvider>
+        <TestComponent />
+      </CheckInStreakProvider>
+    );
+
+    await waitFor(() => {
+      const component = getByTestId('test-component');
+      const streakContext = JSON.parse(component.props.children);
+      expect(streakContext.streaks.morning).toBe(0); // Null should default to 0
+      expect(streakContext.streaks.afternoon).toBe(3);
+      expect(streakContext.streaks.evening).toBe(0); // Null should default to 0
+    });
   });
 }); 

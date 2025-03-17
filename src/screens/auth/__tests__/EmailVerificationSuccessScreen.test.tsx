@@ -1,6 +1,5 @@
 import React from 'react';
 import { render, fireEvent, waitFor, act, RenderAPI } from '@testing-library/react-native';
-import { View, TouchableOpacity } from 'react-native';
 import { EmailVerificationSuccessScreen } from '../EmailVerificationSuccessScreen';
 
 // Mock console.error to avoid cluttering test output
@@ -27,21 +26,32 @@ jest.mock('expo-router', () => ({
 
 // Mock the common components
 jest.mock('@/components/common', () => ({
-  Typography: ({ children, variant, style, glow }: any) => (
-    <View testID={`typography-${variant || 'default'}`}>{children}</View>
-  ),
-  Button: ({ title, onPress, variant, style }: any) => (
-    <TouchableOpacity testID={`button-${title}`} onPress={onPress}>
-      <View>{title}</View>
-    </TouchableOpacity>
-  ),
-  VideoBackground: () => <View testID="video-background" />,
-  Logo: ({ size }: any) => <View testID={`logo-${size}`} />,
+  Typography: jest.fn(({ children, variant, style, glow }) => {
+    const React = require('react');
+    return React.createElement('View', { testID: `typography-${variant || 'default'}` }, children);
+  }),
+  Button: jest.fn(({ title, onPress, variant, style }) => {
+    const React = require('react');
+    return React.createElement('TouchableOpacity', { testID: `button-${title}`, onPress }, 
+      React.createElement('View', null, title)
+    );
+  }),
+  VideoBackground: jest.fn(() => {
+    const React = require('react');
+    return React.createElement('View', { testID: 'video-background' });
+  }),
+  Logo: jest.fn(({ size }) => {
+    const React = require('react');
+    return React.createElement('View', { testID: `logo-${size}` });
+  }),
 }));
 
 // Mock LinearGradient
 jest.mock('expo-linear-gradient', () => ({
-  LinearGradient: ({ children }: any) => <View testID="linear-gradient">{children}</View>,
+  LinearGradient: jest.fn(({ children }) => {
+    const React = require('react');
+    return React.createElement('View', { testID: 'linear-gradient' }, children);
+  }),
 }));
 
 // Mock Auth Context with different states for different tests

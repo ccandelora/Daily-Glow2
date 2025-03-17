@@ -64,4 +64,26 @@ describe('AnimatedBackground', () => {
     
     expect(getByTestId('animated-bg')).toBeTruthy();
   });
+
+  it('handles non-animated mode correctly', () => {
+    const { getByTestId } = render(
+      <AnimatedBackground animated={false} testID="static-bg" />
+    );
+    
+    expect(getByTestId('static-bg')).toBeTruthy();
+    // When animated is false, the animation will not start and fadeAnim should be set directly
+  });
+
+  it('renders with different intensity settings', () => {
+    const { getByTestId: getLightBg } = render(
+      <AnimatedBackground intensity="light" testID="light-bg" />
+    );
+    
+    const { getByTestId: getDarkBg } = render(
+      <AnimatedBackground intensity="dark" testID="dark-bg" />
+    );
+    
+    expect(getLightBg('light-bg')).toBeTruthy();
+    expect(getDarkBg('dark-bg')).toBeTruthy();
+  });
 }); 

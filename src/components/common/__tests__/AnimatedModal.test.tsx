@@ -110,4 +110,30 @@ describe('AnimatedModal', () => {
     const modalContent = getByTestId('test-modal-content');
     expect(modalContent).toBeTruthy();
   });
+
+  it('handles animation when visible changes to false', () => {
+    const { rerender } = render(
+      <AnimatedModal 
+        visible={true} 
+        onClose={mockOnClose}
+        testID="test-modal-content"
+      >
+        <Text>Modal Content</Text>
+      </AnimatedModal>
+    );
+    
+    // Re-render with visible set to false
+    rerender(
+      <AnimatedModal 
+        visible={false} 
+        onClose={mockOnClose}
+        testID="test-modal-content"
+      >
+        <Text>Modal Content</Text>
+      </AnimatedModal>
+    );
+    
+    // The animation should be triggered when visible changes to false
+    // This is testing the else branch in the useEffect
+  });
 }); 

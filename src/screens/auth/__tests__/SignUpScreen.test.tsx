@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
-import { Platform, TouchableOpacity, View, TextInput } from 'react-native';
+import { Platform, TouchableOpacity, View, TextInput, Alert } from 'react-native';
 import { SignUpScreen } from '../SignUpScreen';
 
 // Mock the necessary dependencies
@@ -12,44 +12,78 @@ jest.mock('expo-router', () => ({
 }));
 
 // Mock the common components
-jest.mock('@/components/common', () => ({
-  Typography: ({ children, variant, style, glow, color }: any) => (
-    <View testID={`typography-${variant || 'default'}`}>{children}</View>
-  ),
-  Input: ({ label, value, onChangeText, placeholder, secureTextEntry }: any) => (
-    <View testID={`input-${label}`}>
-      <View testID={`input-label-${label}`}>{label}</View>
-      <TextInput
-        testID={`input-field-${label}`}
-        value={value}
-        onChangeText={onChangeText}
-        placeholder={placeholder}
-        secureTextEntry={secureTextEntry}
-      />
-    </View>
-  ),
-  Button: ({ title, onPress, variant, style }: any) => (
-    <TouchableOpacity testID={`button-${variant}`} onPress={onPress}>
-      <View>{title}</View>
-    </TouchableOpacity>
-  ),
-  Card: ({ children, style, variant }: any) => (
-    <View testID={`card-${variant || 'default'}`}>{children}</View>
-  ),
-  VideoBackground: () => <View testID="video-background" />,
-  Logo: ({ size, style }: any) => <View testID={`logo-${size}`} />,
-}));
+jest.mock('@/components/common', () => {
+  return {
+    Typography: jest.fn(({ children, variant, style, glow, color }) => {
+      const React = require('react');
+      return React.createElement('View', { 
+        testID: `typography-${variant || 'default'}`,
+        style
+      }, React.createElement('Text', null, children));
+    }),
+    
+    Input: jest.fn(({ label, value, onChangeText, placeholder, secureTextEntry }) => {
+      const React = require('react');
+      return React.createElement('View', { 
+        testID: `input-${label}`
+      }, [
+        React.createElement('View', { key: 'label', testID: `input-label-${label}` }, label),
+        React.createElement('TextInput', {
+          key: 'field',
+          testID: `input-field-${label}`,
+          value,
+          onChangeText,
+          placeholder,
+          secureTextEntry
+        })
+      ]);
+    }),
+    
+    Button: jest.fn(({ title, onPress, variant, style }) => {
+      const React = require('react');
+      return React.createElement('TouchableOpacity', { 
+        testID: `button-${variant}`,
+        onPress
+      }, React.createElement('View', null, title));
+    }),
+    
+    Card: jest.fn(({ children, style, variant }) => {
+      const React = require('react');
+      return React.createElement('View', { 
+        testID: `card-${variant || 'default'}`,
+        style
+      }, children);
+    }),
+    
+    VideoBackground: jest.fn(() => {
+      const React = require('react');
+      return React.createElement('View', { testID: 'video-background' });
+    }),
+    
+    Logo: jest.fn(({ size, style }) => {
+      const React = require('react');
+      return React.createElement('View', { testID: `logo-${size}` });
+    })
+  };
+});
 
 // Mock LinearGradient
-jest.mock('expo-linear-gradient', () => ({
-  LinearGradient: ({ children }: any) => <View testID="linear-gradient">{children}</View>,
-}));
+jest.mock('expo-linear-gradient', () => {
+  return {
+    LinearGradient: jest.fn(({ children }) => {
+      const React = require('react');
+      return React.createElement('View', { testID: 'linear-gradient' }, children);
+    })
+  };
+});
 
 // Mock Auth Context
 const mockSignUp = jest.fn();
 jest.mock('@/contexts/AuthContext', () => ({
   useAuth: jest.fn(() => ({
     signUp: mockSignUp,
+    user: null,
+    isEmailVerified: false,
   })),
 }));
 
@@ -62,6 +96,9 @@ jest.mock('@/contexts/AppStateContext', () => ({
     showError: mockShowError,
   })),
 }));
+
+// Mock Alert
+jest.spyOn(Alert, 'alert').mockImplementation(() => {});
 
 // Mock Platform
 const originalPlatform = { ...Platform };

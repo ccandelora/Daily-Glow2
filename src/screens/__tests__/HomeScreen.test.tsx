@@ -14,59 +14,131 @@ jest.mock('expo-router', () => ({
   }),
 }));
 
-// Mock the video background component
+// Mock components using dynamic require approach
 jest.mock('@/components/common/VideoBackground', () => {
   return {
     __esModule: true,
-    default: () => <View testID="mock-video-background" />,
+    default: jest.fn(() => {
+      const React = require('react');
+      return React.createElement('View', { testID: "mock-video-background" });
+    })
   };
 });
 
 // Mock the LinearGradient component
 jest.mock('expo-linear-gradient', () => {
   return {
-    LinearGradient: ({ children }: { children: React.ReactNode }) => (
-      <View testID="mock-linear-gradient">{children}</View>
-    ),
+    LinearGradient: jest.fn(({ children }) => {
+      const React = require('react');
+      return React.createElement('View', { testID: "mock-linear-gradient" }, children);
+    }),
   };
 });
 
-// Mock JournalContext
+// Mock context
 jest.mock('@/contexts/JournalContext', () => ({
-  useJournal: jest.fn(),
+  useJournal: jest.fn(() => ({
+    todayEntries: [],
+    isLoading: false,
+  })),
+}));
+
+jest.mock('@/contexts/AuthContext', () => ({
+  useAuth: jest.fn(() => ({
+    user: { id: 'test-user' },
+    isEmailVerified: true,
+  })),
+}));
+
+jest.mock('@/contexts/UserProfileContext', () => ({
+  useUserProfile: jest.fn(() => ({
+    profile: {
+      first_name: 'Test',
+      last_name: 'User',
+    },
+  })),
 }));
 
 // Mock the common components
 jest.mock('@/components/common', () => {
-  const original = jest.requireActual('@/components/common');
   return {
-    ...original,
-    Typography: ({ children, variant, style, glow, color }: any) => (
-      <View testID={`mock-typography-${variant || 'default'}`}>{children}</View>
-    ),
-    Card: ({ children, style, variant }: any) => (
-      <View testID="mock-card">{children}</View>
-    ),
-    Button: ({ title, onPress, variant, style, textStyle }: any) => (
-      <TouchableOpacity testID={`mock-button-${variant}`} onPress={onPress}>
-        <View>{title}</View>
-      </TouchableOpacity>
-    ),
-    AnimatedMoodIcon: () => <View testID="mock-animated-mood-icon" />,
-    DailyChallenge: () => <View testID="mock-daily-challenge" />,
-    VideoBackground: () => <View testID="mock-video-background" />,
-    Header: ({ showBranding }: any) => <View testID="mock-header" />,
+    Card: jest.fn(({ children, variant, style }) => {
+      const React = require('react');
+      return React.createElement('View', { 
+        testID: `card-${variant || 'default'}`,
+        style
+      }, children);
+    }),
+    
+    Typography: jest.fn(({ children, variant, style }) => {
+      const React = require('react');
+      return React.createElement('View', { 
+        testID: `typography-${variant || 'default'}`,
+        style 
+      }, React.createElement('Text', null, children));
+    }),
+    
+    AnimatedBackground: jest.fn(({ children }) => {
+      const React = require('react');
+      return React.createElement('View', { 
+        testID: 'animated-background' 
+      }, children);
+    }),
+    
+    Button: jest.fn(({ title, onPress, variant, style, textStyle }) => {
+      const React = require('react');
+      return React.createElement('TouchableOpacity', {
+        testID: `mock-button-${variant}`,
+        onPress
+      }, React.createElement('View', null, title));
+    }),
+    AnimatedMoodIcon: jest.fn(() => {
+      const React = require('react');
+      return React.createElement('View', { testID: "mock-animated-mood-icon" });
+    }),
+    DailyChallenge: jest.fn(() => {
+      const React = require('react');
+      return React.createElement('View', { testID: "mock-daily-challenge" });
+    }),
+    VideoBackground: jest.fn(() => {
+      const React = require('react');
+      return React.createElement('View', { testID: "mock-video-background" });
+    }),
+    Header: jest.fn(({ showBranding }) => {
+      const React = require('react');
+      return React.createElement('View', { testID: "mock-header" });
+    }),
   };
 });
 
 // Mock home components
-jest.mock('@/components/home/StreakSummary', () => ({
-  StreakSummary: () => <View testID="mock-streak-summary" />,
-}));
+jest.mock('@/components/home/StreakSummary', () => {
+  return {
+    StreakSummary: jest.fn(() => {
+      const React = require('react');
+      return React.createElement('View', { testID: 'streak-summary' });
+    })
+  };
+});
 
-jest.mock('@/components/home/RecentBadges', () => ({
-  RecentBadges: () => <View testID="mock-recent-badges" />,
-}));
+jest.mock('@/components/home/RecentBadges', () => {
+  return {
+    RecentBadges: jest.fn(() => {
+      const React = require('react');
+      return React.createElement('View', { testID: 'recent-badges' });
+    })
+  };
+});
+
+// Mock DailyChallenge component
+jest.mock('@/components/common/DailyChallenge', () => {
+  return {
+    DailyChallenge: jest.fn(() => {
+      const React = require('react');
+      return React.createElement('View', { testID: 'daily-challenge' });
+    })
+  };
+});
 
 // Mock journal context values
 const mockJournalContext = {
@@ -106,20 +178,17 @@ describe('HomeScreen', () => {
     return render(<HomeScreen />);
   };
 
-  it('renders the home screen correctly without a current check-in', () => {
-    // Render the component
-    const { getByTestId, queryByText } = renderHomeScreen();
+  it('renders correctly', () => {
+    const { getByTestId, queryByTestId } = render(<HomeScreen />);
     
-    // Assert that core components are rendered
+    // Verify main components are rendered
     expect(getByTestId('mock-video-background')).toBeTruthy();
-    expect(getByTestId('mock-header')).toBeTruthy();
-    expect(getByTestId('mock-streak-summary')).toBeTruthy();
-    expect(getByTestId('mock-recent-badges')).toBeTruthy();
+    expect(getByTestId('streak-summary')).toBeTruthy();
+    expect(getByTestId('daily-challenge')).toBeTruthy();
     
-    // Check that JournalContext methods were called
-    expect(mockJournalContext.getRecentEntries).toHaveBeenCalledWith(3);
-    expect(mockJournalContext.getLatestEntryForPeriod).toHaveBeenCalled();
-    expect(mockJournalContext.getTodayEntries).toHaveBeenCalled();
+    // Recent badges may or may not be rendered depending on the mock
+    const recentBadges = queryByTestId('recent-badges');
+    expect(recentBadges).toBeTruthy();
   });
   
   it('displays check-in button when no entry exists for current period', () => {

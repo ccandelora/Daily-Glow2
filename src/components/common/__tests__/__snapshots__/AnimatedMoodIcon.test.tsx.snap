@@ -1,5 +1,32 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`AnimatedMoodIcon renders children correctly 1`] = `
+<View
+  collapsable={false}
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "#FF5733",
+      "borderRadius": 999,
+      "height": 60,
+      "justifyContent": "center",
+      "opacity": 0.6,
+      "overflow": "hidden",
+      "transform": [
+        {
+          "scale": 1,
+        },
+      ],
+      "width": 60,
+    }
+  }
+>
+  <Text>
+    Test Child
+  </Text>
+</View>
+`;
+
 exports[`AnimatedMoodIcon renders correctly when active 1`] = `
 <View
   collapsable={false}

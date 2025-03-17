@@ -1008,4 +1008,262 @@ describe('BadgeService', () => {
       expect(mockAddUserBadge).not.toHaveBeenCalled();
     });
   });
+});
+
+// Tests for createBadgesTables
+describe('createBadgesTables', () => {
+  it('creates the necessary tables for badges', async () => {
+    // Mock successful table creation
+    const mockRpc = jest.fn().mockResolvedValue({ data: true, error: null });
+    (supabase.rpc as jest.Mock).mockImplementation(mockRpc);
+    
+    await BadgeService.createBadgesTables();
+    
+    // Verify the RPC call was made with the correct function name
+    expect(mockRpc).toHaveBeenCalledWith('create_badges_tables');
+    expect(console.log).toHaveBeenCalledWith('Successfully created badges tables');
+  });
+  
+  it('handles errors when creating badges tables', async () => {
+    // Mock an error during table creation
+    const mockRpc = jest.fn().mockResolvedValue({ 
+      data: null, 
+      error: { message: 'Database error' } 
+    });
+    (supabase.rpc as jest.Mock).mockImplementation(mockRpc);
+    
+    await BadgeService.createBadgesTables();
+    
+    // Verify error was logged
+    expect(console.error).toHaveBeenCalledWith(
+      'Error creating badges tables:',
+      expect.objectContaining({ message: 'Database error' })
+    );
+  });
+});
+
+// Tests for checkStreakBadges
+describe('checkStreakBadges', () => {
+  it('checks for streak badges', async () => {
+    // Mock successful badge existence check and badge lookup
+    const mockMaybeSingle = jest.fn()
+      .mockResolvedValueOnce({ data: { id: 'streak-badge-id' }, error: null }) // Badge exists
+      .mockResolvedValueOnce({ data: null, error: null }); // User doesn't have the badge yet
+      
+    const mockEq = jest.fn().mockReturnValue({ maybeSingle: mockMaybeSingle });
+    const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
+    
+    const mockSingle = jest.fn().mockResolvedValue({ 
+      data: { id: 'user-badge-id' },
+      error: null 
+    });
+    const mockInsertSelect = jest.fn().mockReturnValue({ single: mockSingle });
+    const mockInsert = jest.fn().mockReturnValue({ select: mockInsertSelect });
+    
+    (supabase.from as jest.Mock).mockImplementation((table) => {
+      if (table === 'badges') {
+        return { select: mockSelect };
+      } else if (table === 'user_badges') {
+        return { 
+          select: mockSelect,
+          insert: mockInsert 
+        };
+      }
+      return { select: jest.fn() };
+    });
+    
+    // Create a test streak object
+    const streak: CheckInStreak = {
+      id: 'streak-id',
+      user_id: 'user-id',
+      morning_streak: 7,
+      afternoon_streak: 3,
+      evening_streak: 14,
+      longest_morning_streak: 7,
+      longest_afternoon_streak: 3,
+      longest_evening_streak: 14,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    const result = await BadgeService.checkStreakBadges(streak);
+    
+    // Verify badge was checked and added
+    expect(mockSelect).toHaveBeenCalled();
+    expect(mockEq).toHaveBeenCalled();
+    expect(mockInsert).toHaveBeenCalled();
+    expect(result).toBe(true);
+  });
+  
+  it('handles errors when checking streak badges', async () => {
+    // Mock an error during badge check
+    const mockEq = jest.fn().mockReturnValue({ 
+      maybeSingle: jest.fn().mockRejectedValue(new Error('Database error'))
+    });
+    const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
+    
+    (supabase.from as jest.Mock).mockReturnValue({ select: mockSelect });
+    
+    // Create a test streak object
+    const streak: CheckInStreak = {
+      id: 'streak-id',
+      user_id: 'user-id',
+      morning_streak: 7,
+      afternoon_streak: 3,
+      evening_streak: 14,
+      longest_morning_streak: 7,
+      longest_afternoon_streak: 3,
+      longest_evening_streak: 14,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    const result = await BadgeService.checkStreakBadges(streak);
+    
+    // Verify error was handled and appropriate value returned
+    expect(console.error).toHaveBeenCalled();
+    expect(result).toBe(false);
+  });
+  
+  it('skips adding badges the user already has', async () => {
+    // Mock badge exists and user already has it
+    const mockMaybeSingle = jest.fn()
+      .mockResolvedValueOnce({ data: { id: 'streak-badge-id' }, error: null }) // Badge exists
+      .mockResolvedValueOnce({ data: { id: 'user-badge-id' }, error: null }); // User already has badge
+      
+    const mockEq = jest.fn().mockReturnValue({ maybeSingle: mockMaybeSingle });
+    const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
+    
+    (supabase.from as jest.Mock).mockImplementation((table) => {
+      return { select: mockSelect };
+    });
+    
+    // Create a test streak object
+    const streak: CheckInStreak = {
+      id: 'streak-id',
+      user_id: 'user-id',
+      morning_streak: 7,
+      afternoon_streak: 3,
+      evening_streak: 14,
+      longest_morning_streak: 7,
+      longest_afternoon_streak: 3,
+      longest_evening_streak: 14,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    const result = await BadgeService.checkStreakBadges(streak);
+    
+    // Verify console log about skipping
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('User already has this badge'));
+    expect(result).toBe(true);
+  });
+});
+
+// Tests for checkAllPeriodsCompleted
+describe('checkAllPeriodsCompleted', () => {
+  it('adds all periods completed badge when conditions are met', async () => {
+    // Mock badge exists and user doesn't have it yet
+    const mockMaybeSingle = jest.fn()
+      .mockResolvedValueOnce({ data: { id: 'all-periods-badge-id' }, error: null }) // Badge exists
+      .mockResolvedValueOnce({ data: null, error: null }); // User doesn't have the badge yet
+      
+    const mockEq = jest.fn().mockReturnValue({ maybeSingle: mockMaybeSingle });
+    const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
+    
+    const mockSingle = jest.fn().mockResolvedValue({ 
+      data: { id: 'user-badge-id' },
+      error: null 
+    });
+    const mockInsertSelect = jest.fn().mockReturnValue({ single: mockSingle });
+    const mockInsert = jest.fn().mockReturnValue({ select: mockInsertSelect });
+    
+    (supabase.from as jest.Mock).mockImplementation((table) => {
+      if (table === 'badges') {
+        return { select: mockSelect };
+      } else if (table === 'user_badges') {
+        return { 
+          select: mockSelect,
+          insert: mockInsert 
+        };
+      }
+      return { select: jest.fn() };
+    });
+    
+    // Create a test check-in with all periods completed
+    const checkIn = {
+      id: 'check-in-id',
+      user_id: 'user-id',
+      morning_completed: true,
+      afternoon_completed: true,
+      evening_completed: true,
+      date: new Date().toISOString()
+    };
+    
+    const result = await BadgeService.checkAllPeriodsCompleted(checkIn);
+    
+    // Verify badge was added
+    expect(mockInsert).toHaveBeenCalled();
+    expect(result).toBe(true);
+  });
+  
+  it('does not add badge when not all periods are completed', async () => {
+    // Create a test check-in with not all periods completed
+    const checkIn = {
+      id: 'check-in-id',
+      user_id: 'user-id',
+      morning_completed: true,
+      afternoon_completed: false, // One period not completed
+      evening_completed: true,
+      date: new Date().toISOString()
+    };
+    
+    const result = await BadgeService.checkAllPeriodsCompleted(checkIn);
+    
+    // Verify no badge operations were performed
+    expect(supabase.from).not.toHaveBeenCalled();
+    expect(result).toBe(false);
+  });
+});
+
+// Tests for awardFirstCheckInBadge
+describe('awardFirstCheckInBadge', () => {
+  it('adds first check-in badge for a user', async () => {
+    // Mock badge exists and user doesn't have it yet
+    const mockMaybeSingle = jest.fn()
+      .mockResolvedValueOnce({ data: { id: 'first-checkin-badge-id' }, error: null }) // Badge exists
+      .mockResolvedValueOnce({ data: null, error: null }); // User doesn't have the badge yet
+      
+    const mockEq = jest.fn().mockReturnValue({ maybeSingle: mockMaybeSingle });
+    const mockSelect = jest.fn().mockReturnValue({ eq: mockEq });
+    
+    const mockSingle = jest.fn().mockResolvedValue({ 
+      data: { id: 'user-badge-id' },
+      error: null 
+    });
+    const mockInsertSelect = jest.fn().mockReturnValue({ single: mockSingle });
+    const mockInsert = jest.fn().mockReturnValue({ select: mockInsertSelect });
+    
+    (supabase.from as jest.Mock).mockImplementation((table) => {
+      if (table === 'badges') {
+        return { select: mockSelect };
+      } else if (table === 'user_badges') {
+        return { 
+          select: mockSelect,
+          insert: mockInsert 
+        };
+      }
+      return { select: jest.fn() };
+    });
+    
+    const userId = 'user-id';
+    const result = await BadgeService.awardFirstCheckInBadge(userId);
+    
+    // Verify badge was added
+    expect(mockSelect).toHaveBeenCalled();
+    expect(mockEq).toHaveBeenCalledWith('name', 'First Check-in');
+    expect(mockInsert).toHaveBeenCalled();
+    expect(result).toBe(true);
+    expect(console.log).toHaveBeenCalledWith(expect.stringContaining('First Check-in badge awarded'));
+  });
 }); 
