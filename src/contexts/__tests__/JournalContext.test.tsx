@@ -748,14 +748,11 @@ describe('JournalProvider', () => {
     });
 
     await act(async () => {
-      await result.current.addEntry({
-        date: new Date(),
-        time_period: 'MORNING',
-        initial_emotion: 'happy',
-        secondary_emotion: 'excited',
-        emotional_shift: 1,
-        gratitude: 'extremely long gratitude text that exceeds database limits'
-      });
+      await result.current.addEntry(
+        'happy',
+        'excited',
+        'extremely long gratitude text that exceeds database limits'
+      );
     });
 
     // Verify the error is properly handled

@@ -111,21 +111,113 @@ function RootLayoutNav() {
     const { hasCompletedOnboarding, loading: onboardingLoading } = useOnboarding();
     const segments = useSegments();
     const router = useRouter();
+    const { setLoading } = useAppState();
 
     console.log('🚀 RootLayoutNav rendered with segments:', segments);
 
     useEffect(() => {
       try {
-        // Simple navigation logic - if not authenticated, go to sign-in
+        setLoading(onboardingLoading);
+        
+        // Don't redirect while still loading
+        if (onboardingLoading) {
+          console.log('🕒 Onboarding is still loading, not redirecting yet');
+          return;
+        }
+
+        const inAuthGroup = segments[0] === '(auth)';
+        const inOnboardingGroup = segments[0] === '(onboarding)';
+        const inAppGroup = segments[0] === '(app)';
+
+        console.log('Navigation state:', { 
+          hasSession: !!session, 
+          hasCompletedOnboarding, 
+          inAuthGroup,
+          inOnboardingGroup,
+          inAppGroup 
+        });
+
         if (!session) {
-          console.log('🔀 Not authenticated, redirecting to sign-in');
-          router.replace('/(auth)/sign-in');
+          // If not authenticated, go to sign-in
+          if (!inAuthGroup) {
+            console.log('🔀 Not authenticated, redirecting to sign-in');
+            router.replace('/(auth)/sign-in');
+          }
+        } else {
+          // User is authenticated
+          if (inAuthGroup) {
+            // User shouldn't be in auth group if authenticated
+            console.log('🔀 Already authenticated, redirecting from auth');
+            
+            if (!hasCompletedOnboarding) {
+              router.replace('/(onboarding)');
+            } else {
+              router.replace('/(app)');
+            }
+          } else if (!hasCompletedOnboarding && !inOnboardingGroup) {
+            // If onboarding not complete and not in onboarding, redirect to onboarding
+            console.log('🔀 Onboarding not completed, redirecting to onboarding');
+            router.replace('/(onboarding)');
+          } else if (hasCompletedOnboarding && !inAppGroup) {
+            // If onboarding complete and not in app, redirect to app
+            console.log('🔀 Onboarding completed, redirecting to app');
+            router.replace('/(app)');
+          }
         }
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         console.error("Navigation error:", errorMessage);
       }
-    }, [session]);
+    }, [session, hasCompletedOnboarding, onboardingLoading, segments, router]);
+
+    useEffect(() => {
+      // Handle deep links
+      const handleDeepLink = (event: { url: string }) => {
+        console.log('🔗 Deep link received:', event.url);
+        
+        try {
+          const url = event.url;
+          
+          // Handle onboarding deep links
+          if (url.includes('onboarding')) {
+            console.log('🔗 Deep link to onboarding detected');
+            if (!hasCompletedOnboarding) {
+              // Handle different onboarding screens
+              if (url.includes('welcome')) {
+                router.replace('/(onboarding)/welcome');
+              } else if (url.includes('personalize')) {
+                router.replace('/(onboarding)/personalize');
+              } else if (url.includes('notifications')) {
+                router.replace('/(onboarding)/notifications');
+              } else {
+                // Default onboarding route
+                router.replace('/(onboarding)');
+              }
+            } else {
+              console.log('🔀 Onboarding already completed, redirecting to app');
+              router.replace('/(app)');
+            }
+          }
+        } catch (error) {
+          console.error('Error handling deep link:', error);
+        }
+      };
+
+      // Set up listeners for deep links
+      const subscription = Linking.addEventListener('url', handleDeepLink);
+      
+      // Also handle initial URL (app opened from a link)
+      Linking.getInitialURL().then(url => {
+        if (url) {
+          console.log('🔗 App opened from deep link:', url);
+          handleDeepLink({ url });
+        }
+      });
+
+      return () => {
+        subscription.remove();
+      };
+    }, [router, hasCompletedOnboarding]);
 
     return (
       <>

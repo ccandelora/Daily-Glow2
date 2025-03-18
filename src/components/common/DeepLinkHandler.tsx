@@ -47,6 +47,31 @@ export const DeepLinkHandler = () => {
       if (url.startsWith('daily-glow://')) {
         console.log('[DeepLinkHandler] Handling custom scheme URL');
         
+        // Handle onboarding routes explicitly
+        if (url.includes('onboarding')) {
+          console.log('[DeepLinkHandler] This is an onboarding deep link');
+          
+          // Handle specific onboarding screens
+          if (url.includes('welcome')) {
+            console.log('[DeepLinkHandler] Navigating to welcome screen');
+            router.replace('/(onboarding)/welcome');
+            return;
+          } else if (url.includes('personalize')) {
+            console.log('[DeepLinkHandler] Navigating to personalize screen');
+            router.replace('/(onboarding)/personalize');
+            return;
+          } else if (url.includes('notifications')) {
+            console.log('[DeepLinkHandler] Navigating to notifications screen');
+            router.replace('/(onboarding)/notifications');
+            return;
+          } else {
+            // Default onboarding index
+            console.log('[DeepLinkHandler] Navigating to onboarding index');
+            router.replace('/(onboarding)');
+            return;
+          }
+        }
+        
         // Check if this is a confirm-email link
         if (url.includes('confirm-email')) {
           console.log('[DeepLinkHandler] This is a confirm-email deep link');
@@ -265,13 +290,7 @@ export const DeepLinkHandler = () => {
       }
     } catch (error) {
       console.error('[DeepLinkHandler] Error handling deep link:', error);
-      
-      // Show a general error alert
-      Alert.alert(
-        'Deep Link Error',
-        `Error processing link: ${error instanceof Error ? error.message : 'Unknown error'}`,
-        [{ text: 'OK' }]
-      );
+      showError('An error occurred processing this link');
     }
   };
   

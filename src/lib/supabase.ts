@@ -4,7 +4,6 @@ import * as SecureStore from 'expo-secure-store';
 import { Platform, AppState } from 'react-native';
 import * as Linking from 'expo-linking';
 import { AuthChangeEvent, Session } from '@supabase/supabase-js';
-import { SUPABASE_CONFIG } from '@/config/constants';
 
 const ExpoSecureStoreAdapter = {
   getItem: async (key: string) => {
@@ -63,12 +62,16 @@ const ExpoSecureStoreAdapter = {
   },
 };
 
-// Use our constants file as a fallback
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || SUPABASE_CONFIG.URL;
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || SUPABASE_CONFIG.ANON_KEY;
+// Only use environment variables for Supabase configuration
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Supabase environment variables are missing. Please check your .env file or EAS variables.');
+}
 
 // Log configuration for debugging (without exposing full credentials)
-console.log(`Supabase configured with URL: ${supabaseUrl.substring(0, 20)}...`);
+console.log(`Supabase configured with URL: ${supabaseUrl ? supabaseUrl.substring(0, 20) + '...' : 'MISSING'}`);
 console.log(`Supabase key available: ${!!supabaseAnonKey}`);
 
 // Get the URL scheme from Expo
@@ -91,7 +94,7 @@ const getRedirectUrl = () => {
     : 'daily-glow://confirm-email';
 };
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '', {
   auth: {
     storage: Platform.OS === 'web' ? localStorage : ExpoSecureStoreAdapter,
     autoRefreshToken: true,

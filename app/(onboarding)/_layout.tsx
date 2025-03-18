@@ -16,7 +16,34 @@ export default function OnboardingLayout() {
           presentation: 'card',
         }}
       >
-        <Stack.Screen name="index" options={{ gestureEnabled: false }} />
+        <Stack.Screen 
+          name="index" 
+          options={{ 
+            gestureEnabled: false,
+            headerShown: false
+          }} 
+        />
+        <Stack.Screen 
+          name="welcome" 
+          options={{ 
+            gestureEnabled: false,
+            headerShown: false 
+          }} 
+        />
+        <Stack.Screen 
+          name="personalize" 
+          options={{ 
+            gestureEnabled: false,
+            headerShown: false 
+          }} 
+        />
+        <Stack.Screen 
+          name="notifications" 
+          options={{ 
+            gestureEnabled: false,
+            headerShown: false 
+          }} 
+        />
       </Stack>
     </View>
   );

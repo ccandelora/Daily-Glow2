@@ -1,19 +1,30 @@
+import React, { useEffect } from 'react';
 import { Redirect } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOnboarding } from '@/contexts/OnboardingContext';
-import { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, Button } from 'react-native';
+import { Text, View, StyleSheet, ActivityIndicator } from 'react-native';
 
 export default function Index() {
   const { session } = useAuth();
-  const { hasCompletedOnboarding } = useOnboarding();
+  const { hasCompletedOnboarding, loading } = useOnboarding();
   
   useEffect(() => {
     console.log('Root index rendered with:', {
       hasSession: !!session,
-      hasCompletedOnboarding
+      hasCompletedOnboarding,
+      loading
     });
-  }, [session, hasCompletedOnboarding]);
+  }, [session, hasCompletedOnboarding, loading]);
+
+  // Show loading indicator while checking onboarding status
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" color="#8062D6" />
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
+    );
+  }
 
   // If not authenticated, go to login
   if (!session) {
@@ -21,9 +32,15 @@ export default function Index() {
     return <Redirect href="/(auth)/sign-in" />;
   }
 
-  // TEMPORARY: Force showing onboarding regardless of state
-  console.log('Root index: FORCING redirect to onboarding');
-  return <Redirect href="/(onboarding)/index" />;
+  // If onboarding not completed, go to onboarding flow
+  if (!hasCompletedOnboarding) {
+    console.log('Root index: Onboarding not completed, redirecting to onboarding');
+    return <Redirect href="/(onboarding)/welcome" />;
+  }
+  
+  // Otherwise, go to main app
+  console.log('Root index: Onboarding completed, redirecting to main app');
+  return <Redirect href="/(app)" />;
 }
 
 const styles = StyleSheet.create({
@@ -33,15 +50,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
-  debugContainer: {
-    marginTop: 20,
-    padding: 10,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 5,
-    width: '100%',
-  },
-  debugText: {
-    fontSize: 14,
-    marginBottom: 5,
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#666',
   },
 }); 
