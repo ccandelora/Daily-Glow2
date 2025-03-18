@@ -1,22 +1,22 @@
 import React from 'react';
 import { View, StyleSheet, Text, ActivityIndicator } from 'react-native';
-import OnboardingWelcomeScreen from '@/screens/onboarding/OnboardingWelcomeScreen';
+import OnboardingNotificationsScreen from '@/screens/onboarding/OnboardingNotificationsScreen';
 import theme from '@/constants/theme';
 
-export default function Welcome() {
+export default function Notifications() {
   // Add error boundary to catch any issues loading the component
   try {
     return (
       <View style={styles.container}>
-        <OnboardingWelcomeScreen />
+        <OnboardingNotificationsScreen />
       </View>
     );
   } catch (error) {
-    console.error('Error loading welcome screen:', error);
+    console.error('Error loading notifications screen:', error);
     // Fallback UI in case of error
     return (
       <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>Error loading welcome screen</Text>
+        <Text style={styles.errorText}>Error loading notifications screen</Text>
         <ActivityIndicator size="large" color={theme.COLORS.primary.green} />
       </View>
     );

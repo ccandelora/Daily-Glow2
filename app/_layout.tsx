@@ -1,6 +1,6 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect } from 'react';
 import { View, StyleSheet, Platform, Text } from 'react-native';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import { Stack } from 'expo-router';
 import '@/utils/cryptoPolyfill';
 import { AppStateProvider } from '@/contexts/AppStateContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
@@ -8,14 +8,9 @@ import { JournalProvider } from '@/contexts/JournalContext';
 import { ChallengesProvider } from '@/contexts/ChallengesContext';
 import { NotificationsProvider } from '@/contexts/NotificationsContext';
 import { OnboardingProvider, useOnboarding } from '@/contexts/OnboardingContext';
-import { BadgeProvider, useBadges } from '@/contexts/BadgeContext';
-import { CheckInStreakProvider, CheckInStreak } from '@/contexts/CheckInStreakContext';
+import { BadgeProvider } from '@/contexts/BadgeContext';
+import { CheckInStreakProvider } from '@/contexts/CheckInStreakContext';
 import { LoadingOverlay, DeepLinkHandler } from '@/components/common';
-import { BadgeService } from '@/services/BadgeService';
-import * as Linking from 'expo-linking';
-import { supabase } from '@/lib/supabase';
-import { extractTokenFromUrl, verifyEmailWithToken } from '@/utils/authUtils';
-import { useAppState } from '@/contexts/AppStateContext';
 import { logAppStartupInfo } from '@/utils/debugUtils';
 
 // Error Boundary Component
@@ -64,184 +59,23 @@ class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundarySta
   }
 }
 
-// Create a wrapper component to handle streak updates with badge context
-function CheckInStreakWithBadges({ children }: { children: React.ReactNode }) {
-  const { addUserBadge, isLoading } = useBadges();
-  
-  const handleStreakUpdated = useCallback(async (
-    streaks: CheckInStreak, 
-    isFirstCheckIn: boolean, 
-    allPeriodsCompleted: boolean
-  ) => {
-    try {
-      // Skip badge processing if badges are still loading
-      if (isLoading) {
-        console.log('Badges still loading, skipping badge processing');
-        return;
-      }
-      
-      // Award badges based on streak updates
-      if (isFirstCheckIn) {
-        await BadgeService.awardFirstCheckInBadge(addUserBadge);
-      }
-      
-      // Check streak badges
-      await BadgeService.checkStreakBadges(streaks, addUserBadge);
-      
-      // Check if all periods were completed
-      if (allPeriodsCompleted) {
-        await BadgeService.checkAllPeriodsCompleted(addUserBadge);
-      }
-    } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error("Error in streak badge processing:", errorMessage);
-    }
-  }, [addUserBadge, isLoading]);
-  
+function RootLayoutNav() {
+  // Simple routing container that defines the structure but doesn't enforce navigation
+  // Navigation logic is handled in each group's _layout.tsx or index.tsx
   return (
-    <CheckInStreakProvider onStreakUpdated={handleStreakUpdated}>
-      {children}
-    </CheckInStreakProvider>
+    <>
+      <DeepLinkHandler />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(onboarding)" />
+        <Stack.Screen name="(app)" />
+      </Stack>
+    </>
   );
 }
 
-function RootLayoutNav() {
-  try {
-    const { session, user } = useAuth();
-    const { hasCompletedOnboarding, loading: onboardingLoading } = useOnboarding();
-    const segments = useSegments();
-    const router = useRouter();
-    const { setLoading } = useAppState();
-
-    console.log('🚀 RootLayoutNav rendered with segments:', segments);
-
-    useEffect(() => {
-      try {
-        setLoading(onboardingLoading);
-        
-        // Don't redirect while still loading
-        if (onboardingLoading) {
-          console.log('🕒 Onboarding is still loading, not redirecting yet');
-          return;
-        }
-
-        const inAuthGroup = segments[0] === '(auth)';
-        const inOnboardingGroup = segments[0] === '(onboarding)';
-        const inAppGroup = segments[0] === '(app)';
-
-        console.log('Navigation state:', { 
-          hasSession: !!session, 
-          hasCompletedOnboarding, 
-          inAuthGroup,
-          inOnboardingGroup,
-          inAppGroup 
-        });
-
-        if (!session) {
-          // If not authenticated, go to sign-in
-          if (!inAuthGroup) {
-            console.log('🔀 Not authenticated, redirecting to sign-in');
-            router.replace('/(auth)/sign-in');
-          }
-        } else {
-          // User is authenticated
-          if (inAuthGroup) {
-            // User shouldn't be in auth group if authenticated
-            console.log('🔀 Already authenticated, redirecting from auth');
-            
-            if (!hasCompletedOnboarding) {
-              router.replace('/(onboarding)');
-            } else {
-              router.replace('/(app)');
-            }
-          } else if (!hasCompletedOnboarding && !inOnboardingGroup) {
-            // If onboarding not complete and not in onboarding, redirect to onboarding
-            console.log('🔀 Onboarding not completed, redirecting to onboarding');
-            router.replace('/(onboarding)');
-          } else if (hasCompletedOnboarding && !inAppGroup) {
-            // If onboarding complete and not in app, redirect to app
-            console.log('🔀 Onboarding completed, redirecting to app');
-            router.replace('/(app)');
-          }
-        }
-      } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error("Navigation error:", errorMessage);
-      }
-    }, [session, hasCompletedOnboarding, onboardingLoading, segments, router]);
-
-    useEffect(() => {
-      // Handle deep links
-      const handleDeepLink = (event: { url: string }) => {
-        console.log('🔗 Deep link received:', event.url);
-        
-        try {
-          const url = event.url;
-          
-          // Handle onboarding deep links
-          if (url.includes('onboarding')) {
-            console.log('🔗 Deep link to onboarding detected');
-            if (!hasCompletedOnboarding) {
-              // Handle different onboarding screens
-              if (url.includes('welcome')) {
-                router.replace('/(onboarding)/welcome');
-              } else if (url.includes('personalize')) {
-                router.replace('/(onboarding)/personalize');
-              } else if (url.includes('notifications')) {
-                router.replace('/(onboarding)/notifications');
-              } else {
-                // Default onboarding route
-                router.replace('/(onboarding)');
-              }
-            } else {
-              console.log('🔀 Onboarding already completed, redirecting to app');
-              router.replace('/(app)');
-            }
-          }
-        } catch (error) {
-          console.error('Error handling deep link:', error);
-        }
-      };
-
-      // Set up listeners for deep links
-      const subscription = Linking.addEventListener('url', handleDeepLink);
-      
-      // Also handle initial URL (app opened from a link)
-      Linking.getInitialURL().then(url => {
-        if (url) {
-          console.log('🔗 App opened from deep link:', url);
-          handleDeepLink({ url });
-        }
-      });
-
-      return () => {
-        subscription.remove();
-      };
-    }, [router, hasCompletedOnboarding]);
-
-    return (
-      <>
-        <DeepLinkHandler />
-        
-        <Stack
-          screenOptions={{
-            headerShown: false,
-          }}
-        />
-      </>
-    );
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error("Error in RootLayoutNav:", errorMessage);
-    return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorTitle}>Navigation Error</Text>
-        <Text style={styles.errorText}>{errorMessage}</Text>
-      </View>
-    );
-  }
-}
-
+// Root app component that sets up all providers
 export default function RootLayout() {
   console.log('Root layout rendering');
   

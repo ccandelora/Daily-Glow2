@@ -5,6 +5,27 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import theme from '@/constants/theme';
 
+/**
+ * Onboarding Layout
+ * 
+ * Note: If you need to access UserProfileContext during onboarding,
+ * you'll need to wrap the content in UserProfileProvider:
+ * 
+ * ```
+ * import { UserProfileProvider } from '@/contexts/UserProfileContext';
+ * 
+ * return (
+ *   <View style={styles.container}>
+ *     <UserProfileProvider>
+ *       <Stack ...>...</Stack>
+ *     </UserProfileProvider>
+ *   </View>
+ * );
+ * ```
+ * 
+ * For now, the onboarding screens use AsyncStorage directly to avoid 
+ * complications with profile access before the profile is created.
+ */
 export default function OnboardingLayout() {
   console.log('📱 Rendering OnboardingLayout');
   const { session } = useAuth();

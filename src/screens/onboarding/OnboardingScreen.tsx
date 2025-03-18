@@ -1,28 +1,52 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions, Button, Platform, Alert } from 'react-native';
-// Add type declaration for the package
-// @ts-ignore
-import Onboarding from 'react-native-onboarding-swiper';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import { Ionicons } from '@expo/vector-icons';
 import theme from '@/constants/theme';
+import { VideoBackground } from '@/components/common';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 // Create a type declaration for our WelcomeScreen props
-interface WelcomeScreenProps {
-  icon: any; // Using any temporarily for Ionicons names
+interface OnboardingPageProps {
+  icon: keyof typeof Ionicons.glyphMap;
   title: string;
   subtitle: string;
+  isLast?: boolean;
 }
-
-const { width, height } = Dimensions.get('window');
 
 const OnboardingScreen = () => {
   const router = useRouter();
   const { user } = useAuth();
+  const [currentPage, setCurrentPage] = React.useState(0);
 
   console.log('📱 Rendering OnboardingScreen for user:', user?.id);
+
+  // Pages data for the onboarding flow
+  const pages: OnboardingPageProps[] = [
+    {
+      icon: "heart-outline", 
+      title: "Welcome to Daily Glow!", 
+      subtitle: "Begin your journey to wellness and mindfulness"
+    },
+    {
+      icon: "calendar-outline", 
+      title: "Track Your Progress", 
+      subtitle: "Daily check-ins help build healthy habits and maintain your streak"
+    },
+    {
+      icon: "trophy-outline", 
+      title: "Complete Challenges", 
+      subtitle: "Earn badges and track your achievements as you grow"
+    },
+    {
+      icon: "analytics-outline", 
+      title: "Gain Insights", 
+      subtitle: "Learn more about your wellness journey through personalized analytics",
+      isLast: true
+    }
+  ];
 
   const completeOnboarding = async () => {
     // Log the user ID for debugging
@@ -32,7 +56,7 @@ const OnboardingScreen = () => {
       try {
         // Update user profile to mark onboarding as completed
         const { error } = await supabase
-          .from('user_profiles')
+          .from('profiles')
           .update({ has_completed_onboarding: true })
           .eq('user_id', user.id);
         
@@ -50,145 +74,189 @@ const OnboardingScreen = () => {
     console.log('🔀 Navigating to main app after onboarding');
     
     try {
-      Alert.alert(
-        'Onboarding Complete',
-        'You have completed the onboarding process. You will now be redirected to the main app.',
-        [
-          {
-            text: 'OK',
-            onPress: () => {
-              router.replace('/(app)');
-            }
-          }
-        ]
-      );
+      router.replace('/(app)');
     } catch (error) {
       console.error('❌ Navigation failed:', error);
       Alert.alert('Error', 'Failed to navigate to the main app. Please restart the app.');
     }
   };
 
-  // Custom components for the onboarding screens
-  const WelcomeScreen = ({ icon, title, subtitle }: WelcomeScreenProps) => (
-    <View style={styles.screenContainer}>
-      <Ionicons name={icon} size={120} color={theme.COLORS.primary.green} />
+  const goToNextPage = () => {
+    if (currentPage < pages.length - 1) {
+      setCurrentPage(currentPage + 1);
+    } else {
+      completeOnboarding();
+    }
+  };
+
+  const OnboardingPage = ({ icon, title, subtitle, isLast }: OnboardingPageProps) => (
+    <View style={styles.pageContainer}>
+      <View style={styles.iconContainer}>
+        <Ionicons name={icon} size={60} color={theme.COLORS.primary.green} />
+      </View>
       <Text style={styles.title}>{title}</Text>
       <Text style={styles.subtitle}>{subtitle}</Text>
     </View>
   );
 
-  // Add a skip button
-  const renderSkipButton = () => {
-    return (
-      <Button
-        title="Skip"
-        onPress={completeOnboarding}
-        color={Platform.OS === 'ios' ? theme.COLORS.primary.blue : undefined}
-      />
-    );
-  };
-
-  // Add a next button
-  const renderNextButton = () => {
-    return (
-      <Button
-        title="Next"
-        onPress={() => console.log('Next pressed')}
-        color={Platform.OS === 'ios' ? theme.COLORS.primary.green : undefined}
-      />
-    );
-  };
-
-  // Add a done button
-  const renderDoneButton = () => {
-    return (
-      <Button
-        title="Get Started!"
-        onPress={completeOnboarding}
-        color={Platform.OS === 'ios' ? theme.COLORS.primary.green : undefined}
-      />
-    );
-  };
-
   return (
-    <View style={styles.container}>
-      <Onboarding
-        onSkip={completeOnboarding}
-        onDone={completeOnboarding}
-        SkipButtonComponent={renderSkipButton}
-        NextButtonComponent={renderNextButton}
-        DoneButtonComponent={renderDoneButton}
-        pages={[
-          {
-            backgroundColor: theme.COLORS.ui.background,
-            image: <WelcomeScreen 
-              icon="happy" 
-              title="Welcome to Daily Glow!" 
-              subtitle="Begin your journey to wellness" 
-            />,
-            title: '',
-            subtitle: '',
-          },
-          {
-            backgroundColor: theme.COLORS.ui.background,
-            image: <WelcomeScreen 
-              icon="calendar" 
-              title="Track Your Progress" 
-              subtitle="Daily check-ins help build healthy habits" 
-            />,
-            title: '',
-            subtitle: '',
-          },
-          {
-            backgroundColor: theme.COLORS.ui.background,
-            image: <WelcomeScreen 
-              icon="trophy" 
-              title="Complete Challenges" 
-              subtitle="Earn badges and track your achievements" 
-            />,
-            title: '',
-            subtitle: '',
-          },
-          {
-            backgroundColor: theme.COLORS.ui.background,
-            image: <WelcomeScreen 
-              icon="analytics" 
-              title="Gain Insights" 
-              subtitle="Learn more about your wellness journey" 
-            />,
-            title: '',
-            subtitle: '',
-          },
-        ]}
-      />
-    </View>
+    <SafeAreaView style={styles.container}>
+      <VideoBackground />
+      
+      {/* Onboarding Content */}
+      <View style={styles.content}>
+        {/* Progress Indicators */}
+        <View style={styles.progressContainer}>
+          {pages.map((_, index) => (
+            <View 
+              key={index} 
+              style={[
+                styles.progressDot,
+                currentPage === index && styles.progressDotActive
+              ]}
+            />
+          ))}
+        </View>
+        
+        {/* Current Page Content */}
+        <OnboardingPage {...pages[currentPage]} />
+        
+        {/* Navigation Buttons */}
+        <View style={styles.buttonContainer}>
+          {currentPage > 0 && (
+            <TouchableOpacity 
+              style={styles.backButton}
+              onPress={() => setCurrentPage(currentPage - 1)}
+            >
+              <Ionicons name="arrow-back" size={24} color="rgba(255, 255, 255, 0.8)" />
+            </TouchableOpacity>
+          )}
+          
+          <TouchableOpacity 
+            style={styles.nextButton}
+            onPress={goToNextPage}
+          >
+            <Text style={styles.buttonText}>
+              {currentPage === pages.length - 1 ? "Get Started" : "Next"}
+            </Text>
+            <Ionicons 
+              name={currentPage === pages.length - 1 ? "checkmark-circle" : "arrow-forward"} 
+              size={20} 
+              color="#fff" 
+              style={styles.buttonIcon}
+            />
+          </TouchableOpacity>
+          
+          {currentPage < pages.length - 1 && (
+            <TouchableOpacity 
+              style={styles.skipButton}
+              onPress={completeOnboarding}
+            >
+              <Text style={styles.skipButtonText}>Skip</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: theme.COLORS.ui.background,
+    backgroundColor: 'transparent',
   },
-  screenContainer: {
+  content: {
+    flex: 1,
+    padding: 24,
+    justifyContent: 'space-between',
+  },
+  progressContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  progressDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    marginHorizontal: 4,
+  },
+  progressDotActive: {
+    backgroundColor: theme.COLORS.primary.green,
+    width: 20,
+  },
+  pageContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
+  iconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    backgroundColor: 'rgba(0, 158, 76, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 30,
+  },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
-    marginTop: 20,
+    marginBottom: 16,
     textAlign: 'center',
-    color: theme.COLORS.ui.text,
+    color: theme.COLORS.primary.green,
   },
   subtitle: {
-    fontSize: 16,
-    marginTop: 10,
+    fontSize: 18,
     textAlign: 'center',
-    color: theme.COLORS.ui.textSecondary,
+    color: '#fff',
+    lineHeight: 24,
     paddingHorizontal: 20,
+  },
+  buttonContainer: {
+    marginTop: 40,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  backButton: {
+    padding: 10,
+  },
+  nextButton: {
+    backgroundColor: theme.COLORS.primary.green,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    borderRadius: 30,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 6,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+    marginRight: 8,
+  },
+  buttonIcon: {
+    marginLeft: 5,
+  },
+  skipButton: {
+    padding: 10,
+  },
+  skipButtonText: {
+    fontSize: 16,
+    color: 'rgba(255, 255, 255, 0.8)',
   }
 });
 

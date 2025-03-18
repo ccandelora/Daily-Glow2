@@ -5,6 +5,7 @@ import { AppStateProvider } from '@/contexts/AppStateContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { BadgeProvider, useBadges } from '@/contexts/BadgeContext';
 import { CheckInStreakProvider, CheckInStreak } from '@/contexts/CheckInStreakContext';
+import { OnboardingProvider } from '@/contexts/OnboardingContext';
 import { BadgeService } from '@/services/BadgeService';
 import { LoadingOverlay } from '@/components/common';
 import theme from '@/constants/theme';
@@ -49,22 +50,72 @@ function ProtectedRoute() {
   const segments = useSegments();
   const router = useRouter();
   const { session, isLoading } = useAuth();
+  
+  // Import OnboardingContext to check if onboarding is completed
+  const { useOnboarding } = require('@/contexts/OnboardingContext');
+  const { hasCompletedOnboarding, loading: onboardingLoading, dbError } = useOnboarding();
 
   useEffect(() => {
-    if (isLoading) return;
+    // If still loading, don't do any redirects
+    if (isLoading || onboardingLoading) return;
 
     const inAuthGroup = segments[0] === '(auth)';
+    const inOnboardingGroup = segments[0] === '(onboarding)';
+    const inAppGroup = segments[0] === '(app)';
 
-    if (!session && !inAuthGroup) {
-      // Redirect to sign-in if not authenticated and not in auth group
-      router.replace('/(auth)/sign-in');
-    } else if (session && inAuthGroup) {
-      // Redirect to home if authenticated and in auth group
-      router.replace('/(app)');
+    console.log('Navigation check:', { 
+      authenticated: !!session, 
+      completed: hasCompletedOnboarding, 
+      currentGroup: segments[0],
+      dbError
+    });
+
+    try {
+      // Handle missing user auth case first - always go to auth
+      if (!session && !inAuthGroup) {
+        console.log('Redirecting to sign-in: Not authenticated');
+        router.replace('/(auth)/sign-in');
+        return;
+      }
+      
+      // If authenticated but in auth group
+      if (session && inAuthGroup) {
+        // Check if onboarding is needed
+        if (!hasCompletedOnboarding) {
+          console.log('Redirecting to onboarding: Auth completed but onboarding needed');
+          router.replace('/(onboarding)');
+        } else {
+          console.log('Redirecting to main app: Auth and onboarding completed');
+          router.replace('/(app)');
+        }
+        return;
+      }
+      
+      // If authenticated but onboarding not completed and not in onboarding group
+      if (session && !hasCompletedOnboarding && !inOnboardingGroup) {
+        console.log('Redirecting to onboarding: Auth completed but outside onboarding');
+        router.replace('/(onboarding)');
+        return;
+      }
+      
+      // If authenticated with completed onboarding but in onboarding group
+      if (session && hasCompletedOnboarding && inOnboardingGroup) {
+        console.log('Redirecting to main app: Onboarding already completed');
+        router.replace('/(app)');
+        return;
+      }
+    } catch (error) {
+      console.error('Error in navigation logic:', error);
+      // In case of navigation error, default to the main screen or auth
+      if (!session) {
+        router.replace('/(auth)/sign-in');
+      } else {
+        router.replace('/(app)');
+      }
     }
-  }, [session, segments, isLoading]);
+  }, [session, segments, isLoading, hasCompletedOnboarding, onboardingLoading, dbError]);
 
-  if (isLoading) {
+  if (isLoading || onboardingLoading) {
     return <LoadingOverlay />;
   }
 
@@ -76,30 +127,38 @@ export default function RootLayout() {
     <AppStateProvider>
       <BadgeProvider>
         <AuthProvider>
-          <CheckInStreakWithBadges>
-            <View style={styles.container}>
-              <Stack
-                screenOptions={{
-                  headerShown: false,
-                  contentStyle: { backgroundColor: theme.COLORS.ui.background },
-                }}
-              >
-                <Stack.Screen
-                  name="(auth)"
-                  options={{
-                    animation: 'fade',
+          <OnboardingProvider>
+            <CheckInStreakWithBadges>
+              <View style={styles.container}>
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    contentStyle: { backgroundColor: theme.COLORS.ui.background },
                   }}
-                />
-                <Stack.Screen
-                  name="(app)"
-                  options={{
-                    animation: 'fade',
-                  }}
-                />
-              </Stack>
-              <ProtectedRoute />
-            </View>
-          </CheckInStreakWithBadges>
+                >
+                  <Stack.Screen
+                    name="(auth)"
+                    options={{
+                      animation: 'fade',
+                    }}
+                  />
+                  <Stack.Screen
+                    name="(app)"
+                    options={{
+                      animation: 'fade',
+                    }}
+                  />
+                  <Stack.Screen
+                    name="(onboarding)"
+                    options={{
+                      animation: 'fade',
+                    }}
+                  />
+                </Stack>
+                <ProtectedRoute />
+              </View>
+            </CheckInStreakWithBadges>
+          </OnboardingProvider>
         </AuthProvider>
       </BadgeProvider>
     </AppStateProvider>
