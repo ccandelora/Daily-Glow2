@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import theme from '@/constants/theme';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const OnboardingPersonalizeScreen = () => {
   const router = useRouter();
@@ -24,6 +25,26 @@ const OnboardingPersonalizeScreen = () => {
       setSelectedGoals(selectedGoals.filter(g => g !== goal));
     } else {
       setSelectedGoals([...selectedGoals, goal]);
+    }
+  };
+
+  const handleContinue = async () => {
+    try {
+      // Save user preferences
+      if (name.trim()) {
+        await AsyncStorage.setItem('userName', name.trim());
+      }
+      
+      if (selectedGoals.length > 0) {
+        await AsyncStorage.setItem('userGoals', JSON.stringify(selectedGoals));
+      }
+      
+      // Navigate to notifications screen
+      router.push('/(onboarding)/notifications');
+    } catch (error) {
+      console.error('Error saving personalization data:', error);
+      // Continue anyway if saving fails
+      router.push('/(onboarding)/notifications');
     }
   };
 
@@ -74,7 +95,7 @@ const OnboardingPersonalizeScreen = () => {
       <View style={styles.buttonContainer}>
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.push('/(onboarding)/notifications')}
+          onPress={handleContinue}
         >
           <Text style={styles.buttonText}>Continue</Text>
         </TouchableOpacity>

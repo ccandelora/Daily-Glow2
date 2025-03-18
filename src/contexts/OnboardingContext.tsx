@@ -8,6 +8,7 @@ type OnboardingContextType = {
   hasCompletedOnboarding: boolean | null;
   loading: boolean;
   completeOnboarding: () => Promise<void>;
+  setHasCompletedOnboarding: (value: boolean) => void;
 };
 
 // Create the context with default values
@@ -15,6 +16,7 @@ const OnboardingContext = createContext<OnboardingContextType>({
   hasCompletedOnboarding: null,
   loading: true,
   completeOnboarding: async () => {},
+  setHasCompletedOnboarding: () => {},
 });
 
 // Provider component
@@ -143,6 +145,7 @@ export const OnboardingProvider = ({ children }: { children: ReactNode }) => {
         hasCompletedOnboarding,
         loading,
         completeOnboarding,
+        setHasCompletedOnboarding,
       }}
     >
       {children}

@@ -1,29 +1,47 @@
 import React, { useEffect } from 'react';
-import { Redirect, useRouter } from 'expo-router';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import theme from '@/constants/theme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Index() {
   const router = useRouter();
-  const { hasCompletedOnboarding } = useOnboarding();
+  const { hasCompletedOnboarding, setHasCompletedOnboarding } = useOnboarding();
   
   useEffect(() => {
-    console.log('📱 Onboarding index loaded, redirecting to welcome screen');
-    
-    // A slight delay to allow the router to initialize properly
-    const timer = setTimeout(() => {
-      // If user has already completed onboarding, redirect to app
-      if (hasCompletedOnboarding) {
-        console.log('🔀 Onboarding already completed, redirecting to app');
-        router.replace('/(app)');
-      } else {
-        console.log('🔀 Navigating to welcome screen');
+    const checkAndLoadOnboardingStatus = async () => {
+      try {
+        console.log('📱 Onboarding index loaded, checking status');
+        
+        // Check AsyncStorage first, then update context if needed
+        const storedStatus = await AsyncStorage.getItem('hasCompletedOnboarding');
+        const completedFromStorage = storedStatus === 'true';
+        
+        // If AsyncStorage indicates complete but context doesn't, update context
+        if (completedFromStorage && !hasCompletedOnboarding) {
+          setHasCompletedOnboarding(true);
+        }
+        
+        // Direct to appropriate screen
+        if (completedFromStorage || hasCompletedOnboarding) {
+          console.log('🔀 Onboarding already completed, redirecting to app');
+          router.replace('/(app)');
+        } else {
+          console.log('🔀 Navigating to welcome screen');
+          // Slight delay to allow navigation to stabilize
+          setTimeout(() => {
+            router.push('/(onboarding)/welcome');
+          }, 100);
+        }
+      } catch (error) {
+        console.error('Error checking onboarding status:', error);
+        // Default to welcome screen if there's an error
         router.push('/(onboarding)/welcome');
       }
-    }, 100);
+    };
     
-    return () => clearTimeout(timer);
+    checkAndLoadOnboardingStatus();
   }, [router, hasCompletedOnboarding]);
 
   // Show a loading indicator while redirecting

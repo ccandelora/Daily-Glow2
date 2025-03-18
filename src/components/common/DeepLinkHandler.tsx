@@ -51,22 +51,33 @@ export const DeepLinkHandler = () => {
         if (url.includes('onboarding')) {
           console.log('[DeepLinkHandler] This is an onboarding deep link');
           
-          // Handle specific onboarding screens
-          if (url.includes('welcome')) {
-            console.log('[DeepLinkHandler] Navigating to welcome screen');
-            router.replace('/(onboarding)/welcome');
-            return;
-          } else if (url.includes('personalize')) {
-            console.log('[DeepLinkHandler] Navigating to personalize screen');
-            router.replace('/(onboarding)/personalize');
-            return;
-          } else if (url.includes('notifications')) {
-            console.log('[DeepLinkHandler] Navigating to notifications screen');
-            router.replace('/(onboarding)/notifications');
-            return;
-          } else {
-            // Default onboarding index
-            console.log('[DeepLinkHandler] Navigating to onboarding index');
+          try {
+            // Parse the URL to see if it contains specific onboarding screen
+            const parsedUrl = new URL(url);
+            const path = parsedUrl.pathname || '';
+            
+            // Handle specific onboarding screens
+            if (path.includes('welcome') || url.includes('welcome')) {
+              console.log('[DeepLinkHandler] Navigating to welcome screen');
+              router.replace('/(onboarding)/welcome');
+              return;
+            } else if (path.includes('personalize') || url.includes('personalize')) {
+              console.log('[DeepLinkHandler] Navigating to personalize screen');
+              router.replace('/(onboarding)/personalize');
+              return;
+            } else if (path.includes('notifications') || url.includes('notifications')) {
+              console.log('[DeepLinkHandler] Navigating to notifications screen');
+              router.replace('/(onboarding)/notifications');
+              return;
+            } else {
+              // Default onboarding index
+              console.log('[DeepLinkHandler] Navigating to onboarding index');
+              router.replace('/(onboarding)');
+              return;
+            }
+          } catch (error) {
+            console.error('[DeepLinkHandler] Error parsing onboarding URL:', error);
+            // Default behavior if parsing fails
             router.replace('/(onboarding)');
             return;
           }
