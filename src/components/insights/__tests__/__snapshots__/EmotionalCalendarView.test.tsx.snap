@@ -1,0 +1,4221 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmotionalCalendarView handles empty entries correctly 1`] = `
+<View
+  style={
+    {
+      "marginVertical": 16,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Sun
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Mon
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Tue
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Wed
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Thu
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Fri
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Sat
+    </TypographyMock>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        9
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        10
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        11
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        12
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        13
+      </TypographyMock>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        14
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        15
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+  </View>
+  <TypographyMock
+    style={
+      {
+        "color": "rgba(255, 255, 255, 0.7)",
+        "marginTop": 8,
+        "textAlign": "center",
+      }
+    }
+    variant="caption"
+  >
+    5/9/2023
+     - 
+    5/15/2023
+  </TypographyMock>
+</View>
+`;
+
+exports[`EmotionalCalendarView handles entries with same date but different emotions 1`] = `
+<View
+  style={
+    {
+      "marginVertical": 16,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Sun
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Mon
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Tue
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Wed
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Thu
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Fri
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Sat
+    </TypographyMock>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        9
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        10
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        11
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        12
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        13
+      </TypographyMock>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        14
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "borderColor": "rgba(82, 67, 194, 0.3)40",
+            "borderWidth": 1,
+          },
+          {
+            "backgroundColor": "#2E7D3240",
+          },
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        15
+      </TypographyMock>
+      <Text
+        style={
+          {
+            "fontSize": 16,
+          }
+        }
+      >
+        😊
+      </Text>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#00C853",
+            "borderRadius": 10,
+            "bottom": 2,
+            "height": 14,
+            "justifyContent": "center",
+            "position": "absolute",
+            "right": 2,
+            "width": 14,
+          }
+        }
+      >
+        <TypographyMock
+          style={
+            {
+              "color": "#121212",
+              "fontSize": 8,
+              "fontWeight": "bold",
+            }
+          }
+          variant="caption"
+        >
+          3
+        </TypographyMock>
+      </View>
+    </View>
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+  </View>
+  <TypographyMock
+    style={
+      {
+        "color": "rgba(255, 255, 255, 0.7)",
+        "marginTop": 8,
+        "textAlign": "center",
+      }
+    }
+    variant="caption"
+  >
+    5/9/2023
+     - 
+    5/15/2023
+  </TypographyMock>
+</View>
+`;
+
+exports[`EmotionalCalendarView renders all-time calendar view correctly 1`] = `
+<View
+  style={
+    {
+      "marginVertical": 16,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Sun
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Mon
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Tue
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Wed
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Thu
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Fri
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Sat
+    </TypographyMock>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        16
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        17
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        18
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        19
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        20
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        21
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        22
+      </TypographyMock>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        23
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        24
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        25
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        26
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        27
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        28
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        29
+      </TypographyMock>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        30
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        1
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        2
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        3
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        4
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        5
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        6
+      </TypographyMock>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        7
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "borderColor": "rgba(82, 67, 194, 0.3)40",
+            "borderWidth": 1,
+          },
+          {
+            "backgroundColor": "#43A04740",
+          },
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        8
+      </TypographyMock>
+      <Text
+        style={
+          {
+            "fontSize": 16,
+          }
+        }
+      >
+        😌
+      </Text>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#00C853",
+            "borderRadius": 10,
+            "bottom": 2,
+            "height": 14,
+            "justifyContent": "center",
+            "position": "absolute",
+            "right": 2,
+            "width": 14,
+          }
+        }
+      >
+        <TypographyMock
+          style={
+            {
+              "color": "#121212",
+              "fontSize": 8,
+              "fontWeight": "bold",
+            }
+          }
+          variant="caption"
+        >
+          1
+        </TypographyMock>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        9
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        10
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        11
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        12
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "borderColor": "rgba(82, 67, 194, 0.3)40",
+            "borderWidth": 1,
+          },
+          {
+            "backgroundColor": "#FF525240",
+          },
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        13
+      </TypographyMock>
+      <Text
+        style={
+          {
+            "fontSize": 16,
+          }
+        }
+      >
+        😠
+      </Text>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#00C853",
+            "borderRadius": 10,
+            "bottom": 2,
+            "height": 14,
+            "justifyContent": "center",
+            "position": "absolute",
+            "right": 2,
+            "width": 14,
+          }
+        }
+      >
+        <TypographyMock
+          style={
+            {
+              "color": "#121212",
+              "fontSize": 8,
+              "fontWeight": "bold",
+            }
+          }
+          variant="caption"
+        >
+          1
+        </TypographyMock>
+      </View>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "borderColor": "rgba(82, 67, 194, 0.3)40",
+            "borderWidth": 1,
+          },
+          {
+            "backgroundColor": "#1565C040",
+          },
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        14
+      </TypographyMock>
+      <Text
+        style={
+          {
+            "fontSize": 16,
+          }
+        }
+      >
+        😢
+      </Text>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#00C853",
+            "borderRadius": 10,
+            "bottom": 2,
+            "height": 14,
+            "justifyContent": "center",
+            "position": "absolute",
+            "right": 2,
+            "width": 14,
+          }
+        }
+      >
+        <TypographyMock
+          style={
+            {
+              "color": "#121212",
+              "fontSize": 8,
+              "fontWeight": "bold",
+            }
+          }
+          variant="caption"
+        >
+          1
+        </TypographyMock>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "borderColor": "rgba(82, 67, 194, 0.3)40",
+            "borderWidth": 1,
+          },
+          {
+            "backgroundColor": "#2E7D3240",
+          },
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        15
+      </TypographyMock>
+      <Text
+        style={
+          {
+            "fontSize": 16,
+          }
+        }
+      >
+        😊
+      </Text>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#00C853",
+            "borderRadius": 10,
+            "bottom": 2,
+            "height": 14,
+            "justifyContent": "center",
+            "position": "absolute",
+            "right": 2,
+            "width": 14,
+          }
+        }
+      >
+        <TypographyMock
+          style={
+            {
+              "color": "#121212",
+              "fontSize": 8,
+              "fontWeight": "bold",
+            }
+          }
+          variant="caption"
+        >
+          1
+        </TypographyMock>
+      </View>
+    </View>
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+  </View>
+  <TypographyMock
+    style={
+      {
+        "color": "rgba(255, 255, 255, 0.7)",
+        "marginTop": 8,
+        "textAlign": "center",
+      }
+    }
+    variant="caption"
+  >
+    4/16/2023
+     - 
+    5/15/2023
+  </TypographyMock>
+</View>
+`;
+
+exports[`EmotionalCalendarView renders monthly calendar view correctly 1`] = `
+<View
+  style={
+    {
+      "marginVertical": 16,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Sun
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Mon
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Tue
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Wed
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Thu
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Fri
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Sat
+    </TypographyMock>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        16
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        17
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        18
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        19
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        20
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        21
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        22
+      </TypographyMock>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        23
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        24
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        25
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        26
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        27
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        28
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        29
+      </TypographyMock>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        30
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        1
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        2
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        3
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        4
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        5
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        6
+      </TypographyMock>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        7
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "borderColor": "rgba(82, 67, 194, 0.3)40",
+            "borderWidth": 1,
+          },
+          {
+            "backgroundColor": "#43A04740",
+          },
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        8
+      </TypographyMock>
+      <Text
+        style={
+          {
+            "fontSize": 16,
+          }
+        }
+      >
+        😌
+      </Text>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#00C853",
+            "borderRadius": 10,
+            "bottom": 2,
+            "height": 14,
+            "justifyContent": "center",
+            "position": "absolute",
+            "right": 2,
+            "width": 14,
+          }
+        }
+      >
+        <TypographyMock
+          style={
+            {
+              "color": "#121212",
+              "fontSize": 8,
+              "fontWeight": "bold",
+            }
+          }
+          variant="caption"
+        >
+          1
+        </TypographyMock>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        9
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        10
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        11
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        12
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "borderColor": "rgba(82, 67, 194, 0.3)40",
+            "borderWidth": 1,
+          },
+          {
+            "backgroundColor": "#FF525240",
+          },
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        13
+      </TypographyMock>
+      <Text
+        style={
+          {
+            "fontSize": 16,
+          }
+        }
+      >
+        😠
+      </Text>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#00C853",
+            "borderRadius": 10,
+            "bottom": 2,
+            "height": 14,
+            "justifyContent": "center",
+            "position": "absolute",
+            "right": 2,
+            "width": 14,
+          }
+        }
+      >
+        <TypographyMock
+          style={
+            {
+              "color": "#121212",
+              "fontSize": 8,
+              "fontWeight": "bold",
+            }
+          }
+          variant="caption"
+        >
+          1
+        </TypographyMock>
+      </View>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "borderColor": "rgba(82, 67, 194, 0.3)40",
+            "borderWidth": 1,
+          },
+          {
+            "backgroundColor": "#1565C040",
+          },
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        14
+      </TypographyMock>
+      <Text
+        style={
+          {
+            "fontSize": 16,
+          }
+        }
+      >
+        😢
+      </Text>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#00C853",
+            "borderRadius": 10,
+            "bottom": 2,
+            "height": 14,
+            "justifyContent": "center",
+            "position": "absolute",
+            "right": 2,
+            "width": 14,
+          }
+        }
+      >
+        <TypographyMock
+          style={
+            {
+              "color": "#121212",
+              "fontSize": 8,
+              "fontWeight": "bold",
+            }
+          }
+          variant="caption"
+        >
+          1
+        </TypographyMock>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "borderColor": "rgba(82, 67, 194, 0.3)40",
+            "borderWidth": 1,
+          },
+          {
+            "backgroundColor": "#2E7D3240",
+          },
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        15
+      </TypographyMock>
+      <Text
+        style={
+          {
+            "fontSize": 16,
+          }
+        }
+      >
+        😊
+      </Text>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#00C853",
+            "borderRadius": 10,
+            "bottom": 2,
+            "height": 14,
+            "justifyContent": "center",
+            "position": "absolute",
+            "right": 2,
+            "width": 14,
+          }
+        }
+      >
+        <TypographyMock
+          style={
+            {
+              "color": "#121212",
+              "fontSize": 8,
+              "fontWeight": "bold",
+            }
+          }
+          variant="caption"
+        >
+          1
+        </TypographyMock>
+      </View>
+    </View>
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+  </View>
+  <TypographyMock
+    style={
+      {
+        "color": "rgba(255, 255, 255, 0.7)",
+        "marginTop": 8,
+        "textAlign": "center",
+      }
+    }
+    variant="caption"
+  >
+    4/16/2023
+     - 
+    5/15/2023
+  </TypographyMock>
+</View>
+`;
+
+exports[`EmotionalCalendarView renders weekly calendar view correctly 1`] = `
+<View
+  style={
+    {
+      "marginVertical": 16,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Sun
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Mon
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Tue
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Wed
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Thu
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Fri
+    </TypographyMock>
+    <TypographyMock
+      style={
+        {
+          "color": "rgba(255, 255, 255, 0.7)",
+          "flex": 1,
+          "fontSize": 12,
+          "textAlign": "center",
+        }
+      }
+      variant="caption"
+    >
+      Sat
+    </TypographyMock>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        9
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        10
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        11
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "backgroundColor": "transparent",
+          },
+          null,
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        12
+      </TypographyMock>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "borderColor": "rgba(82, 67, 194, 0.3)40",
+            "borderWidth": 1,
+          },
+          {
+            "backgroundColor": "#FF525240",
+          },
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        13
+      </TypographyMock>
+      <Text
+        style={
+          {
+            "fontSize": 16,
+          }
+        }
+      >
+        😠
+      </Text>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#00C853",
+            "borderRadius": 10,
+            "bottom": 2,
+            "height": 14,
+            "justifyContent": "center",
+            "position": "absolute",
+            "right": 2,
+            "width": 14,
+          }
+        }
+      >
+        <TypographyMock
+          style={
+            {
+              "color": "#121212",
+              "fontSize": 8,
+              "fontWeight": "bold",
+            }
+          }
+          variant="caption"
+        >
+          1
+        </TypographyMock>
+      </View>
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "marginBottom": 4,
+      }
+    }
+  >
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "borderColor": "rgba(82, 67, 194, 0.3)40",
+            "borderWidth": 1,
+          },
+          {
+            "backgroundColor": "#1565C040",
+          },
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        14
+      </TypographyMock>
+      <Text
+        style={
+          {
+            "fontSize": 16,
+          }
+        }
+      >
+        😢
+      </Text>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#00C853",
+            "borderRadius": 10,
+            "bottom": 2,
+            "height": 14,
+            "justifyContent": "center",
+            "position": "absolute",
+            "right": 2,
+            "width": 14,
+          }
+        }
+      >
+        <TypographyMock
+          style={
+            {
+              "color": "#121212",
+              "fontSize": 8,
+              "fontWeight": "bold",
+            }
+          }
+          variant="caption"
+        >
+          1
+        </TypographyMock>
+      </View>
+    </View>
+    <View
+      style={
+        [
+          {
+            "alignItems": "center",
+            "aspectRatio": 1,
+            "borderRadius": 4,
+            "flex": 1,
+            "justifyContent": "center",
+            "margin": 2,
+            "position": "relative",
+          },
+          {
+            "borderColor": "rgba(82, 67, 194, 0.3)40",
+            "borderWidth": 1,
+          },
+          {
+            "backgroundColor": "#2E7D3240",
+          },
+        ]
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 10,
+            "left": 4,
+            "position": "absolute",
+            "top": 2,
+          }
+        }
+        variant="caption"
+      >
+        15
+      </TypographyMock>
+      <Text
+        style={
+          {
+            "fontSize": 16,
+          }
+        }
+      >
+        😊
+      </Text>
+      <View
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "#00C853",
+            "borderRadius": 10,
+            "bottom": 2,
+            "height": 14,
+            "justifyContent": "center",
+            "position": "absolute",
+            "right": 2,
+            "width": 14,
+          }
+        }
+      >
+        <TypographyMock
+          style={
+            {
+              "color": "#121212",
+              "fontSize": 8,
+              "fontWeight": "bold",
+            }
+          }
+          variant="caption"
+        >
+          1
+        </TypographyMock>
+      </View>
+    </View>
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "backgroundColor": "transparent",
+        }
+      }
+    />
+  </View>
+  <TypographyMock
+    style={
+      {
+        "color": "rgba(255, 255, 255, 0.7)",
+        "marginTop": 8,
+        "textAlign": "center",
+      }
+    }
+    variant="caption"
+  >
+    5/9/2023
+     - 
+    5/15/2023
+  </TypographyMock>
+</View>
+`;

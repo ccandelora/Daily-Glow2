@@ -31,6 +31,50 @@ interface EmotionalWordCloudProps {
 }
 
 export const EmotionalWordCloud: React.FC<EmotionalWordCloudProps> = ({ entries, width, height }) => {
+  // IMPORTANT: Define this function BEFORE useMemo to fix the reference error
+  // Generate sample data when no real data exists
+  const generateSampleWordCloud = (): WordData[] => {
+    const sampleWords = [
+      { text: 'happy', value: 10, emotion: 'happy' },
+      { text: 'family', value: 8, emotion: 'peaceful' },
+      { text: 'friends', value: 7, emotion: 'happy' },
+      { text: 'work', value: 6, emotion: 'optimistic' },
+      { text: 'relaxed', value: 5, emotion: 'peaceful' },
+      { text: 'excited', value: 5, emotion: 'happy' },
+      { text: 'tired', value: 4, emotion: 'sad' },
+      { text: 'grateful', value: 4, emotion: 'peaceful' },
+      { text: 'productive', value: 3, emotion: 'powerful' },
+      { text: 'stressed', value: 3, emotion: 'scared' },
+    ];
+    
+    const centerX = width / 2;
+    const centerY = height / 2;
+    
+    return sampleWords.map((word, index) => {
+      const emotionData = getEmotionById(word.emotion);
+      const fontSize = 16 + (word.value / 10) * 16;
+      
+      // Calculate position (spiral layout)
+      const angle = (index / sampleWords.length) * 2 * Math.PI * 3;
+      const spiralFactor = 10 + (index * 4);
+      const x = centerX + Math.cos(angle) * spiralFactor;
+      const y = centerY + Math.sin(angle) * spiralFactor;
+      
+      // Less rotation for better readability
+      const rotation = Math.floor(Math.random() * 2) * 20 - 10; // -10, 0, or 10 degrees
+      
+      return {
+        text: word.text,
+        value: word.value,
+        color: emotionData?.color || theme.COLORS.ui.text,
+        x,
+        y,
+        size: fontSize,
+        rotation,
+      };
+    });
+  };
+
   const wordCloudData = useMemo(() => {
     console.log('EmotionalWordCloud entries:', entries.length);
     
@@ -141,49 +185,6 @@ export const EmotionalWordCloud: React.FC<EmotionalWordCloudProps> = ({ entries,
     
     return placedWords;
   }, [entries, width, height]);
-  
-  // Generate sample data when no real data exists
-  const generateSampleWordCloud = (): WordData[] => {
-    const sampleWords = [
-      { text: 'happy', value: 10, emotion: 'happy' },
-      { text: 'family', value: 8, emotion: 'peaceful' },
-      { text: 'friends', value: 7, emotion: 'happy' },
-      { text: 'work', value: 6, emotion: 'optimistic' },
-      { text: 'relaxed', value: 5, emotion: 'peaceful' },
-      { text: 'excited', value: 5, emotion: 'happy' },
-      { text: 'tired', value: 4, emotion: 'sad' },
-      { text: 'grateful', value: 4, emotion: 'peaceful' },
-      { text: 'productive', value: 3, emotion: 'powerful' },
-      { text: 'stressed', value: 3, emotion: 'scared' },
-    ];
-    
-    const centerX = width / 2;
-    const centerY = height / 2;
-    
-    return sampleWords.map((word, index) => {
-      const emotionData = getEmotionById(word.emotion);
-      const fontSize = 16 + (word.value / 10) * 16;
-      
-      // Calculate position (spiral layout)
-      const angle = (index / sampleWords.length) * 2 * Math.PI * 3;
-      const spiralFactor = 10 + (index * 4);
-      const x = centerX + Math.cos(angle) * spiralFactor;
-      const y = centerY + Math.sin(angle) * spiralFactor;
-      
-      // Less rotation for better readability
-      const rotation = Math.floor(Math.random() * 2) * 20 - 10; // -10, 0, or 10 degrees
-      
-      return {
-        text: word.text,
-        value: word.value,
-        color: emotionData?.color || theme.COLORS.ui.text,
-        x,
-        y,
-        size: fontSize,
-        rotation,
-      };
-    });
-  };
   
   if (wordCloudData.length === 0) {
     return (

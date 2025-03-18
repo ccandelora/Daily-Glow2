@@ -5,10 +5,10 @@
     "scheme": "daily-glow",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/icon-square.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splash-square.png",
       "resizeMode": "contain",
       "backgroundColor": "#000000"
     },
@@ -21,11 +21,14 @@
       "associatedDomains": [
         "applinks:daily-glow.app",
         "applinks:*.supabase.co"
-      ]
+      ],
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon-square.png",
         "backgroundColor": "#000000"
       },
       "package": "com.dailyglow.app",
@@ -48,12 +51,15 @@
               "pathPrefix": "/auth/v1/verify"
             }
           ],
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/icon-square.png"
     },
     "plugins": [
       "expo-router",
@@ -66,15 +72,15 @@
         "origin": false
       },
       "eas": {
-        "projectId": "dailyglow"
+        "projectId": "63152758-fdae-4d0e-94b6-4cbb3d8d697f"
       }
     },
-    "owner": "dailyglow",
+    "owner": "ccandelora",
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "updates": {
-      "url": "https://u.expo.dev/dailyglow"
+      "url": "https://u.expo.dev/ccandelora/daily-glow"
     }
   }
 }

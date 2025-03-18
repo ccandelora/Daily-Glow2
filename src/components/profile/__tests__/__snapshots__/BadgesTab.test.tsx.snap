@@ -1,0 +1,751 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BadgesTab renders correctly with empty badges list: empty-badges 1`] = `
+<RCTScrollView
+  style={
+    {
+      "backgroundColor": "rgba(28, 14, 45, 0.95)",
+      "flex": 1,
+    }
+  }
+>
+  <View>
+    <View
+      collapsable={false}
+      style={
+        {
+          "opacity": 0,
+          "padding": 24,
+        }
+      }
+    >
+      <TypographyMock
+        glow="soft"
+        style={
+          {
+            "marginBottom": 24,
+            "marginTop": 32,
+          }
+        }
+        variant="h3"
+      >
+        Your Badges
+      </TypographyMock>
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "marginVertical": 24,
+            "textAlign": "center",
+          }
+        }
+        variant="body"
+      >
+        You haven't earned any badges yet. Complete special activities to earn badges!
+      </TypographyMock>
+      <TypographyMock
+        glow="soft"
+        style={
+          {
+            "marginBottom": 24,
+            "marginTop": 32,
+          }
+        }
+        variant="h3"
+      >
+        Available Badges
+      </TypographyMock>
+    </View>
+  </View>
+</RCTScrollView>
+`;
+
+exports[`BadgesTab renders correctly with no user badges: no-badges 1`] = `
+<RCTScrollView
+  style={
+    {
+      "backgroundColor": "rgba(28, 14, 45, 0.95)",
+      "flex": 1,
+    }
+  }
+>
+  <View>
+    <View
+      collapsable={false}
+      style={
+        {
+          "opacity": 0,
+          "padding": 24,
+        }
+      }
+    >
+      <TypographyMock
+        glow="soft"
+        style={
+          {
+            "marginBottom": 24,
+            "marginTop": 32,
+          }
+        }
+        variant="h3"
+      >
+        Your Badges
+      </TypographyMock>
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "marginVertical": 24,
+            "textAlign": "center",
+          }
+        }
+        variant="body"
+      >
+        You haven't earned any badges yet. Complete special activities to earn badges!
+      </TypographyMock>
+      <TypographyMock
+        glow="soft"
+        style={
+          {
+            "marginBottom": 24,
+            "marginTop": 32,
+          }
+        }
+        variant="h3"
+      >
+        Available Badges
+      </TypographyMock>
+      <CardMock
+        style={
+          {
+            "backgroundColor": "rgba(38, 20, 60, 0.5)",
+            "marginBottom": 16,
+            "padding": 16,
+          }
+        }
+        variant="default"
+      >
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "marginBottom": 16,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "rgba(120, 120, 120, 0.1)",
+                "borderColor": "rgba(120, 120, 120, 0.2)",
+                "borderRadius": 24,
+                "borderWidth": 1,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 16,
+                "width": 48,
+              }
+            }
+          >
+            <FontAwesome6Mock
+              color="rgba(120, 120, 120, 0.5)"
+              name="leaf"
+              size={24}
+            />
+          </View>
+          <View
+            style={
+              {
+                "flex": 1,
+              }
+            }
+          >
+            <TypographyMock
+              color="rgba(255, 255, 255, 0.7)"
+              glow="none"
+              style={
+                {
+                  "fontSize": 18,
+                  "marginBottom": 4,
+                }
+              }
+              variant="h3"
+            >
+              First Check-in
+            </TypographyMock>
+            <TypographyMock
+              color="rgba(120, 120, 120, 0.6)"
+              style={
+                {
+                  "fontSize": 14,
+                }
+              }
+              variant="body"
+            >
+              Complete your first check-in
+            </TypographyMock>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginTop": 16,
+            }
+          }
+        >
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            Not yet earned
+          </TypographyMock>
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            Beginner
+          </TypographyMock>
+        </View>
+      </CardMock>
+      <CardMock
+        style={
+          {
+            "backgroundColor": "rgba(38, 20, 60, 0.5)",
+            "marginBottom": 16,
+            "padding": 16,
+          }
+        }
+        variant="default"
+      >
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "marginBottom": 16,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "rgba(120, 120, 120, 0.1)",
+                "borderColor": "rgba(120, 120, 120, 0.2)",
+                "borderRadius": 24,
+                "borderWidth": 1,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 16,
+                "width": 48,
+              }
+            }
+          >
+            <FontAwesome6Mock
+              color="rgba(120, 120, 120, 0.5)"
+              name="shield"
+              size={24}
+            />
+          </View>
+          <View
+            style={
+              {
+                "flex": 1,
+              }
+            }
+          >
+            <TypographyMock
+              color="rgba(255, 255, 255, 0.7)"
+              glow="none"
+              style={
+                {
+                  "fontSize": 18,
+                  "marginBottom": 4,
+                }
+              }
+              variant="h3"
+            >
+              Consistent User
+            </TypographyMock>
+            <TypographyMock
+              color="rgba(120, 120, 120, 0.6)"
+              style={
+                {
+                  "fontSize": 14,
+                }
+              }
+              variant="body"
+            >
+              Check in for 7 consecutive days
+            </TypographyMock>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginTop": 16,
+            }
+          }
+        >
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            Not yet earned
+          </TypographyMock>
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            Intermediate
+          </TypographyMock>
+        </View>
+      </CardMock>
+      <CardMock
+        style={
+          {
+            "backgroundColor": "rgba(38, 20, 60, 0.5)",
+            "marginBottom": 16,
+            "padding": 16,
+          }
+        }
+        variant="default"
+      >
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "marginBottom": 16,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "rgba(120, 120, 120, 0.1)",
+                "borderColor": "rgba(120, 120, 120, 0.2)",
+                "borderRadius": 24,
+                "borderWidth": 1,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 16,
+                "width": 48,
+              }
+            }
+          >
+            <FontAwesome6Mock
+              color="rgba(120, 120, 120, 0.5)"
+              name="crown"
+              size={24}
+            />
+          </View>
+          <View
+            style={
+              {
+                "flex": 1,
+              }
+            }
+          >
+            <TypographyMock
+              color="rgba(255, 255, 255, 0.7)"
+              glow="none"
+              style={
+                {
+                  "fontSize": 18,
+                  "marginBottom": 4,
+                }
+              }
+              variant="h3"
+            >
+              Emotional Master
+            </TypographyMock>
+            <TypographyMock
+              color="rgba(120, 120, 120, 0.6)"
+              style={
+                {
+                  "fontSize": 14,
+                }
+              }
+              variant="body"
+            >
+              Record a wide range of emotions
+            </TypographyMock>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginTop": 16,
+            }
+          }
+        >
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            Not yet earned
+          </TypographyMock>
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            Master
+          </TypographyMock>
+        </View>
+      </CardMock>
+    </View>
+  </View>
+</RCTScrollView>
+`;
+
+exports[`BadgesTab renders correctly with user badges 1`] = `
+<RCTScrollView
+  style={
+    {
+      "backgroundColor": "rgba(28, 14, 45, 0.95)",
+      "flex": 1,
+    }
+  }
+>
+  <View>
+    <View
+      collapsable={false}
+      style={
+        {
+          "opacity": 0,
+          "padding": 24,
+        }
+      }
+    >
+      <TypographyMock
+        glow="soft"
+        style={
+          {
+            "marginBottom": 24,
+            "marginTop": 32,
+          }
+        }
+        variant="h3"
+      >
+        Your Badges
+      </TypographyMock>
+      <CardMock
+        style={
+          {
+            "backgroundColor": "rgba(38, 20, 60, 0.9)",
+            "marginBottom": 16,
+            "padding": 16,
+          }
+        }
+        variant="glow"
+      >
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "marginBottom": 16,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#00C85320",
+                "borderColor": "#00C853",
+                "borderRadius": 24,
+                "borderWidth": 1,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 16,
+                "width": 48,
+              }
+            }
+          >
+            <FontAwesome6Mock
+              color="#00C853"
+              name="leaf"
+              size={24}
+            />
+          </View>
+          <View
+            style={
+              {
+                "flex": 1,
+              }
+            }
+          >
+            <TypographyMock
+              color="#FFFFFF"
+              glow="medium"
+              style={
+                {
+                  "fontSize": 18,
+                  "marginBottom": 4,
+                }
+              }
+              variant="h3"
+            >
+              First Check-in
+            </TypographyMock>
+            <TypographyMock
+              color="rgba(255, 255, 255, 0.7)"
+              style={
+                {
+                  "fontSize": 14,
+                }
+              }
+              variant="body"
+            >
+              Complete your first check-in
+            </TypographyMock>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginTop": 16,
+            }
+          }
+        >
+          <TypographyMock
+            color="#00C853"
+            glow="soft"
+            variant="caption"
+          >
+            Earned
+          </TypographyMock>
+          <TypographyMock
+            color="#00C853"
+            glow="soft"
+            variant="caption"
+          >
+            Beginner
+          </TypographyMock>
+        </View>
+      </CardMock>
+      <TypographyMock
+        glow="soft"
+        style={
+          {
+            "marginBottom": 24,
+            "marginTop": 32,
+          }
+        }
+        variant="h3"
+      >
+        Available Badges
+      </TypographyMock>
+      <CardMock
+        style={
+          {
+            "backgroundColor": "rgba(38, 20, 60, 0.5)",
+            "marginBottom": 16,
+            "padding": 16,
+          }
+        }
+        variant="default"
+      >
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "marginBottom": 16,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "rgba(120, 120, 120, 0.1)",
+                "borderColor": "rgba(120, 120, 120, 0.2)",
+                "borderRadius": 24,
+                "borderWidth": 1,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 16,
+                "width": 48,
+              }
+            }
+          >
+            <FontAwesome6Mock
+              color="rgba(120, 120, 120, 0.5)"
+              name="shield"
+              size={24}
+            />
+          </View>
+          <View
+            style={
+              {
+                "flex": 1,
+              }
+            }
+          >
+            <TypographyMock
+              color="rgba(255, 255, 255, 0.7)"
+              glow="none"
+              style={
+                {
+                  "fontSize": 18,
+                  "marginBottom": 4,
+                }
+              }
+              variant="h3"
+            >
+              Consistent User
+            </TypographyMock>
+            <TypographyMock
+              color="rgba(120, 120, 120, 0.6)"
+              style={
+                {
+                  "fontSize": 14,
+                }
+              }
+              variant="body"
+            >
+              Check in for 7 consecutive days
+            </TypographyMock>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginTop": 16,
+            }
+          }
+        >
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            Not yet earned
+          </TypographyMock>
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            Intermediate
+          </TypographyMock>
+        </View>
+      </CardMock>
+      <CardMock
+        style={
+          {
+            "backgroundColor": "rgba(38, 20, 60, 0.5)",
+            "marginBottom": 16,
+            "padding": 16,
+          }
+        }
+        variant="default"
+      >
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "marginBottom": 16,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "rgba(120, 120, 120, 0.1)",
+                "borderColor": "rgba(120, 120, 120, 0.2)",
+                "borderRadius": 24,
+                "borderWidth": 1,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 16,
+                "width": 48,
+              }
+            }
+          >
+            <FontAwesome6Mock
+              color="rgba(120, 120, 120, 0.5)"
+              name="crown"
+              size={24}
+            />
+          </View>
+          <View
+            style={
+              {
+                "flex": 1,
+              }
+            }
+          >
+            <TypographyMock
+              color="rgba(255, 255, 255, 0.7)"
+              glow="none"
+              style={
+                {
+                  "fontSize": 18,
+                  "marginBottom": 4,
+                }
+              }
+              variant="h3"
+            >
+              Emotional Master
+            </TypographyMock>
+            <TypographyMock
+              color="rgba(120, 120, 120, 0.6)"
+              style={
+                {
+                  "fontSize": 14,
+                }
+              }
+              variant="body"
+            >
+              Record a wide range of emotions
+            </TypographyMock>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginTop": 16,
+            }
+          }
+        >
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            Not yet earned
+          </TypographyMock>
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            Master
+          </TypographyMock>
+        </View>
+      </CardMock>
+    </View>
+  </View>
+</RCTScrollView>
+`;

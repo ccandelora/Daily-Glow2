@@ -38,9 +38,9 @@ export const SignUpScreen = () => {
       // On mobile, redirect to verification instructions
       // On web, redirect to welcome screen (verification will happen via email link)
       if (Platform.OS === 'web') {
-        router.replace('/(onboarding)/welcome');
+        router.replace('/(app)');
       } else {
-        router.replace('/(auth)/verification-instructions');
+        router.replace('/(app)');
       }
     } catch (error) {
       // Error is already handled in AuthContext

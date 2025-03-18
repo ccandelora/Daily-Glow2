@@ -1,0 +1,97 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EmailVerificationBanner renders correctly with email 1`] = `
+<View
+  style={
+    {
+      "backgroundColor": "rgba(255, 193, 7, 0.15)",
+      "borderColor": "rgba(255, 193, 7, 0.3)",
+      "borderRadius": 16,
+      "borderWidth": 1,
+      "flexDirection": "row",
+      "marginVertical": 16,
+      "padding": 16,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "backgroundColor": "rgba(255, 193, 7, 0.2)",
+        "borderRadius": 20,
+        "height": 40,
+        "justifyContent": "center",
+        "marginRight": 16,
+        "width": 40,
+      }
+    }
+  >
+    <Ionicons
+      color="#FFFFFF"
+      name="mail-unread-outline"
+      size={24}
+    />
+  </View>
+  <View
+    style={
+      {
+        "flex": 1,
+      }
+    }
+  >
+    <Text
+      style={
+        [
+          {
+            "color": "#FFFFFF",
+            "fontFamily": "System",
+            "fontSize": 16,
+          },
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 16,
+            "fontWeight": "400",
+            "lineHeight": 24,
+          },
+          undefined,
+          null,
+          {
+            "color": "#FFFFFF",
+            "fontWeight": "700",
+            "marginBottom": 4,
+          },
+        ]
+      }
+    >
+      Please verify your email
+    </Text>
+    <Text
+      style={
+        [
+          {
+            "color": "#FFFFFF",
+            "fontFamily": "System",
+            "fontSize": 16,
+          },
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "fontSize": 14,
+            "fontWeight": "400",
+          },
+          undefined,
+          null,
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "lineHeight": 20,
+          },
+        ]
+      }
+    >
+      We've sent a verification link to 
+      test@example.com
+      . Please check your inbox and verify your email to unlock all features.
+    </Text>
+  </View>
+</View>
+`;

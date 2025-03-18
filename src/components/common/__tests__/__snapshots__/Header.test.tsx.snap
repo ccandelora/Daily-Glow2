@@ -1,0 +1,57 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header matches snapshot with default props 1`] = `
+<RNCSafeAreaProvider
+  onInsetsChange={[Function]}
+  style={
+    [
+      {
+        "flex": 1,
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    style={
+      [
+        {
+          "backgroundColor": "transparent",
+          "paddingBottom": 4,
+        },
+        {
+          "paddingTop": 16,
+        },
+      ]
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "marginBottom": 4,
+          "paddingHorizontal": 24,
+        }
+      }
+    />
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flexDirection": "row",
+          "minHeight": 44,
+          "paddingHorizontal": 24,
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "marginLeft": "auto",
+          }
+        }
+      />
+    </View>
+  </View>
+</RNCSafeAreaProvider>
+`;

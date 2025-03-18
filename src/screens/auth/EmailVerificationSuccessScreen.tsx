@@ -35,7 +35,7 @@ export const EmailVerificationSuccessScreen = () => {
   }, []);
 
   const handleContinue = () => {
-    router.replace('/(onboarding)/welcome');
+    router.replace('/(app)');
   };
 
   const handleRetry = async () => {

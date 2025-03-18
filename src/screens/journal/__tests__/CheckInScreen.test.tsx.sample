@@ -1,0 +1,159 @@
+import React from 'react';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { CheckInScreen } from '../CheckInScreen';
+
+// Import mocks from separate files
+import { 
+  Typography, 
+  Card, 
+  Button, 
+  Input, 
+  Header, 
+  EmotionWheel, 
+  VideoBackground 
+} from './__mocks__/ComponentMocks';
+
+import { 
+  mockAddEntry, 
+  mockGetLatestEntryForPeriod, 
+  mockGetTodayEntries,
+  mockShowError,
+  setupJournalContextMock,
+  setupAppStateContextMock,
+  setupRouterMock
+} from './__mocks__/ContextMocks';
+
+import {
+  mockCurrentTimePeriod,
+  mockTimePeriods,
+  mockTimePeriodInfo
+} from './__mocks__/UtilityMocks';
+
+import { setupAnimatedMocks } from './__mocks__/AnimationMocks';
+
+// Setup mocks for external dependencies
+jest.mock('react-native/Libraries/Animated/Animated', () => setupAnimatedMocks());
+
+// Mock expo-router with our mock implementation
+jest.mock('expo-router', () => ({
+  useRouter: jest.fn(() => setupRouterMock()),
+}));
+
+// Mock JournalContext with our mock implementation
+jest.mock('@/contexts/JournalContext', () => ({
+  useJournal: jest.fn(() => setupJournalContextMock()),
+}));
+
+// Mock AppStateContext with our mock implementation
+jest.mock('@/contexts/AppStateContext', () => ({
+  useAppState: jest.fn(() => setupAppStateContextMock()),
+}));
+
+// Mock common components with our imported mocks
+jest.mock('@/components/common', () => ({
+  Typography, 
+  Card,
+  Button,
+  Input,
+  Header,
+  EmotionWheel,
+  VideoBackground
+}));
+
+// Mock LinearGradient
+jest.mock('expo-linear-gradient', () => ({
+  LinearGradient: ({ children }) => <div data-testid="linear-gradient">{children}</div>,
+}));
+
+// Mock utils and constants
+jest.mock('@/utils/dateTime', () => ({
+  getCurrentTimePeriod: jest.fn(() => mockCurrentTimePeriod),
+  TimePeriod: mockTimePeriods,
+}));
+
+jest.mock('@/constants/theme', () => ({
+  COLORS: {
+    ui: {
+      background: '#121212',
+      card: '#1E1E1E',
+      text: '#FFFFFF',
+      accent: '#6200EE',
+    },
+  },
+  SPACING: {
+    sm: 8,
+    md: 16,
+    lg: 24,
+    xl: 32,
+  },
+  TIME_PERIODS: mockTimePeriodInfo,
+}));
+
+describe('CheckInScreen', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    
+    // Default mocks for a fresh check-in (no completed periods)
+    mockGetLatestEntryForPeriod.mockReturnValue(null);
+    mockGetTodayEntries.mockReturnValue([]);
+  });
+
+  it('renders initial emotion selection step', () => {
+    const { getByTestId, getByText } = render(<CheckInScreen />);
+    
+    // Check that basic elements are rendered
+    expect(getByTestId('video-background')).toBeTruthy();
+    expect(getByTestId('header')).toBeTruthy();
+    expect(getByTestId('emotion-wheel')).toBeTruthy();
+    
+    // Check for step title
+    expect(getByText('How are you feeling right now?')).toBeTruthy();
+  });
+
+  it('moves through the 3-step check-in process', async () => {
+    const { getByTestId, getByText } = render(<CheckInScreen />);
+    
+    // Step 1: Select initial emotion
+    fireEvent.press(getByTestId('select-emotion-happy'));
+    
+    // Should now be on step 2
+    await waitFor(() => {
+      expect(getByText('Can you be more specific?')).toBeTruthy();
+    });
+    
+    // Step 2: Select secondary emotion
+    fireEvent.press(getByTestId('select-emotion-sad'));
+    
+    // Should now be on step 3
+    await waitFor(() => {
+      expect(getByText('What are you grateful for today?')).toBeTruthy();
+      expect(getByTestId('input-What are you grateful for?')).toBeTruthy();
+    });
+    
+    // Step 3: Enter gratitude and submit
+    const gratitudeInput = getByTestId('input-field-What are you grateful for?');
+    fireEvent.changeText(gratitudeInput, 'I am grateful for this test passing');
+    
+    // Optional note
+    const noteInput = getByTestId('input-field-Add a note (optional)');
+    fireEvent.changeText(noteInput, 'This is a test note');
+    
+    // Submit
+    const submitButton = getByTestId('button-Submit');
+    fireEvent.press(submitButton);
+    
+    // Check that addEntry was called with correct values
+    expect(mockAddEntry).toHaveBeenCalledWith(
+      'happy',
+      'sad',
+      'I am grateful for this test passing',
+      'This is a test note'
+    );
+    
+    // Should navigate back
+    const router = require('expo-router').useRouter();
+    expect(router().back).toHaveBeenCalled();
+  });
+
+  // Additional tests as before...
+}); 

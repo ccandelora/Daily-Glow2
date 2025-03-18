@@ -1,16 +1,32 @@
 import React, { useEffect, useRef } from 'react';
-import { Animated, StyleSheet, View, Dimensions } from 'react-native';
+import { Animated, StyleSheet, View, Dimensions, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import theme from '@/constants/theme';
 
-interface AnimatedBackgroundProps {
-  intensity?: 'light' | 'medium' | 'strong';
+export interface AnimatedBackgroundProps {
+  /**
+   * Whether the background should be animated
+   */
   animated?: boolean;
+  /**
+   * The intensity of the background effect, 'light' or 'dark'
+   */
+  intensity?: 'light' | 'dark';
+  /**
+   * The test ID for testing
+   */
+  testID?: string;
+  /**
+   * Additional styles for the container
+   */
+  style?: ViewStyle;
 }
 
-export const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({ 
-  intensity = 'medium',
-  animated = true 
+export const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({
+  animated = true,
+  intensity = 'dark',
+  testID,
+  style,
 }) => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const rotateAnim = useRef(new Animated.Value(0)).current;
@@ -52,7 +68,7 @@ export const AnimatedBackground: React.FC<AnimatedBackgroundProps> = ({
   });
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, style]} testID={testID}>
       {/* Static base gradient */}
       <LinearGradient
         colors={[

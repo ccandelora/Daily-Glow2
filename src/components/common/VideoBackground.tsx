@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
-import { AVPlaybackStatus, ResizeMode, Video } from 'expo-av';
+import { ResizeMode, Video } from 'expo-av';
 
 export const VideoBackground: React.FC = () => {
   return (

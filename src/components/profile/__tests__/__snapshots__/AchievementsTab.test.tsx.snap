@@ -1,0 +1,1060 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AchievementsTab handles correctly when user profile is null: null-profile 1`] = `
+<RCTScrollView
+  style={
+    {
+      "flex": 1,
+      "padding": 16,
+    }
+  }
+>
+  <View>
+    <View
+      style={
+        {
+          "marginTop": 16,
+        }
+      }
+    >
+      <CardMock
+        style={
+          {
+            "backgroundColor": "rgba(255, 255, 255, 0.1)",
+            "borderRadius": 12,
+            "marginBottom": 16,
+            "padding": 16,
+          }
+        }
+        variant="glow"
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#00BCD420",
+                "borderColor": "#00BCD4",
+                "borderRadius": 24,
+                "borderWidth": 1,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 48,
+              }
+            }
+          >
+            <FontAwesome6Mock
+              color="#00BCD4"
+              name="medal"
+              size={24}
+            />
+          </View>
+          <View
+            style={
+              {
+                "flex": 1,
+              }
+            }
+          >
+            <TypographyMock
+              color="#FFFFFF"
+              glow="medium"
+              style={
+                {
+                  "marginBottom": 4,
+                }
+              }
+              variant="h3"
+            >
+              First Check-in
+            </TypographyMock>
+            <TypographyMock
+              color="rgba(255, 255, 255, 0.7)"
+              style={
+                {
+                  "opacity": 0.8,
+                }
+              }
+              variant="body"
+            >
+              Complete your first daily check-in
+            </TypographyMock>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "borderTopColor": "rgba(255, 255, 255, 0.1)",
+              "borderTopWidth": 1,
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginTop": 12,
+              "paddingTop": 12,
+            }
+          }
+        >
+          <TypographyMock
+            color="#00BCD4"
+            glow="soft"
+            variant="caption"
+          >
+            Earned
+          </TypographyMock>
+          <TypographyMock
+            color="#00C853"
+            glow="soft"
+            variant="caption"
+          >
+            +
+            50
+             pts
+          </TypographyMock>
+        </View>
+      </CardMock>
+    </View>
+    <TypographyMock
+      glow="soft"
+      style={
+        {
+          "marginBottom": 16,
+          "marginTop": 24,
+        }
+      }
+      variant="h3"
+    >
+      Available Achievements
+    </TypographyMock>
+    <View
+      style={
+        {
+          "marginTop": 16,
+        }
+      }
+    >
+      <CardMock
+        style={
+          {
+            "backgroundColor": "rgba(255, 255, 255, 0.05)",
+            "borderRadius": 12,
+            "marginBottom": 16,
+            "padding": 16,
+          }
+        }
+        variant="default"
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "rgba(120, 120, 120, 0.1)",
+                "borderColor": "rgba(120, 120, 120, 0.2)",
+                "borderRadius": 24,
+                "borderWidth": 1,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 48,
+              }
+            }
+          >
+            <FontAwesome6Mock
+              color="rgba(120, 120, 120, 0.5)"
+              name="fire"
+              size={24}
+            />
+          </View>
+          <View
+            style={
+              {
+                "flex": 1,
+              }
+            }
+          >
+            <TypographyMock
+              color="rgba(255, 255, 255, 0.7)"
+              glow="none"
+              style={
+                {
+                  "marginBottom": 4,
+                }
+              }
+              variant="h3"
+            >
+              7-Day Streak
+            </TypographyMock>
+            <TypographyMock
+              color="rgba(120, 120, 120, 0.6)"
+              style={
+                {
+                  "opacity": 0.8,
+                }
+              }
+              variant="body"
+            >
+              Maintain a 7-day check-in streak
+            </TypographyMock>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "borderTopColor": "rgba(255, 255, 255, 0.1)",
+              "borderTopWidth": 1,
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginTop": 12,
+              "paddingTop": 12,
+            }
+          }
+        >
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            Requires 7 day streak
+          </TypographyMock>
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            +
+            100
+             pts
+          </TypographyMock>
+        </View>
+      </CardMock>
+      <CardMock
+        style={
+          {
+            "backgroundColor": "rgba(255, 255, 255, 0.05)",
+            "borderRadius": 12,
+            "marginBottom": 16,
+            "padding": 16,
+          }
+        }
+        variant="default"
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "rgba(120, 120, 120, 0.1)",
+                "borderColor": "rgba(120, 120, 120, 0.2)",
+                "borderRadius": 24,
+                "borderWidth": 1,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 48,
+              }
+            }
+          >
+            <FontAwesome6Mock
+              color="rgba(120, 120, 120, 0.5)"
+              name="crown"
+              size={24}
+            />
+          </View>
+          <View
+            style={
+              {
+                "flex": 1,
+              }
+            }
+          >
+            <TypographyMock
+              color="rgba(255, 255, 255, 0.7)"
+              glow="none"
+              style={
+                {
+                  "marginBottom": 4,
+                }
+              }
+              variant="h3"
+            >
+              30-Day Streak
+            </TypographyMock>
+            <TypographyMock
+              color="rgba(120, 120, 120, 0.6)"
+              style={
+                {
+                  "opacity": 0.8,
+                }
+              }
+              variant="body"
+            >
+              Maintain a 30-day check-in streak
+            </TypographyMock>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "borderTopColor": "rgba(255, 255, 255, 0.1)",
+              "borderTopWidth": 1,
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginTop": 12,
+              "paddingTop": 12,
+            }
+          }
+        >
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            Requires 30 day streak
+          </TypographyMock>
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            +
+            300
+             pts
+          </TypographyMock>
+        </View>
+      </CardMock>
+    </View>
+  </View>
+</RCTScrollView>
+`;
+
+exports[`AchievementsTab renders correctly with no user achievements: no-achievements 1`] = `
+<RCTScrollView
+  style={
+    {
+      "flex": 1,
+      "padding": 16,
+    }
+  }
+>
+  <View>
+    <View
+      style={
+        {
+          "alignItems": "center",
+          "flex": 1,
+          "justifyContent": "center",
+          "marginTop": 40,
+        }
+      }
+    >
+      <TypographyMock
+        style={
+          {
+            "marginVertical": 24,
+            "opacity": 0.7,
+            "textAlign": "center",
+          }
+        }
+        variant="body"
+      >
+        You haven't earned any achievements yet. Keep up your daily check-ins!
+      </TypographyMock>
+    </View>
+    <TypographyMock
+      glow="soft"
+      style={
+        {
+          "marginBottom": 16,
+          "marginTop": 24,
+        }
+      }
+      variant="h3"
+    >
+      Available Achievements
+    </TypographyMock>
+    <View
+      style={
+        {
+          "marginTop": 16,
+        }
+      }
+    >
+      <CardMock
+        style={
+          {
+            "backgroundColor": "rgba(255, 255, 255, 0.05)",
+            "borderRadius": 12,
+            "marginBottom": 16,
+            "padding": 16,
+          }
+        }
+        variant="default"
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "rgba(120, 120, 120, 0.1)",
+                "borderColor": "rgba(120, 120, 120, 0.2)",
+                "borderRadius": 24,
+                "borderWidth": 1,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 48,
+              }
+            }
+          >
+            <FontAwesome6Mock
+              color="rgba(120, 120, 120, 0.5)"
+              name="medal"
+              size={24}
+            />
+          </View>
+          <View
+            style={
+              {
+                "flex": 1,
+              }
+            }
+          >
+            <TypographyMock
+              color="rgba(255, 255, 255, 0.7)"
+              glow="none"
+              style={
+                {
+                  "marginBottom": 4,
+                }
+              }
+              variant="h3"
+            >
+              First Check-in
+            </TypographyMock>
+            <TypographyMock
+              color="rgba(120, 120, 120, 0.6)"
+              style={
+                {
+                  "opacity": 0.8,
+                }
+              }
+              variant="body"
+            >
+              Complete your first daily check-in
+            </TypographyMock>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "borderTopColor": "rgba(255, 255, 255, 0.1)",
+              "borderTopWidth": 1,
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginTop": 12,
+              "paddingTop": 12,
+            }
+          }
+        >
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            Not yet earned
+          </TypographyMock>
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            +
+            50
+             pts
+          </TypographyMock>
+        </View>
+      </CardMock>
+      <CardMock
+        style={
+          {
+            "backgroundColor": "rgba(255, 255, 255, 0.05)",
+            "borderRadius": 12,
+            "marginBottom": 16,
+            "padding": 16,
+          }
+        }
+        variant="default"
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "rgba(120, 120, 120, 0.1)",
+                "borderColor": "rgba(120, 120, 120, 0.2)",
+                "borderRadius": 24,
+                "borderWidth": 1,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 48,
+              }
+            }
+          >
+            <FontAwesome6Mock
+              color="rgba(120, 120, 120, 0.5)"
+              name="fire"
+              size={24}
+            />
+          </View>
+          <View
+            style={
+              {
+                "flex": 1,
+              }
+            }
+          >
+            <TypographyMock
+              color="rgba(255, 255, 255, 0.7)"
+              glow="none"
+              style={
+                {
+                  "marginBottom": 4,
+                }
+              }
+              variant="h3"
+            >
+              7-Day Streak
+            </TypographyMock>
+            <TypographyMock
+              color="rgba(120, 120, 120, 0.6)"
+              style={
+                {
+                  "opacity": 0.8,
+                }
+              }
+              variant="body"
+            >
+              Maintain a 7-day check-in streak
+            </TypographyMock>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "borderTopColor": "rgba(255, 255, 255, 0.1)",
+              "borderTopWidth": 1,
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginTop": 12,
+              "paddingTop": 12,
+            }
+          }
+        >
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            Requires 7 day streak
+          </TypographyMock>
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            +
+            100
+             pts
+          </TypographyMock>
+        </View>
+      </CardMock>
+      <CardMock
+        style={
+          {
+            "backgroundColor": "rgba(255, 255, 255, 0.05)",
+            "borderRadius": 12,
+            "marginBottom": 16,
+            "padding": 16,
+          }
+        }
+        variant="default"
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "rgba(120, 120, 120, 0.1)",
+                "borderColor": "rgba(120, 120, 120, 0.2)",
+                "borderRadius": 24,
+                "borderWidth": 1,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 48,
+              }
+            }
+          >
+            <FontAwesome6Mock
+              color="rgba(120, 120, 120, 0.5)"
+              name="crown"
+              size={24}
+            />
+          </View>
+          <View
+            style={
+              {
+                "flex": 1,
+              }
+            }
+          >
+            <TypographyMock
+              color="rgba(255, 255, 255, 0.7)"
+              glow="none"
+              style={
+                {
+                  "marginBottom": 4,
+                }
+              }
+              variant="h3"
+            >
+              30-Day Streak
+            </TypographyMock>
+            <TypographyMock
+              color="rgba(120, 120, 120, 0.6)"
+              style={
+                {
+                  "opacity": 0.8,
+                }
+              }
+              variant="body"
+            >
+              Maintain a 30-day check-in streak
+            </TypographyMock>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "borderTopColor": "rgba(255, 255, 255, 0.1)",
+              "borderTopWidth": 1,
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginTop": 12,
+              "paddingTop": 12,
+            }
+          }
+        >
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            Requires 30 day streak
+          </TypographyMock>
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            +
+            300
+             pts
+          </TypographyMock>
+        </View>
+      </CardMock>
+    </View>
+  </View>
+</RCTScrollView>
+`;
+
+exports[`AchievementsTab renders correctly with user achievements 1`] = `
+<RCTScrollView
+  style={
+    {
+      "flex": 1,
+      "padding": 16,
+    }
+  }
+>
+  <View>
+    <View
+      style={
+        {
+          "marginTop": 16,
+        }
+      }
+    >
+      <CardMock
+        style={
+          {
+            "backgroundColor": "rgba(255, 255, 255, 0.1)",
+            "borderRadius": 12,
+            "marginBottom": 16,
+            "padding": 16,
+          }
+        }
+        variant="glow"
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#00BCD420",
+                "borderColor": "#00BCD4",
+                "borderRadius": 24,
+                "borderWidth": 1,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 48,
+              }
+            }
+          >
+            <FontAwesome6Mock
+              color="#00BCD4"
+              name="medal"
+              size={24}
+            />
+          </View>
+          <View
+            style={
+              {
+                "flex": 1,
+              }
+            }
+          >
+            <TypographyMock
+              color="#FFFFFF"
+              glow="medium"
+              style={
+                {
+                  "marginBottom": 4,
+                }
+              }
+              variant="h3"
+            >
+              First Check-in
+            </TypographyMock>
+            <TypographyMock
+              color="rgba(255, 255, 255, 0.7)"
+              style={
+                {
+                  "opacity": 0.8,
+                }
+              }
+              variant="body"
+            >
+              Complete your first daily check-in
+            </TypographyMock>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "borderTopColor": "rgba(255, 255, 255, 0.1)",
+              "borderTopWidth": 1,
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginTop": 12,
+              "paddingTop": 12,
+            }
+          }
+        >
+          <TypographyMock
+            color="#00BCD4"
+            glow="soft"
+            variant="caption"
+          >
+            Earned
+          </TypographyMock>
+          <TypographyMock
+            color="#00C853"
+            glow="soft"
+            variant="caption"
+          >
+            +
+            50
+             pts
+          </TypographyMock>
+        </View>
+      </CardMock>
+    </View>
+    <TypographyMock
+      glow="soft"
+      style={
+        {
+          "marginBottom": 16,
+          "marginTop": 24,
+        }
+      }
+      variant="h3"
+    >
+      Available Achievements
+    </TypographyMock>
+    <View
+      style={
+        {
+          "marginTop": 16,
+        }
+      }
+    >
+      <CardMock
+        style={
+          {
+            "backgroundColor": "rgba(255, 255, 255, 0.05)",
+            "borderRadius": 12,
+            "marginBottom": 16,
+            "padding": 16,
+          }
+        }
+        variant="default"
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "rgba(120, 120, 120, 0.1)",
+                "borderColor": "rgba(120, 120, 120, 0.2)",
+                "borderRadius": 24,
+                "borderWidth": 1,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 48,
+              }
+            }
+          >
+            <FontAwesome6Mock
+              color="rgba(120, 120, 120, 0.5)"
+              name="fire"
+              size={24}
+            />
+          </View>
+          <View
+            style={
+              {
+                "flex": 1,
+              }
+            }
+          >
+            <TypographyMock
+              color="rgba(255, 255, 255, 0.7)"
+              glow="none"
+              style={
+                {
+                  "marginBottom": 4,
+                }
+              }
+              variant="h3"
+            >
+              7-Day Streak
+            </TypographyMock>
+            <TypographyMock
+              color="rgba(120, 120, 120, 0.6)"
+              style={
+                {
+                  "opacity": 0.8,
+                }
+              }
+              variant="body"
+            >
+              Maintain a 7-day check-in streak
+            </TypographyMock>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "borderTopColor": "rgba(255, 255, 255, 0.1)",
+              "borderTopWidth": 1,
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginTop": 12,
+              "paddingTop": 12,
+            }
+          }
+        >
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            Requires 7 day streak
+          </TypographyMock>
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            +
+            100
+             pts
+          </TypographyMock>
+        </View>
+      </CardMock>
+      <CardMock
+        style={
+          {
+            "backgroundColor": "rgba(255, 255, 255, 0.05)",
+            "borderRadius": 12,
+            "marginBottom": 16,
+            "padding": 16,
+          }
+        }
+        variant="default"
+      >
+        <View
+          style={
+            {
+              "alignItems": "center",
+              "flexDirection": "row",
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "rgba(120, 120, 120, 0.1)",
+                "borderColor": "rgba(120, 120, 120, 0.2)",
+                "borderRadius": 24,
+                "borderWidth": 1,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 12,
+                "width": 48,
+              }
+            }
+          >
+            <FontAwesome6Mock
+              color="rgba(120, 120, 120, 0.5)"
+              name="crown"
+              size={24}
+            />
+          </View>
+          <View
+            style={
+              {
+                "flex": 1,
+              }
+            }
+          >
+            <TypographyMock
+              color="rgba(255, 255, 255, 0.7)"
+              glow="none"
+              style={
+                {
+                  "marginBottom": 4,
+                }
+              }
+              variant="h3"
+            >
+              30-Day Streak
+            </TypographyMock>
+            <TypographyMock
+              color="rgba(120, 120, 120, 0.6)"
+              style={
+                {
+                  "opacity": 0.8,
+                }
+              }
+              variant="body"
+            >
+              Maintain a 30-day check-in streak
+            </TypographyMock>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "borderTopColor": "rgba(255, 255, 255, 0.1)",
+              "borderTopWidth": 1,
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginTop": 12,
+              "paddingTop": 12,
+            }
+          }
+        >
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            Requires 30 day streak
+          </TypographyMock>
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            +
+            300
+             pts
+          </TypographyMock>
+        </View>
+      </CardMock>
+    </View>
+  </View>
+</RCTScrollView>
+`;

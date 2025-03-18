@@ -1,6 +1,6 @@
-import React, { useEffect, useCallback } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Stack, useRouter, useSegments } from 'expo-router';
+import React, { useEffect } from 'react';
+import { View, StyleSheet, Platform, Text } from 'react-native';
+import { Stack } from 'expo-router';
 import '@/utils/cryptoPolyfill';
 import { AppStateProvider } from '@/contexts/AppStateContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
@@ -8,138 +8,152 @@ import { JournalProvider } from '@/contexts/JournalContext';
 import { ChallengesProvider } from '@/contexts/ChallengesContext';
 import { NotificationsProvider } from '@/contexts/NotificationsContext';
 import { OnboardingProvider, useOnboarding } from '@/contexts/OnboardingContext';
-import { BadgeProvider, useBadges } from '@/contexts/BadgeContext';
-import { CheckInStreakProvider, CheckInStreak } from '@/contexts/CheckInStreakContext';
+import { BadgeProvider } from '@/contexts/BadgeContext';
+import { CheckInStreakProvider } from '@/contexts/CheckInStreakContext';
 import { LoadingOverlay, DeepLinkHandler } from '@/components/common';
-import { BadgeService } from '@/services/BadgeService';
-import * as Linking from 'expo-linking';
-import { supabase } from '@/lib/supabase';
-import { extractTokenFromUrl, verifyEmailWithToken } from '@/utils/authUtils';
-import { useAppState } from '@/contexts/AppStateContext';
+import { logAppStartupInfo } from '@/utils/debugUtils';
 
-// Create a wrapper component to handle streak updates with badge context
-function CheckInStreakWithBadges({ children }: { children: React.ReactNode }) {
-  const { addUserBadge, isLoading } = useBadges();
-  
-  const handleStreakUpdated = useCallback(async (
-    streaks: CheckInStreak, 
-    isFirstCheckIn: boolean, 
-    allPeriodsCompleted: boolean
-  ) => {
-    // Skip badge processing if badges are still loading
-    if (isLoading) {
-      console.log('Badges still loading, skipping badge processing');
-      return;
+// Error Boundary Component
+interface ErrorBoundaryProps {
+  children: React.ReactNode;
+}
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+  error: Error | null;
+  errorInfo: { componentStack: string } | null;
+}
+
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  state: ErrorBoundaryState = { 
+    hasError: false, 
+    error: null, 
+    errorInfo: null 
+  };
+
+  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: { componentStack: string }): void {
+    console.error("App crashed with error:", error);
+    console.error("Component stack:", errorInfo.componentStack);
+    this.setState({ errorInfo });
+  }
+
+  render(): React.ReactNode {
+    if (this.state.hasError) {
+      return (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorTitle}>Something went wrong</Text>
+          <Text style={styles.errorText}>
+            {this.state.error && this.state.error.toString()}
+          </Text>
+          <Text style={styles.errorDetail}>
+            {this.state.errorInfo && this.state.errorInfo.componentStack}
+          </Text>
+        </View>
+      );
     }
-    
-    // Award badges based on streak updates
-    if (isFirstCheckIn) {
-      await BadgeService.awardFirstCheckInBadge(addUserBadge);
-    }
-    
-    // Check streak badges
-    await BadgeService.checkStreakBadges(streaks, addUserBadge);
-    
-    // Check if all periods were completed
-    if (allPeriodsCompleted) {
-      await BadgeService.checkAllPeriodsCompleted(addUserBadge);
-    }
-  }, [addUserBadge, isLoading]);
-  
-  return (
-    <CheckInStreakProvider onStreakUpdated={handleStreakUpdated}>
-      {children}
-    </CheckInStreakProvider>
-  );
+    return this.props.children;
+  }
 }
 
 function RootLayoutNav() {
-  const { session } = useAuth();
-  const { hasCompletedOnboarding } = useOnboarding();
-  const segments = useSegments();
-  const router = useRouter();
-
-  useEffect(() => {
-    const inAuthGroup = segments[0] === '(auth)';
-    const inAppGroup = segments[0] === '(app)';
-    const inOnboardingGroup = segments[0] === '(onboarding)';
-
-    console.log('Root layout navigation check:', {
-      session: !!session,
-      hasCompletedOnboarding,
-      currentSegment: segments[0],
-      inAuthGroup,
-      inAppGroup,
-      inOnboardingGroup
-    });
-
-    if (!session) {
-      // Not authenticated
-      if (!inAuthGroup) {
-        console.log('Not authenticated, redirecting to login');
-        router.replace('/(auth)/login');
-      }
-    } else {
-      // Authenticated
-      if (!hasCompletedOnboarding && !inOnboardingGroup) {
-        console.log('Onboarding incomplete, redirecting to welcome');
-        router.replace('/(onboarding)/welcome');
-      } else if (hasCompletedOnboarding && !inAppGroup) {
-        console.log('Onboarding complete, redirecting to app');
-        router.replace('/(app)');
-      }
-    }
-  }, [session, hasCompletedOnboarding, segments]);
-
+  // Simple routing container that defines the structure but doesn't enforce navigation
+  // Navigation logic is handled in each group's _layout.tsx or index.tsx
   return (
     <>
       <DeepLinkHandler />
-      
-      <Stack
-        screenOptions={{
-          headerShown: false,
-        }}
-      />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(onboarding)" />
+        <Stack.Screen name="(app)" />
+      </Stack>
     </>
   );
 }
 
+// Root app component that sets up all providers
 export default function RootLayout() {
-  const { refreshSession } = useAuth();
-  const { session } = useAuth();
-  const { hasCompletedOnboarding } = useOnboarding();
-  const segments = useSegments();
-  const router = useRouter();
-  const { showError, showSuccess } = useAppState();
-
   console.log('Root layout rendering');
+  
+  // Log diagnostic information about environment and configuration
+  try {
+    logAppStartupInfo();
+  } catch (error) {
+    console.error("Error logging app startup info:", error);
+  }
 
-  return (
-    <AppStateProvider>
-      <AuthProvider>
-        <OnboardingProvider>
-          <BadgeProvider>
-            <CheckInStreakWithBadges>
-              <JournalProvider>
-                <ChallengesProvider>
-                  <NotificationsProvider>
-                    <View style={styles.container}>
-                      <RootLayoutNav />
-                      <LoadingOverlay />
-                    </View>
-                  </NotificationsProvider>
-                </ChallengesProvider>
-              </JournalProvider>
-            </CheckInStreakWithBadges>
-          </BadgeProvider>
-        </OnboardingProvider>
-      </AuthProvider>
-    </AppStateProvider>
-  );
+  try {
+    // Check for environment variables early
+    if (!process.env.EXPO_PUBLIC_SUPABASE_URL || !process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY) {
+      console.error("Missing required environment variables for Supabase");
+    }
+
+    return (
+      <ErrorBoundary>
+        <AppStateProvider>
+          <AuthProvider>
+            <OnboardingProvider>
+              <BadgeProvider>
+                <JournalProvider>
+                  <ChallengesProvider>
+                    <ErrorBoundary>
+                      <NotificationsProvider>
+                        <CheckInStreakProvider>
+                          <View style={styles.container}>
+                            <RootLayoutNav />
+                            <LoadingOverlay />
+                          </View>
+                        </CheckInStreakProvider>
+                      </NotificationsProvider>
+                    </ErrorBoundary>
+                  </ChallengesProvider>
+                </JournalProvider>
+              </BadgeProvider>
+            </OnboardingProvider>
+          </AuthProvider>
+        </AppStateProvider>
+      </ErrorBoundary>
+    );
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("Critical error in RootLayout:", errorMessage);
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorTitle}>Critical Error</Text>
+        <Text style={styles.errorText}>{errorMessage}</Text>
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+    backgroundColor: '#fff',
+  },
+  errorTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: 'red',
+  },
+  errorText: {
+    fontSize: 16,
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  errorDetail: {
+    fontSize: 12,
+    color: '#666',
   },
 }); 

@@ -17,6 +17,7 @@ interface AnimatedModalProps {
   title?: string;
   children: React.ReactNode;
   style?: ViewStyle;
+  testID?: string;
 }
 
 export const AnimatedModal: React.FC<AnimatedModalProps> = ({
@@ -25,6 +26,7 @@ export const AnimatedModal: React.FC<AnimatedModalProps> = ({
   title,
   children,
   style,
+  testID,
 }) => {
   const slideAnim = React.useRef(new Animated.Value(0)).current;
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
@@ -80,6 +82,7 @@ export const AnimatedModal: React.FC<AnimatedModalProps> = ({
           style={styles.backdrop}
           onPress={onClose}
           activeOpacity={1}
+          testID="backdrop"
         />
         <Animated.View
           style={[
@@ -96,11 +99,16 @@ export const AnimatedModal: React.FC<AnimatedModalProps> = ({
             },
             style,
           ]}
+          testID={testID || "modal-content"}
         >
           {title && (
             <View style={styles.header}>
               <Typography variant="h3">{title}</Typography>
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <TouchableOpacity 
+                onPress={onClose} 
+                style={styles.closeButton}
+                testID="close-button"
+              >
                 <Typography variant="h3">×</Typography>
               </TouchableOpacity>
             </View>

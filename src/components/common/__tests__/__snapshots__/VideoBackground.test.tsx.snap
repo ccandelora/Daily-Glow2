@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`VideoBackground renders correctly 1`] = `
+<Video
+  isLooping={true}
+  isMuted={true}
+  resizeMode="cover"
+  shouldPlay={true}
+  source={
+    {
+      "testUri": "../../../assets/11985491_1080_1920_30fps.mp4",
+    }
+  }
+  style={
+    {
+      "bottom": 0,
+      "left": 0,
+      "position": "absolute",
+      "right": 0,
+      "top": 0,
+    }
+  }
+  useNativeControls={false}
+/>
+`;

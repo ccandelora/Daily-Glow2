@@ -62,8 +62,17 @@ const ExpoSecureStoreAdapter = {
   },
 };
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
+// Only use environment variables for Supabase configuration
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Supabase environment variables are missing. Please check your .env file or EAS variables.');
+}
+
+// Log configuration for debugging (without exposing full credentials)
+console.log(`Supabase configured with URL: ${supabaseUrl ? supabaseUrl.substring(0, 20) + '...' : 'MISSING'}`);
+console.log(`Supabase key available: ${!!supabaseAnonKey}`);
 
 // Get the URL scheme from Expo
 const scheme = Linking.createURL('');
@@ -85,7 +94,7 @@ const getRedirectUrl = () => {
     : 'daily-glow://confirm-email';
 };
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '', {
   auth: {
     storage: Platform.OS === 'web' ? localStorage : ExpoSecureStoreAdapter,
     autoRefreshToken: true,

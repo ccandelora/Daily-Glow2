@@ -47,35 +47,104 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   const [userBadges, setUserBadges] = useState<UserBadge[]>([]);
   const { setLoading, showError } = useAppState();
   const { session } = useAuth();
+  const [isSubscribed, setIsSubscribed] = useState(false);
 
   useEffect(() => {
-    if (session?.user) {
-      loadNotifications();
-      loadUserBadges();
-      subscribeToNotifications();
+    let cleanupFunction = () => {};
+    
+    try {
+      if (session?.user) {
+        // Load data first
+        loadNotifications().catch(err => {
+          console.error('Error loading notifications:', err);
+        });
+        
+        loadUserBadges().catch(err => {
+          console.error('Error loading user badges:', err);
+        });
+        
+        // Then set up subscription
+        if (!isSubscribed) {
+          cleanupFunction = subscribeToNotifications();
+          setIsSubscribed(true);
+        }
+      }
+    } catch (error) {
+      console.error('Error in NotificationsProvider useEffect:', error);
     }
+    
+    // Return cleanup function
+    return () => {
+      try {
+        cleanupFunction();
+        setIsSubscribed(false);
+      } catch (error) {
+        console.error('Error in NotificationsProvider cleanup:', error);
+      }
+    };
   }, [session]);
 
   const subscribeToNotifications = () => {
-    const notificationsSubscription = supabase
-      .channel('notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${session?.user?.id}`,
-        },
-        (payload) => {
-          setNotifications(prev => [payload.new as Notification, ...prev]);
-        }
-      )
-      .subscribe();
+    try {
+      // Defensive check for supabase client
+      if (!supabase) {
+        console.warn('Supabase client not available - skipping notification subscription');
+        return () => {};
+      }
+      
+      // Check if channel method exists on supabase
+      if (!supabase.channel || typeof supabase.channel !== 'function') {
+        console.warn('Supabase channel feature not available - skipping notification subscription');
+        return () => {}; // Return empty cleanup function
+      }
+      
+      // Check if user is available
+      if (!session?.user?.id) {
+        console.warn('User ID not available - skipping notification subscription');
+        return () => {};
+      }
+      
+      try {
+        const notificationsSubscription = supabase
+          .channel('notifications')
+          .on(
+            'postgres_changes',
+            {
+              event: 'INSERT',
+              schema: 'public',
+              table: 'notifications',
+              filter: `user_id=eq.${session?.user?.id}`,
+            },
+            (payload) => {
+              try {
+                setNotifications(prev => [payload.new as Notification, ...prev]);
+              } catch (error) {
+                console.error('Error handling notification payload:', error);
+              }
+            }
+          )
+          .subscribe((status) => {
+            console.log(`Notification subscription status: ${status}`);
+          });
 
-    return () => {
-      supabase.removeChannel(notificationsSubscription);
-    };
+        return () => {
+          try {
+            if (notificationsSubscription && supabase.removeChannel && typeof supabase.removeChannel === 'function') {
+              supabase.removeChannel(notificationsSubscription);
+              console.log('Notification subscription removed');
+            }
+          } catch (error) {
+            console.error('Error removing notification channel:', error);
+          }
+        };
+      } catch (subscriptionError) {
+        console.error('Error creating subscription:', subscriptionError);
+        return () => {};
+      }
+    } catch (error) {
+      console.error('Error in subscribeToNotifications:', error);
+      return () => {}; // Return empty cleanup function
+    }
   };
 
   const loadNotifications = async () => {

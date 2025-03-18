@@ -1,0 +1,136 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LoadingSpinner Component applies custom color: spinner-with-color-#FF0000 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+        "justifyContent": "center",
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    collapsable={false}
+    style={
+      {
+        "borderColor": "#FF0000",
+        "borderRadius": 999,
+        "borderTopColor": "transparent",
+        "borderWidth": 3,
+        "height": 40,
+        "transform": [
+          {
+            "rotate": "0deg",
+          },
+        ],
+        "width": 40,
+      }
+    }
+  />
+</View>
+`;
+
+exports[`LoadingSpinner Component applies custom size: spinner-with-size-60 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+        "justifyContent": "center",
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    collapsable={false}
+    style={
+      {
+        "borderColor": "#00C853",
+        "borderRadius": 999,
+        "borderTopColor": "transparent",
+        "borderWidth": 3,
+        "height": 60,
+        "transform": [
+          {
+            "rotate": "0deg",
+          },
+        ],
+        "width": 60,
+      }
+    }
+  />
+</View>
+`;
+
+exports[`LoadingSpinner Component applies custom style: spinner-with-custom-style 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+        "justifyContent": "center",
+      },
+      {
+        "backgroundColor": "#F0F0F0",
+        "marginTop": 20,
+      },
+    ]
+  }
+>
+  <View
+    collapsable={false}
+    style={
+      {
+        "borderColor": "#00C853",
+        "borderRadius": 999,
+        "borderTopColor": "transparent",
+        "borderWidth": 3,
+        "height": 40,
+        "transform": [
+          {
+            "rotate": "0deg",
+          },
+        ],
+        "width": 40,
+      }
+    }
+  />
+</View>
+`;
+
+exports[`LoadingSpinner Component renders correctly with default props: default-spinner 1`] = `
+<View
+  style={
+    [
+      {
+        "alignItems": "center",
+        "justifyContent": "center",
+      },
+      undefined,
+    ]
+  }
+>
+  <View
+    collapsable={false}
+    style={
+      {
+        "borderColor": "#00C853",
+        "borderRadius": 999,
+        "borderTopColor": "transparent",
+        "borderWidth": 3,
+        "height": 40,
+        "transform": [
+          {
+            "rotate": "0deg",
+          },
+        ],
+        "width": 40,
+      }
+    }
+  />
+</View>
+`;

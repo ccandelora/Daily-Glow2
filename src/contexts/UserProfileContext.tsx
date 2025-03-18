@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useAuth } from './AuthContext';
 import { useAppState } from './AppStateContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface Achievement {
   id: string;
@@ -29,6 +30,8 @@ export interface UserProfile {
   streak: number;
   last_check_in: string | null;
   points: number;
+  user_goals: string[];
+  notification_preferences: string[];
   created_at: string;
   updated_at: string;
 }
@@ -38,6 +41,8 @@ interface UserProfileContextType {
   isLoading: boolean;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   refreshProfile: () => Promise<void>;
+  saveUserGoals: (goals: string[]) => Promise<void>;
+  saveNotificationPreferences: (preferences: string[]) => Promise<void>;
 }
 
 const UserProfileContext = createContext<UserProfileContextType | undefined>(undefined);
@@ -74,7 +79,10 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ c
         .single();
       
       if (tableCheckError && tableCheckError.message.includes('relation "profiles" does not exist')) {
-        // Create a temporary profile object if the table doesn't exist yet
+        // Get locally stored preferences
+        const storedGoals = await AsyncStorage.getItem('userGoals');
+        const storedNotifications = await AsyncStorage.getItem('notificationPreferences');
+        
         const tempProfile: UserProfile = {
           id: 'temp-id',
           user_id: user.id,
@@ -83,6 +91,8 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ c
           streak: 0,
           last_check_in: null,
           points: 0,
+          user_goals: storedGoals ? JSON.parse(storedGoals) : [],
+          notification_preferences: storedNotifications ? JSON.parse(storedNotifications) : [],
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         };
@@ -109,7 +119,9 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ c
             avatar_url: null,
             streak: 0,
             last_check_in: null,
-            points: 0
+            points: 0,
+            user_goals: [],
+            notification_preferences: []
           };
           
           const { data: createdProfile, error: createError } = await supabase
@@ -195,6 +207,88 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ c
     await fetchProfile();
   };
 
+  // Add function to save user goals
+  const saveUserGoals = async (goals: string[]) => {
+    if (!user) return;
+    
+    try {
+      // Save to AsyncStorage for offline availability
+      await AsyncStorage.setItem('userGoals', JSON.stringify(goals));
+      
+      // Update in database if available
+      try {
+        await supabase
+          .from('profiles')
+          .update({ user_goals: goals })
+          .eq('user_id', user.id);
+          
+        // Update local state
+        if (userProfile) {
+          setUserProfile({
+            ...userProfile,
+            user_goals: goals,
+            updated_at: new Date().toISOString()
+          });
+        }
+      } catch (dbError: any) {
+        console.log('Database not available, goals saved locally only', dbError.message);
+        // Still update local state
+        if (userProfile) {
+          setUserProfile({
+            ...userProfile,
+            user_goals: goals,
+            updated_at: new Date().toISOString()
+          });
+        }
+      }
+    } catch (error: any) {
+      console.error('Error saving user goals:', error.message);
+      showError('Failed to save your goals');
+      throw error;
+    }
+  };
+  
+  // Add function to save notification preferences
+  const saveNotificationPreferences = async (preferences: string[]) => {
+    if (!user) return;
+    
+    try {
+      // Save to AsyncStorage for offline availability
+      await AsyncStorage.setItem('notificationPreferences', JSON.stringify(preferences));
+      
+      // Update in database if available
+      try {
+        await supabase
+          .from('profiles')
+          .update({ notification_preferences: preferences })
+          .eq('user_id', user.id);
+          
+        // Update local state
+        if (userProfile) {
+          setUserProfile({
+            ...userProfile,
+            notification_preferences: preferences,
+            updated_at: new Date().toISOString()
+          });
+        }
+      } catch (dbError: any) {
+        console.log('Database not available, notification preferences saved locally only', dbError.message);
+        // Still update local state
+        if (userProfile) {
+          setUserProfile({
+            ...userProfile,
+            notification_preferences: preferences,
+            updated_at: new Date().toISOString()
+          });
+        }
+      }
+    } catch (error: any) {
+      console.error('Error saving notification preferences:', error.message);
+      showError('Failed to save your notification preferences');
+      throw error;
+    }
+  };
+
   useEffect(() => {
     fetchProfile();
   }, [user?.id]);
@@ -204,7 +298,9 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ c
       userProfile,
       isLoading,
       updateProfile,
-      refreshProfile
+      refreshProfile,
+      saveUserGoals,
+      saveNotificationPreferences
     }}>
       {children}
     </UserProfileContext.Provider>
