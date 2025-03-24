@@ -37,46 +37,46 @@ const mockAchievements = [
     id: 'streak3',
     name: '3-Day Streak',
     description: 'Complete check-ins for 3 consecutive days',
-    icon_name: 'trophy-outline',
+    icon_name: 'trophy',
     points: 50,
     requires_streak: 3,
-    created_at: '2023-01-01T00:00:00.000Z'
+    created_at: new Date().toISOString()
   },
   {
     id: 'streak7',
     name: '7-Day Streak',
     description: 'Complete check-ins for 7 consecutive days',
-    icon_name: 'ribbon-outline',
+    icon_name: 'award',
     points: 100,
     requires_streak: 7,
-    created_at: '2023-01-01T00:00:00.000Z'
+    created_at: new Date().toISOString()
   },
   {
     id: 'streak14',
     name: '2-Week Streak',
     description: 'Complete check-ins for 14 consecutive days',
-    icon_name: 'star-outline',
+    icon_name: 'star',
     points: 200,
     requires_streak: 14,
-    created_at: '2023-01-01T00:00:00.000Z'
+    created_at: new Date().toISOString()
   },
   {
     id: 'firstCheckIn',
     name: 'First Check-in',
     description: 'Complete your first daily check-in',
-    icon_name: 'checkmark-circle-outline',
+    icon_name: 'circle-check',
     points: 25,
     requires_streak: null,
-    created_at: '2023-01-01T00:00:00.000Z'
+    created_at: new Date().toISOString()
   },
   {
     id: 'completeProfile',
     name: 'Profile Complete',
     description: 'Fill out your profile information',
-    icon_name: 'person-outline',
+    icon_name: 'user',
     points: 25,
     requires_streak: null,
-    created_at: '2023-01-01T00:00:00.000Z'
+    created_at: new Date().toISOString()
   },
 ];
 

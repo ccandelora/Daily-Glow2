@@ -10,6 +10,7 @@ import { calculateOverallStreak } from '@/utils/streakCalculator';
 import { useCheckInStreak } from '@/contexts/CheckInStreakContext';
 import { EmotionalCalendarView, EmotionalGrowthChart, EmotionalWordCloud } from '@/components/insights';
 import { FontAwesome6 } from '@expo/vector-icons';
+import { StatisticsDashboard } from '@/components/achievements/StatisticsDashboard';
 import { 
   analyzeEmotionalTriggers, 
   generatePersonalizedRecommendations, 
@@ -687,6 +688,12 @@ export const InsightsScreen = () => {
               </Typography>
             )}
           </Card>
+
+          {/* Detailed Statistics Dashboard */}
+          <Typography variant="h2" style={styles.sectionTitle}>
+            Detailed Statistics
+          </Typography>
+          <StatisticsDashboard />
         </View>
       </ScrollView>
     </View>
@@ -1154,5 +1161,10 @@ const styles = StyleSheet.create({
   noDataText: {
     textAlign: 'center',
     marginVertical: theme.SPACING.md,
+  },
+  sectionTitle: {
+    marginTop: theme.SPACING.xl,
+    marginBottom: theme.SPACING.md,
+    fontSize: 24,
   },
 }); 

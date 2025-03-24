@@ -1,0 +1,665 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AchievementsAndBadgesTab renders correctly with empty badges and achievements list: empty-badges-and-achievements 1`] = `
+<RCTScrollView
+  style={
+    {
+      "backgroundColor": "rgba(28, 14, 45, 0.95)",
+      "flex": 1,
+    }
+  }
+>
+  <View>
+    <View
+      collapsable={false}
+      style={
+        {
+          "opacity": 0,
+          "padding": 24,
+        }
+      }
+    >
+      <TypographyMock
+        glow="soft"
+        style={
+          {
+            "marginBottom": 24,
+            "marginTop": 32,
+          }
+        }
+        variant="h3"
+      >
+        Your Achievements & Badges
+      </TypographyMock>
+      <TypographyMock
+        style={
+          {
+            "color": "rgba(255, 255, 255, 0.7)",
+            "marginVertical": 24,
+            "textAlign": "center",
+          }
+        }
+        variant="body"
+      >
+        You haven't earned any achievements or badges yet. Complete activities to earn rewards!
+      </TypographyMock>
+      <TypographyMock
+        glow="soft"
+        style={
+          {
+            "marginBottom": 24,
+            "marginTop": 32,
+          }
+        }
+        variant="h3"
+      >
+        Available Rewards
+      </TypographyMock>
+    </View>
+  </View>
+</RCTScrollView>
+`;
+
+exports[`AchievementsAndBadgesTab renders correctly with no user badges: no-badges 1`] = `
+<RCTScrollView
+  style={
+    {
+      "backgroundColor": "rgba(28, 14, 45, 0.95)",
+      "flex": 1,
+    }
+  }
+>
+  <View>
+    <View
+      collapsable={false}
+      style={
+        {
+          "opacity": 0,
+          "padding": 24,
+        }
+      }
+    >
+      <AchievementRecommendationsMock />
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "justifyContent": "space-between",
+            "marginBottom": 16,
+            "marginTop": 24,
+          }
+        }
+      >
+        <TypographyMock
+          glow="soft"
+          style={
+            {
+              "marginBottom": 8,
+            }
+          }
+          variant="h3"
+        >
+          Your Rewards
+        </TypographyMock>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+            }
+          }
+        >
+          <View
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": true,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#4169E1",
+                "borderRadius": 16,
+                "justifyContent": "center",
+                "marginRight": 8,
+                "paddingHorizontal": 12,
+                "paddingVertical": 4,
+              }
+            }
+          >
+            <TypographyMock variant="caption">All</TypographyMock>
+          </View>
+          <View
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": false,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "rgba(255, 255, 255, 0.1)",
+                "borderRadius": 16,
+                "justifyContent": "center",
+                "marginRight": 8,
+                "paddingHorizontal": 12,
+                "paddingVertical": 4,
+              }
+            }
+          >
+            <TypographyMock variant="caption">Earned</TypographyMock>
+          </View>
+          <View
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": false,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "rgba(255, 255, 255, 0.1)",
+                "borderRadius": 16,
+                "justifyContent": "center",
+                "marginRight": 8,
+                "paddingHorizontal": 12,
+                "paddingVertical": 4,
+              }
+            }
+          >
+            <TypographyMock variant="caption">In Progress</TypographyMock>
+          </View>
+        </View>
+      </View>
+      <AchievementProgressMock
+        achievements={
+          [
+            {
+              "achievement": {
+                "description": "Maintain a 3-day streak",
+                "icon_name": "fire",
+                "id": "a1",
+                "name": "First Streak",
+                "points": 10,
+                "requires_streak": 3,
+              },
+              "achievement_id": "a1",
+              "earned_at": "2023-06-01T12:00:00Z",
+              "id": "ua-1",
+            },
+          ]
+        }
+        currentStreak={5}
+      />
+      <CardMock
+        style={
+          {
+            "backgroundColor": "rgba(38, 20, 60, 0.5)",
+            "marginBottom": 16,
+            "padding": 16,
+          }
+        }
+        variant="default"
+      >
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "marginBottom": 16,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "rgba(120, 120, 120, 0.1)",
+                "borderColor": "rgba(120, 120, 120, 0.2)",
+                "borderRadius": 24,
+                "borderWidth": 1,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 16,
+                "width": 48,
+              }
+            }
+          >
+            <FontAwesome6Mock
+              color="rgba(120, 120, 120, 0.5)"
+              name="leaf"
+              size={24}
+            />
+          </View>
+          <View
+            style={
+              {
+                "flex": 1,
+              }
+            }
+          >
+            <TypographyMock
+              color="rgba(255, 255, 255, 0.7)"
+              glow="none"
+              style={
+                {
+                  "fontSize": 18,
+                  "marginBottom": 4,
+                }
+              }
+              variant="h3"
+            >
+              First Check-in
+            </TypographyMock>
+            <TypographyMock
+              color="rgba(120, 120, 120, 0.6)"
+              style={
+                {
+                  "fontSize": 14,
+                }
+              }
+              variant="body"
+            >
+              Complete your first check-in
+            </TypographyMock>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginTop": 16,
+            }
+          }
+        >
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            Not yet earned
+          </TypographyMock>
+          <TypographyMock
+            color="rgba(120, 120, 120, 0.5)"
+            glow="none"
+            variant="caption"
+          >
+            Beginner
+          </TypographyMock>
+        </View>
+      </CardMock>
+    </View>
+  </View>
+</RCTScrollView>
+`;
+
+exports[`AchievementsAndBadgesTab renders correctly with user badges and achievements 1`] = `
+<RCTScrollView
+  style={
+    {
+      "backgroundColor": "rgba(28, 14, 45, 0.95)",
+      "flex": 1,
+    }
+  }
+>
+  <View>
+    <View
+      collapsable={false}
+      style={
+        {
+          "opacity": 0,
+          "padding": 24,
+        }
+      }
+    >
+      <AchievementRecommendationsMock />
+      <View
+        style={
+          {
+            "flexDirection": "row",
+            "justifyContent": "space-between",
+            "marginBottom": 16,
+            "marginTop": 24,
+          }
+        }
+      >
+        <TypographyMock
+          glow="soft"
+          style={
+            {
+              "marginBottom": 8,
+            }
+          }
+          variant="h3"
+        >
+          Your Rewards
+        </TypographyMock>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+            }
+          }
+        >
+          <View
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": true,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "#4169E1",
+                "borderRadius": 16,
+                "justifyContent": "center",
+                "marginRight": 8,
+                "paddingHorizontal": 12,
+                "paddingVertical": 4,
+              }
+            }
+          >
+            <TypographyMock variant="caption">All</TypographyMock>
+          </View>
+          <View
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": false,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "rgba(255, 255, 255, 0.1)",
+                "borderRadius": 16,
+                "justifyContent": "center",
+                "marginRight": 8,
+                "paddingHorizontal": 12,
+                "paddingVertical": 4,
+              }
+            }
+          >
+            <TypographyMock variant="caption">Earned</TypographyMock>
+          </View>
+          <View
+            accessibilityState={
+              {
+                "busy": undefined,
+                "checked": undefined,
+                "disabled": undefined,
+                "expanded": undefined,
+                "selected": false,
+              }
+            }
+            accessibilityValue={
+              {
+                "max": undefined,
+                "min": undefined,
+                "now": undefined,
+                "text": undefined,
+              }
+            }
+            accessible={true}
+            collapsable={false}
+            focusable={true}
+            onBlur={[Function]}
+            onClick={[Function]}
+            onFocus={[Function]}
+            onResponderGrant={[Function]}
+            onResponderMove={[Function]}
+            onResponderRelease={[Function]}
+            onResponderTerminate={[Function]}
+            onResponderTerminationRequest={[Function]}
+            onStartShouldSetResponder={[Function]}
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "rgba(255, 255, 255, 0.1)",
+                "borderRadius": 16,
+                "justifyContent": "center",
+                "marginRight": 8,
+                "paddingHorizontal": 12,
+                "paddingVertical": 4,
+              }
+            }
+          >
+            <TypographyMock variant="caption">In Progress</TypographyMock>
+          </View>
+        </View>
+      </View>
+      <AchievementProgressMock
+        achievements={
+          [
+            {
+              "achievement": {
+                "description": "Maintain a 3-day streak",
+                "icon_name": "fire",
+                "id": "a1",
+                "name": "First Streak",
+                "points": 10,
+                "requires_streak": 3,
+              },
+              "achievement_id": "a1",
+              "earned_at": "2023-06-01T12:00:00Z",
+              "id": "ua-1",
+            },
+          ]
+        }
+        currentStreak={5}
+      />
+      <CardMock
+        style={
+          {
+            "backgroundColor": "rgba(38, 20, 60, 0.5)",
+            "marginBottom": 16,
+            "padding": 16,
+          }
+        }
+        variant="default"
+      >
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "marginBottom": 16,
+            }
+          }
+        >
+          <View
+            style={
+              {
+                "alignItems": "center",
+                "backgroundColor": "rgba(41, 121, 255, 0.1)",
+                "borderColor": "rgba(41, 121, 255, 0.3)",
+                "borderRadius": 24,
+                "borderWidth": 1,
+                "height": 48,
+                "justifyContent": "center",
+                "marginRight": 16,
+                "width": 48,
+              }
+            }
+          >
+            <FontAwesome6Mock
+              color="#2979FF"
+              name="leaf"
+              size={24}
+            />
+          </View>
+          <View
+            style={
+              {
+                "flex": 1,
+              }
+            }
+          >
+            <TypographyMock
+              glow="soft"
+              style={
+                {
+                  "fontSize": 18,
+                  "marginBottom": 4,
+                }
+              }
+              variant="h3"
+            >
+              First Check-in
+            </TypographyMock>
+            <TypographyMock
+              style={
+                {
+                  "fontSize": 14,
+                }
+              }
+              variant="body"
+            >
+              Complete your first check-in
+            </TypographyMock>
+          </View>
+        </View>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "justifyContent": "space-between",
+              "marginTop": 16,
+            }
+          }
+        >
+          <TypographyMock
+            color="#4169E1"
+            glow="soft"
+            variant="caption"
+          >
+            Earned
+          </TypographyMock>
+          <TypographyMock
+            variant="caption"
+          >
+            Beginner
+          </TypographyMock>
+        </View>
+      </CardMock>
+    </View>
+  </View>
+</RCTScrollView>
+`;

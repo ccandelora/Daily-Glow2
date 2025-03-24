@@ -23,12 +23,12 @@ const OnboardingPersonalizeScreen = () => {
   const [isSaving, setIsSaving] = useState(false);
 
   const goals: Goal[] = [
-    { id: 'stress', label: 'Reduce stress', icon: 'leaf-outline' },
-    { id: 'sleep', label: 'Improve sleep', icon: 'moon-outline' },
-    { id: 'habits', label: 'Build healthy habits', icon: 'fitness-outline' },
-    { id: 'mindful', label: 'Increase mindfulness', icon: 'heart-outline' },
-    { id: 'mood', label: 'Boost mood', icon: 'sunny-outline' },
-    { id: 'track', label: 'Track mental health', icon: 'pulse-outline' }
+    { id: 'stress', label: 'Reduce stress', icon: 'leaf' },
+    { id: 'sleep', label: 'Improve sleep', icon: 'moon' },
+    { id: 'habits', label: 'Build healthy habits', icon: 'fitness' },
+    { id: 'mindful', label: 'Increase mindfulness', icon: 'heart' },
+    { id: 'mood', label: 'Boost mood', icon: 'sunny' },
+    { id: 'track', label: 'Track mental health', icon: 'pulse' }
   ];
 
   const toggleGoal = (goalId: string) => {

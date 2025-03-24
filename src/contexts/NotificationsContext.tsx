@@ -2,6 +2,10 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAppState } from './AppStateContext';
 import { useAuth } from './AuthContext';
 import { supabase } from '@/lib/supabase';
+import { AchievementUnlock } from '@/components/achievements/AchievementUnlock';
+import { useAchievements } from './AchievementsContext';
+import { useBadges } from './BadgeContext';
+import theme from '@/constants/theme';
 
 interface Badge {
   id: string;
@@ -30,6 +34,15 @@ interface Notification {
   created_at: string;
 }
 
+// Add notification display types
+interface NotificationDisplayData {
+  title: string;
+  description: string;
+  icon: string;
+  iconColor: string;
+  type: 'achievement' | 'badge';
+}
+
 interface NotificationsContextType {
   notifications: Notification[];
   unreadCount: number;
@@ -38,6 +51,8 @@ interface NotificationsContextType {
   markAllAsRead: () => Promise<void>;
   deleteNotification: (notificationId: string) => Promise<void>;
   refreshNotifications: () => Promise<void>;
+  showAchievementNotification: (achievementId: string) => void;
+  showBadgeNotification: (badgeName: string) => void;
 }
 
 const NotificationsContext = createContext<NotificationsContextType | undefined>(undefined);
@@ -48,6 +63,33 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   const { setLoading, showError } = useAppState();
   const { session } = useAuth();
   const [isSubscribed, setIsSubscribed] = useState(false);
+  
+  // Add state for achievement notifications
+  const [notification, setNotification] = useState<NotificationDisplayData | null>(null);
+  const [visible, setVisible] = useState(false);
+  const [queue, setQueue] = useState<NotificationDisplayData[]>([]);
+  
+  // Get achievements and badges
+  let achievements: any[] = [];
+  let badges: any[] = [];
+  
+  try {
+    const achievementsContext = useAchievements();
+    if (achievementsContext) {
+      achievements = achievementsContext.achievements;
+    }
+  } catch (error) {
+    console.log('AchievementsContext not available in NotificationsProvider');
+  }
+  
+  try {
+    const badgesContext = useBadges();
+    if (badgesContext) {
+      badges = badgesContext.badges;
+    }
+  } catch (error) {
+    console.log('BadgesContext not available in NotificationsProvider');
+  }
 
   useEffect(() => {
     let cleanupFunction = () => {};
@@ -269,6 +311,74 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
+  // Display handling for achievements and badges
+  useEffect(() => {
+    // Check if there's notifications in the queue and none being displayed
+    if (queue.length > 0 && !visible) {
+      // Display the next notification in the queue
+      setNotification(queue[0]);
+      setVisible(true);
+      // Remove the notification from the queue
+      setQueue(prev => prev.slice(1));
+    }
+  }, [queue, visible]);
+
+  // Handle showing achievement notifications
+  const showAchievementNotification = (achievementId: string) => {
+    const achievement = achievements.find((a: any) => a.id === achievementId);
+    
+    if (achievement) {
+      const newNotification: NotificationDisplayData = {
+        title: achievement.name,
+        description: achievement.description,
+        icon: achievement.icon_name || 'trophy',
+        iconColor: theme.COLORS.primary.teal,
+        type: 'achievement'
+      };
+      
+      // If already showing a notification, add to queue
+      if (visible) {
+        setQueue(prev => [...prev, newNotification]);
+      } else {
+        // Show immediately
+        setNotification(newNotification);
+        setVisible(true);
+      }
+    }
+  };
+  
+  // Handle showing badge notifications
+  const showBadgeNotification = (badgeName: string) => {
+    const badge = badges.find((b: any) => b.name === badgeName);
+    
+    if (badge) {
+      const newNotification: NotificationDisplayData = {
+        title: badge.name,
+        description: badge.description,
+        icon: badge.icon_name || 'award',
+        iconColor: badge.category === 'consistency' 
+          ? theme.COLORS.primary.green 
+          : theme.COLORS.primary.orange,
+        type: 'badge'
+      };
+      
+      // If already showing a notification, add to queue
+      if (visible) {
+        setQueue(prev => [...prev, newNotification]);
+      } else {
+        // Show immediately
+        setNotification(newNotification);
+        setVisible(true);
+      }
+    }
+  };
+  
+  // Handle completion of notification animation
+  const handleAnimationComplete = () => {
+    setVisible(false);
+    setNotification(null);
+  };
+
   const value = {
     notifications,
     unreadCount,
@@ -277,11 +387,25 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     markAllAsRead,
     deleteNotification,
     refreshNotifications,
+    showAchievementNotification,
+    showBadgeNotification
   };
 
   return (
     <NotificationsContext.Provider value={value}>
       {children}
+      
+      {notification && (
+        <AchievementUnlock
+          title={notification.title}
+          description={notification.description}
+          icon={notification.icon}
+          iconColor={notification.iconColor}
+          type={notification.type}
+          visible={visible}
+          onAnimationComplete={handleAnimationComplete}
+        />
+      )}
     </NotificationsContext.Provider>
   );
 }

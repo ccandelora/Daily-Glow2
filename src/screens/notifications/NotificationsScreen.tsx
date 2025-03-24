@@ -7,6 +7,7 @@ import theme from '@/constants/theme';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
 import * as Haptics from 'expo-haptics';
+import { getCompatibleIconName } from '@/utils/iconUtils';
 
 const getCardStyle = (isUnread: boolean): ViewStyle => {
   const baseStyle: ViewStyle = {
@@ -74,7 +75,7 @@ export const NotificationsScreen = () => {
           onPress={() => handleDelete(notificationId)}
           style={[styles.swipeAction, { backgroundColor: theme.COLORS.primary.red }]}
         >
-          <FontAwesome6 name="trash" size={24} color={theme.COLORS.ui.background} />
+          <FontAwesome6 name={getCompatibleIconName("trash")} size={24} color={theme.COLORS.ui.background} />
         </TouchableOpacity>
       </Animated.View>
     );

@@ -33,4 +33,25 @@ export const isSameDay = (date1: Date, date2: Date): boolean => {
     date1.getMonth() === date2.getMonth() &&
     date1.getDate() === date2.getDate()
   );
+};
+
+/**
+ * Returns an array of Date objects for the past n days, including today
+ * @param days Number of days to return
+ * @returns Array of Date objects, ordered from oldest to newest (today is last)
+ */
+export const getPastDays = (days: number): Date[] => {
+  const result: Date[] = [];
+  const now = new Date();
+
+  // Go back 'days-1' days from today and create a Date for each day
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date(now);
+    date.setDate(now.getDate() - i);
+    // Reset time to midnight
+    date.setHours(0, 0, 0, 0);
+    result.push(date);
+  }
+
+  return result;
 }; 

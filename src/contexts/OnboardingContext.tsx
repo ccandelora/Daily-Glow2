@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { useAppState } from './AppStateContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Alert } from 'react-native';
+import { useAchievementTriggers } from '@/hooks/useAchievementTriggers';
 
 // Define the context type
 type OnboardingContextType = {
@@ -29,6 +30,13 @@ const OnboardingContext = createContext<OnboardingContextType>({
 export const OnboardingProvider = ({ children }: { children: ReactNode }) => {
   const { session, user } = useAuth();
   const { setLoading, showError } = useAppState();
+  // Skip achievements and journal in the onboarding context to avoid circular dependencies
+  const { triggerWelcome, triggerProfileCompleted } = useAchievementTriggers({ 
+    skipAchievements: true,
+    skipJournal: true,
+    skipNotifications: true
+  });
+  
   // Start with clear false to ensure onboarding shows
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<boolean>(false);
   const [loading, setLocalLoading] = useState<boolean>(true);
@@ -216,6 +224,15 @@ export const OnboardingProvider = ({ children }: { children: ReactNode }) => {
                 }
               } else {
                 console.log('✅ Successfully created profile with onboarding completed');
+                
+                // Trigger welcome achievement for new users
+                try {
+                  await triggerWelcome();
+                  await triggerProfileCompleted();
+                } catch (achievementError) {
+                  console.error('Error triggering onboarding achievements:', achievementError);
+                  // Don't block the flow for achievement errors
+                }
               }
             } catch (err) {
               console.error('🔴 Error creating profile:', err);
@@ -238,21 +255,21 @@ export const OnboardingProvider = ({ children }: { children: ReactNode }) => {
             .from('profiles')
             .update({ has_completed_onboarding: true })
             .eq('user_id', user.id);
-
+            
           if (error) {
-            // Check if this is a schema error
-            if (error.message && error.message.includes('column') && error.message.includes('does not exist')) {
-              console.error('🔴 Database schema error - missing column:', error.message);
-              setDbError(true);
-              setErrorType('schema');
-              setSkipDatabaseOperations(true);
-            } else {
-              console.error('🔴 Error completing onboarding in database:', error.message);
-              setDbError(true);
-              setErrorType('connection');
-            }
+            console.error('🔴 Error updating profile:', error.message);
+            setDbError(true);
+            setErrorType('other');
           } else {
-            console.log('✅ Successfully updated onboarding status in profile');
+            console.log('✅ Successfully updated profile with onboarding completed');
+            
+            // Trigger achievement for completing profile
+            try {
+              await triggerProfileCompleted();
+            } catch (achievementError) {
+              console.error('Error triggering profile completion achievement:', achievementError);
+              // Don't block the flow for achievement errors
+            }
           }
         }
       } catch (dbError) {

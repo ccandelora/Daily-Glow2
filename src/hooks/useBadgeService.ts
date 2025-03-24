@@ -62,11 +62,41 @@ export const useBadgeService = () => {
     }
   }, [addUserBadge, isLoading]);
   
+  const checkMoodPatternBadges = useCallback(async (entries: any[]) => {
+    if (isLoading) {
+      console.log('Badges still loading, skipping mood pattern badge check');
+      return;
+    }
+    
+    try {
+      await BadgeService.checkMoodPatternBadges(entries, addUserBadge);
+    } catch (error) {
+      console.error('Error in checkMoodPatternBadges:', error);
+      // Don't let errors propagate to UI
+    }
+  }, [addUserBadge, isLoading]);
+  
+  const checkJournalFrequencyBadges = useCallback(async (entries: any[]) => {
+    if (isLoading) {
+      console.log('Badges still loading, skipping journal frequency badge check');
+      return;
+    }
+    
+    try {
+      await BadgeService.checkJournalFrequencyBadges(entries, addUserBadge);
+    } catch (error) {
+      console.error('Error in checkJournalFrequencyBadges:', error);
+      // Don't let errors propagate to UI
+    }
+  }, [addUserBadge, isLoading]);
+  
   return {
     checkStreakBadges,
     checkAllPeriodsCompleted,
     awardFirstCheckInBadge,
     awardWelcomeBadge,
+    checkMoodPatternBadges,
+    checkJournalFrequencyBadges,
     isLoading
   };
 }; 

@@ -58,6 +58,95 @@ export const BADGE_IDS = {
     'Positive Shift': 'Positive Shift',
     'Emotional Balance': 'Emotional Balance',
   },
+  // Consistency badges - awarded for maintaining streaks across multiple time periods
+  CONSISTENCY: {
+    'Consistency Champion: Bronze': 'Consistency Champion: Bronze',  // All periods with 3+ day streaks
+    'Consistency Champion: Silver': 'Consistency Champion: Silver',  // All periods with 7+ day streaks
+    'Consistency Champion: Gold': 'Consistency Champion: Gold',      // All periods with 14+ day streaks
+    'Consistency Champion: Platinum': 'Consistency Champion: Platinum', // All periods with 30+ day streaks
+  },
+  // Mood pattern badges - NEW
+  MOOD_PATTERNS: {
+    'Gratitude Master': 'Gratitude Master',         // Write detailed gratitude entries for 7 days
+    'Mood Improver': 'Mood Improver',               // Show positive emotional shift in 5 entries
+    'Emotional Explorer': 'Emotional Explorer',     // Use 10 different emotion categories
+    'Mood Insight': 'Mood Insight',                 // Record the same emotion 3 days in a row
+    'Emotion Investigator': 'Emotion Investigator', // Add detailed notes to 5 emotional entries
+  },
+  // Journal frequency badges - NEW
+  JOURNAL_FREQUENCY: {
+    'Daily Journaler': 'Daily Journaler',           // Journal for 7 consecutive days
+    'Weekly Reflection': 'Weekly Reflection',       // Complete at least one entry each day for a week
+    'Afternoon Reflection': 'Afternoon Reflection', // Complete 5 afternoon reflections
+    'Evening Reflection': 'Evening Reflection',     // Complete 5 evening reflections
+    'Morning Reflection': 'Morning Reflection',     // Complete 5 morning reflections
+    'Full Day Recorder': 'Full Day Recorder',       // Record entries for all periods in a day for 3 days
+  }
+};
+
+// Badge icon mapping for all badge types
+interface BadgeIconMap {
+  [key: string]: string;
+}
+
+export const BADGE_ICONS: BadgeIconMap = {
+  // Streak badge icons
+  'streak-morning-3': 'sun',
+  'streak-morning-7': 'sun',
+  'streak-morning-14': 'sun',
+  'streak-morning-30': 'sun',
+  'streak-morning-60': 'sun',
+  'streak-morning-90': 'sun',
+  'streak-afternoon-3': 'cloud-sun',
+  'streak-afternoon-7': 'cloud-sun',
+  'streak-afternoon-14': 'cloud-sun',
+  'streak-afternoon-30': 'cloud-sun',
+  'streak-afternoon-60': 'cloud-sun',
+  'streak-afternoon-90': 'cloud-sun',
+  'streak-evening-3': 'moon',
+  'streak-evening-7': 'moon',
+  'streak-evening-14': 'moon',
+  'streak-evening-30': 'moon',
+  'streak-evening-60': 'moon',
+  'streak-evening-90': 'moon',
+  
+  // Time period badge icons
+  'All Periods Completed': 'clock',
+  
+  // Completion badge icons
+  'Welcome Badge': 'hand-wave',
+  'First Check-in': 'check-circle',
+  'First Week Completed': 'calendar',
+  'First Month Completed': 'calendar-check',
+  
+  // Emotion badge icons
+  'Emotional Range': 'rainbow',
+  'Positive Shift': 'trending-up',
+  'Emotional Balance': 'balance-scale',
+  
+  // Consistency badge icons
+  'Consistency Champion: Bronze': 'medal',
+  'Consistency Champion: Silver': 'medal',
+  'Consistency Champion: Gold': 'medal',
+  'Consistency Champion: Platinum': 'medal',
+  
+  // Mood pattern badge icons - NEW
+  'Gratitude Master': 'heart-circle',
+  'Mood Improver': 'trending-up',
+  'Emotional Explorer': 'compass',
+  'Mood Insight': 'lightbulb',
+  'Emotion Investigator': 'search',
+  
+  // Journal frequency badge icons - NEW
+  'Daily Journaler': 'book',
+  'Weekly Reflection': 'bookmark',
+  'Afternoon Reflection': 'cloud-sun',
+  'Evening Reflection': 'moon',
+  'Morning Reflection': 'sun',
+  'Full Day Recorder': 'calendar-day',
+  
+  // Default icon
+  'default': 'star'
 };
 
 export class BadgeService {
@@ -148,7 +237,7 @@ export class BadgeService {
       // Create completion badges first (including First Check-in)
       console.log('Creating completion badges...');
       for (const badgeId in BADGE_IDS.COMPLETION) {
-        const badge = BADGE_IDS.COMPLETION[badgeId];
+        const badge = BADGE_IDS.COMPLETION[badgeId as keyof typeof BADGE_IDS.COMPLETION];
         console.log(`Creating badge: ${badge}`);
         const { error } = await supabase
           .from('badges')
@@ -157,7 +246,7 @@ export class BadgeService {
               name: badge,
               description: `Complete your ${badge.toLowerCase()}`,
               category: 'completion',
-              icon_name: badgeId
+              icon_name: BADGE_ICONS[badge] || BADGE_ICONS['default']
             }
           ]);
           
@@ -174,6 +263,7 @@ export class BadgeService {
         for (const days in BADGE_IDS.STREAKS[period]) {
           const badge = BADGE_IDS.STREAKS[period][days];
           console.log(`Creating badge: ${badge}`);
+          const iconKey = `streak-${period.toLowerCase()}-${days}`;
           const { error } = await supabase
             .from('badges')
             .insert([
@@ -181,7 +271,7 @@ export class BadgeService {
                 name: badge,
                 description: `Complete ${days} consecutive ${period.toLowerCase()} check-ins`,
                 category: 'streak',
-                icon_name: `streak-${period.toLowerCase()}-${days}`
+                icon_name: BADGE_ICONS[iconKey] || BADGE_ICONS['default']
               }
             ]);
             
@@ -196,17 +286,17 @@ export class BadgeService {
       // Create emotion badges
       console.log('Creating emotion badges...');
       for (const badgeId in BADGE_IDS.EMOTIONS) {
-        const badge = BADGE_IDS.EMOTIONS[badgeId];
+        const badge = BADGE_IDS.EMOTIONS[badgeId as keyof typeof BADGE_IDS.EMOTIONS];
         let description = '';
         
         switch (badgeId) {
-          case 'emotional-range':
+          case 'Emotional Range':
             description = 'Experience a wide range of emotions in your check-ins';
             break;
-          case 'positive-shift':
+          case 'Positive Shift':
             description = 'Experience a positive emotional shift in a check-in';
             break;
-          case 'emotional-balance':
+          case 'Emotional Balance':
             description = 'Maintain emotional balance for a week';
             break;
           default:
@@ -221,7 +311,7 @@ export class BadgeService {
               name: badge,
               description,
               category: 'emotion',
-              icon_name: badgeId
+              icon_name: BADGE_ICONS[badge] || BADGE_ICONS['default']
             }
           ]);
           
@@ -232,46 +322,144 @@ export class BadgeService {
         }
       }
       
-      // Verify that badges were created
-      const { data: verifyBadges, error: verifyError } = await supabase
-        .from('badges')
-        .select('*');
+      // Create consistency badges
+      console.log('Creating consistency badges...');
+      for (const badgeId in BADGE_IDS.CONSISTENCY) {
+        const badge = BADGE_IDS.CONSISTENCY[badgeId as keyof typeof BADGE_IDS.CONSISTENCY];
+        let description = '';
         
-      if (verifyError) {
-        console.error('Error verifying badges creation:', verifyError);
-      } else {
-        console.log(`Successfully created ${verifyBadges?.length || 0} badges`);
+        switch (badgeId) {
+          case 'Consistency Champion: Bronze':
+            description = 'Maintain at least a 3-day streak in all time periods';
+            break;
+          case 'Consistency Champion: Silver':
+            description = 'Maintain at least a 7-day streak in all time periods';
+            break;
+          case 'Consistency Champion: Gold':
+            description = 'Maintain at least a 14-day streak in all time periods';
+            break;
+          case 'Consistency Champion: Platinum':
+            description = 'Maintain at least a 30-day streak in all time periods';
+            break;
+          default:
+            description = `Earn ${badge}`;
+        }
         
-        // Check if First Check-in badge was created
-        const firstCheckIn = verifyBadges?.find(b => b.name === 'First Check-in');
-        if (firstCheckIn) {
-          console.log('First Check-in badge was created successfully');
-        } else {
-          console.log('First Check-in badge was NOT created, attempting to create it directly');
+        console.log(`Creating badge: ${badge}`);
+        const { error } = await supabase
+          .from('badges')
+          .insert([
+            {
+              name: badge,
+              description,
+              category: 'consistency',
+              icon_name: BADGE_ICONS[badge] || BADGE_ICONS['default']
+            }
+          ]);
           
-          // Try to create it directly
-          const { error: directError } = await supabase
-            .from('badges')
-            .insert([
-              {
-                name: 'First Check-in',
-                description: 'Complete your first check-in',
-                category: 'completion',
-                icon_name: 'first-checkin'
-              }
-            ]);
-            
-          if (directError) {
-            console.error('Error creating First Check-in badge directly:', directError);
-          } else {
-            console.log('Successfully created First Check-in badge directly');
-          }
+        if (error) {
+          console.error(`Error creating badge ${badge}:`, error);
+        } else {
+          console.log(`Successfully created badge: ${badge}`);
         }
       }
       
-      console.log('Badge initialization complete');
-    } catch (error: any) {
-      console.error('Error initializing badges:', error.message);
+      // Create mood pattern badges
+      console.log('Creating mood pattern badges...');
+      for (const badgeId in BADGE_IDS.MOOD_PATTERNS) {
+        const badge = BADGE_IDS.MOOD_PATTERNS[badgeId as keyof typeof BADGE_IDS.MOOD_PATTERNS];
+        let description = '';
+        
+        switch (badgeId) {
+          case 'Gratitude Master':
+            description = 'Write detailed gratitude entries for 7 days';
+            break;
+          case 'Mood Improver':
+            description = 'Show positive emotional shift in 5 check-in entries';
+            break;
+          case 'Emotional Explorer':
+            description = 'Use 10 different emotion categories in your check-ins';
+            break;
+          case 'Mood Insight':
+            description = 'Record the same primary emotion 3 days in a row';
+            break;
+          case 'Emotion Investigator':
+            description = 'Add detailed notes to 5 emotional entries';
+            break;
+          default:
+            description = `Earn ${badge}`;
+        }
+        
+        console.log(`Creating badge: ${badge}`);
+        const { error } = await supabase
+          .from('badges')
+          .insert([
+            {
+              name: badge,
+              description,
+              category: 'mood_pattern',
+              icon_name: BADGE_ICONS[badge] || BADGE_ICONS['default']
+            }
+          ]);
+          
+        if (error) {
+          console.error(`Error creating badge ${badge}:`, error);
+        } else {
+          console.log(`Successfully created badge: ${badge}`);
+        }
+      }
+      
+      // Create journal frequency badges
+      console.log('Creating journal frequency badges...');
+      for (const badgeId in BADGE_IDS.JOURNAL_FREQUENCY) {
+        const badge = BADGE_IDS.JOURNAL_FREQUENCY[badgeId as keyof typeof BADGE_IDS.JOURNAL_FREQUENCY];
+        let description = '';
+        
+        switch (badgeId) {
+          case 'Daily Journaler':
+            description = 'Complete at least one check-in for 7 consecutive days';
+            break;
+          case 'Weekly Reflection':
+            description = 'Complete at least one check-in each day for a week';
+            break;
+          case 'Afternoon Reflection':
+            description = 'Complete 5 afternoon check-ins';
+            break;
+          case 'Evening Reflection':
+            description = 'Complete 5 evening check-ins';
+            break;
+          case 'Morning Reflection':
+            description = 'Complete 5 morning check-ins';
+            break;
+          case 'Full Day Recorder':
+            description = 'Record check-ins for all time periods in a day for 3 different days';
+            break;
+          default:
+            description = `Earn ${badge}`;
+        }
+        
+        console.log(`Creating badge: ${badge}`);
+        const { error } = await supabase
+          .from('badges')
+          .insert([
+            {
+              name: badge,
+              description,
+              category: 'journal_frequency',
+              icon_name: BADGE_ICONS[badge] || BADGE_ICONS['default']
+            }
+          ]);
+          
+        if (error) {
+          console.error(`Error creating badge ${badge}:`, error);
+        } else {
+          console.log(`Successfully created badge: ${badge}`);
+        }
+      }
+      
+      console.log('All badges created successfully');
+    } catch (error) {
+      console.error('Error initializing badges:', error);
     }
   }
 
@@ -378,6 +566,31 @@ export class BadgeService {
       if (eveningStreak >= 30) await awardBadge(BADGE_IDS.STREAKS.EVENING['30']);
       if (eveningStreak >= 60) await awardBadge(BADGE_IDS.STREAKS.EVENING['60']);
       if (eveningStreak >= 90) await awardBadge(BADGE_IDS.STREAKS.EVENING['90']);
+      
+      // Check for consistency champions (all time periods have streaks)
+      const allPeriodsActive = morningStreak > 0 && afternoonStreak > 0 && eveningStreak > 0;
+      
+      if (allPeriodsActive) {
+        // Bronze - all periods at least 3 days
+        if (morningStreak >= 3 && afternoonStreak >= 3 && eveningStreak >= 3) {
+          await awardBadge(BADGE_IDS.CONSISTENCY['Consistency Champion: Bronze']);
+        }
+        
+        // Silver - all periods at least 7 days
+        if (morningStreak >= 7 && afternoonStreak >= 7 && eveningStreak >= 7) {
+          await awardBadge(BADGE_IDS.CONSISTENCY['Consistency Champion: Silver']);
+        }
+        
+        // Gold - all periods at least 14 days
+        if (morningStreak >= 14 && afternoonStreak >= 14 && eveningStreak >= 14) {
+          await awardBadge(BADGE_IDS.CONSISTENCY['Consistency Champion: Gold']);
+        }
+        
+        // Platinum - all periods at least 30 days
+        if (morningStreak >= 30 && afternoonStreak >= 30 && eveningStreak >= 30) {
+          await awardBadge(BADGE_IDS.CONSISTENCY['Consistency Champion: Platinum']);
+        }
+      }
     } catch (error) {
       console.error('Error checking streak badges:', error);
     }
@@ -476,6 +689,216 @@ export class BadgeService {
       });
     } catch (error) {
       console.error('Error awarding first check-in badge:', error);
+    }
+  }
+
+  /**
+   * Check for mood pattern achievements based on journal entries
+   * @param entries The user's journal entries
+   * @param addUserBadge Callback to add a badge to a user
+   */
+  public static async checkMoodPatternBadges(
+    entries: any[], 
+    addUserBadge: (badgeName: string) => Promise<void>
+  ): Promise<void> {
+    try {
+      if (!entries || entries.length === 0) {
+        return;
+      }
+
+      // Check for Gratitude Master - detailed gratitude entries for 7 days
+      // We'll determine "detailed" as entries with gratitude text longer than 20 characters
+      const detailedGratitudeEntries = entries.filter(entry => 
+        entry.gratitude && entry.gratitude.length > 20
+      );
+      
+      if (detailedGratitudeEntries.length >= 7) {
+        const badgeName = BADGE_IDS.MOOD_PATTERNS['Gratitude Master'];
+        await addUserBadge(badgeName).catch(e => {
+          console.error(`BadgeService: Error awarding ${badgeName} badge:`, e);
+        });
+      }
+
+      // Check for Mood Improver - positive emotional shift in 5 entries
+      const positiveShiftEntries = entries.filter(entry => 
+        entry.emotional_shift && entry.emotional_shift > 0
+      );
+      
+      if (positiveShiftEntries.length >= 5) {
+        const badgeName = BADGE_IDS.MOOD_PATTERNS['Mood Improver'];
+        await addUserBadge(badgeName).catch(e => {
+          console.error(`BadgeService: Error awarding ${badgeName} badge:`, e);
+        });
+      }
+
+      // Check for Emotional Explorer - use 10 different emotion categories
+      const uniqueEmotions = new Set(
+        entries.map(entry => entry.initial_emotion)
+          .filter(emotion => emotion) // Remove null/undefined
+      );
+      
+      if (uniqueEmotions.size >= 10) {
+        const badgeName = BADGE_IDS.MOOD_PATTERNS['Emotional Explorer'];
+        await addUserBadge(badgeName).catch(e => {
+          console.error(`BadgeService: Error awarding ${badgeName} badge:`, e);
+        });
+      }
+
+      // Check for Mood Insight - same emotion 3 days in a row
+      // Sort entries by date
+      const sortedEntries = [...entries].sort(
+        (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+      
+      let sameEmotionCount = 1;
+      let prevEmotion = sortedEntries[0]?.initial_emotion;
+      
+      for (let i = 1; i < sortedEntries.length; i++) {
+        const currentEmotion = sortedEntries[i].initial_emotion;
+        
+        if (currentEmotion === prevEmotion) {
+          sameEmotionCount++;
+          if (sameEmotionCount >= 3) {
+            const badgeName = BADGE_IDS.MOOD_PATTERNS['Mood Insight'];
+            await addUserBadge(badgeName).catch(e => {
+              console.error(`BadgeService: Error awarding ${badgeName} badge:`, e);
+            });
+            break;
+          }
+        } else {
+          sameEmotionCount = 1;
+          prevEmotion = currentEmotion;
+        }
+      }
+
+      // Check for Emotion Investigator - detailed notes in 5 entries
+      // We'll determine "detailed" as entries with note text longer than 30 characters
+      const detailedNoteEntries = entries.filter(entry => 
+        entry.note && entry.note.length > 30
+      );
+      
+      if (detailedNoteEntries.length >= 5) {
+        const badgeName = BADGE_IDS.MOOD_PATTERNS['Emotion Investigator'];
+        await addUserBadge(badgeName).catch(e => {
+          console.error(`BadgeService: Error awarding ${badgeName} badge:`, e);
+        });
+      }
+    } catch (error) {
+      console.error('Error checking mood pattern badges:', error);
+    }
+  }
+
+  /**
+   * Check for journal frequency achievements based on journal entries
+   * @param entries The user's journal entries
+   * @param addUserBadge Callback to add a badge to a user
+   */
+  public static async checkJournalFrequencyBadges(
+    entries: any[], 
+    addUserBadge: (badgeName: string) => Promise<void>
+  ): Promise<void> {
+    try {
+      if (!entries || entries.length === 0) {
+        return;
+      }
+
+      // Sort entries by date
+      const sortedEntries = [...entries].sort(
+        (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+
+      // Group entries by date (YYYY-MM-DD)
+      const entriesByDate = sortedEntries.reduce((acc, entry) => {
+        const date = new Date(entry.created_at).toISOString().split('T')[0];
+        if (!acc[date]) {
+          acc[date] = [];
+        }
+        acc[date].push(entry);
+        return acc;
+      }, {} as Record<string, any[]>);
+
+      // Check for Daily Journaler - one check-in for 7 consecutive days
+      const dateKeys = Object.keys(entriesByDate).sort();
+      let maxConsecutiveDays = 1;
+      let currentStreak = 1;
+      
+      for (let i = 1; i < dateKeys.length; i++) {
+        const currentDate = new Date(dateKeys[i]);
+        const prevDate = new Date(dateKeys[i - 1]);
+        
+        // Check if dates are consecutive
+        const dayDiff = Math.round((currentDate.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24));
+        
+        if (dayDiff === 1) {
+          currentStreak++;
+          maxConsecutiveDays = Math.max(maxConsecutiveDays, currentStreak);
+        } else {
+          currentStreak = 1;
+        }
+      }
+      
+      if (maxConsecutiveDays >= 7) {
+        const badgeName = BADGE_IDS.JOURNAL_FREQUENCY['Daily Journaler'];
+        await addUserBadge(badgeName).catch(e => {
+          console.error(`BadgeService: Error awarding ${badgeName} badge:`, e);
+        });
+      }
+
+      // Check for Weekly Reflection - 7 consecutive days with entries
+      if (maxConsecutiveDays >= 7) {
+        const badgeName = BADGE_IDS.JOURNAL_FREQUENCY['Weekly Reflection'];
+        await addUserBadge(badgeName).catch(e => {
+          console.error(`BadgeService: Error awarding ${badgeName} badge:`, e);
+        });
+      }
+
+      // Check for period-specific reflection badges
+      const morningEntries = entries.filter(entry => entry.time_period === 'morning');
+      const afternoonEntries = entries.filter(entry => entry.time_period === 'afternoon');
+      const eveningEntries = entries.filter(entry => entry.time_period === 'evening');
+      
+      if (morningEntries.length >= 5) {
+        const badgeName = BADGE_IDS.JOURNAL_FREQUENCY['Morning Reflection'];
+        await addUserBadge(badgeName).catch(e => {
+          console.error(`BadgeService: Error awarding ${badgeName} badge:`, e);
+        });
+      }
+      
+      if (afternoonEntries.length >= 5) {
+        const badgeName = BADGE_IDS.JOURNAL_FREQUENCY['Afternoon Reflection'];
+        await addUserBadge(badgeName).catch(e => {
+          console.error(`BadgeService: Error awarding ${badgeName} badge:`, e);
+        });
+      }
+      
+      if (eveningEntries.length >= 5) {
+        const badgeName = BADGE_IDS.JOURNAL_FREQUENCY['Evening Reflection'];
+        await addUserBadge(badgeName).catch(e => {
+          console.error(`BadgeService: Error awarding ${badgeName} badge:`, e);
+        });
+      }
+
+      // Check for Full Day Recorder - all periods in a day for 3 different days
+      let fullDayCount = 0;
+      
+      for (const date in entriesByDate) {
+        const dayEntries = entriesByDate[date];
+        const periods = new Set(dayEntries.map((entry: any) => entry.time_period));
+        
+        if (periods.size >= 3) { // All three periods recorded
+          fullDayCount++;
+          
+          if (fullDayCount >= 3) {
+            const badgeName = BADGE_IDS.JOURNAL_FREQUENCY['Full Day Recorder'];
+            await addUserBadge(badgeName).catch(e => {
+              console.error(`BadgeService: Error awarding ${badgeName} badge:`, e);
+            });
+            break;
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error checking journal frequency badges:', error);
     }
   }
 }
