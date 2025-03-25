@@ -96,7 +96,7 @@ We are making good progress toward the 80% coverage goal for all context provide
 1. Complete tests for Profile screens (in progress)
    - ✅ ProfileScreen (88.9% statement, 81.8% branch coverage) 
    - ✅ SettingsScreen (100% coverage across all metrics)
-   - Additional profile components (AchievementsTab, BadgesTab, StreaksTab)
+   - Additional profile components (AchievementsAndBadgesTab)
 
 2. Common Components testing
    - ✅ Button, Card, Typography, and Header components (100% coverage)

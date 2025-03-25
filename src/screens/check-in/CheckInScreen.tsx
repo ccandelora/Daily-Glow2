@@ -8,14 +8,14 @@ import { useCheckInStreak } from '@/contexts/CheckInStreakContext';
 import { getCurrentTimePeriod } from '@/utils/dateTime';
 import theme from '@/constants/theme';
 import { Emotion } from '@/constants/emotions';
-import { useBadgeService } from '@/hooks/useBadgeService';
+import { useAchievementTriggers } from '@/hooks/useAchievementTriggers';
 
 export const CheckInScreen = () => {
   const router = useRouter();
   const { addEntry, getTodayEntries } = useJournal();
   const { showError, showSuccess } = useAppState();
-  const { streaks } = useCheckInStreak();
-  const badgeService = useBadgeService();
+  const { streaks, isFirstCheckIn } = useCheckInStreak();
+  const { triggerCheckInCompleted, triggerMoodAchievement } = useAchievementTriggers();
   
   const [step, setStep] = useState<'initial' | 'gratitude' | 'final'>('initial');
   const [initialEmotion, setInitialEmotion] = useState<string | undefined>();
@@ -105,17 +105,25 @@ export const CheckInScreen = () => {
     setLoading(true);
     
     try {
+      // Add the journal entry
       await addEntry(initialEmotion, postEmotion || '', gratitude, note);
-      
-      // Check and award badges
-      await badgeService.checkStreakBadges(streaks);
       
       // Check if all periods were completed today
       const todayEntries = getTodayEntries();
       const completedPeriods = new Set(todayEntries.map((entry: any) => entry.time_period));
+      const allPeriodsCompleted = completedPeriods.size === 3;
       
-      if (completedPeriods.size === 3) {
-        await badgeService.checkAllPeriodsCompleted();
+      // Trigger achievements and badges for completed check-in
+      await triggerCheckInCompleted(
+        streaks,
+        isFirstCheckIn,
+        allPeriodsCompleted,
+        initialEmotion
+      );
+      
+      // Check for mood improvement (if both initial and post emotions are set)
+      if (initialEmotion && postEmotion) {
+        await triggerMoodAchievement(postEmotion, initialEmotion);
       }
       
       // Show success message with streak information

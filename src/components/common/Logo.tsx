@@ -13,7 +13,7 @@ interface LogoProps {
 
 export const Logo: React.FC<LogoProps> = ({
   size = 'medium',
-  showText = true,
+  showText = false,
   style,
   imageStyle,
   textStyle,

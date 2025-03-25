@@ -26,23 +26,23 @@ const OnboardingScreen = () => {
   // Pages data for the onboarding flow
   const pages: OnboardingPageProps[] = [
     {
-      icon: "heart-outline", 
-      title: "Welcome to Daily Glow!", 
+      icon: "heart",
+      title: "Welcome to Daily Glow!",
       subtitle: "Begin your journey to wellness and mindfulness"
     },
     {
-      icon: "calendar-outline", 
-      title: "Track Your Progress", 
+      icon: "calendar",
+      title: "Track Your Progress",
       subtitle: "Daily check-ins help build healthy habits and maintain your streak"
     },
     {
-      icon: "trophy-outline", 
-      title: "Complete Challenges", 
+      icon: "trophy",
+      title: "Complete Challenges",
       subtitle: "Earn badges and track your achievements as you grow"
     },
     {
-      icon: "analytics-outline", 
-      title: "Gain Insights", 
+      icon: "analytics",
+      title: "Gain Insights",
       subtitle: "Learn more about your wellness journey through personalized analytics",
       isLast: true
     }

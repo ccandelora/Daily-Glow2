@@ -30,12 +30,12 @@ const ProfileScreen = () => {
 
   // Map of goal IDs to display text and icons
   const goalMapping: Record<string, Goal> = {
-    stress: { id: 'stress', label: 'Reduce stress', icon: 'leaf-outline' },
-    sleep: { id: 'sleep', label: 'Improve sleep', icon: 'moon-outline' },
-    habits: { id: 'habits', label: 'Build healthy habits', icon: 'fitness-outline' },
-    mindful: { id: 'mindful', label: 'Increase mindfulness', icon: 'heart-outline' },
-    mood: { id: 'mood', label: 'Boost mood', icon: 'sunny-outline' },
-    track: { id: 'track', label: 'Track mental health', icon: 'pulse-outline' }
+    stress: { id: 'stress', label: 'Reduce stress', icon: 'leaf' },
+    sleep: { id: 'sleep', label: 'Improve sleep', icon: 'moon' },
+    habits: { id: 'habits', label: 'Build healthy habits', icon: 'fitness' },
+    mindful: { id: 'mindful', label: 'Increase mindfulness', icon: 'heart' },
+    mood: { id: 'mood', label: 'Boost mood', icon: 'sunny' },
+    track: { id: 'track', label: 'Track mental health', icon: 'pulse' }
   };
 
   // Map of notification preference IDs to display text

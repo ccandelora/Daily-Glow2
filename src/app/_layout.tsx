@@ -6,6 +6,10 @@ import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { BadgeProvider, useBadges } from '@/contexts/BadgeContext';
 import { CheckInStreakProvider, CheckInStreak } from '@/contexts/CheckInStreakContext';
 import { OnboardingProvider } from '@/contexts/OnboardingContext';
+import { AchievementsProvider } from '@/contexts/AchievementsContext';
+import { MoodProvider } from '@/contexts/MoodContext';
+import { NotificationsProvider } from '@/contexts/NotificationsContext';
+import { JournalProvider } from '@/contexts/JournalContext';
 import { BadgeService } from '@/services/BadgeService';
 import { LoadingOverlay } from '@/components/common';
 import theme from '@/constants/theme';
@@ -129,34 +133,42 @@ export default function RootLayout() {
         <AuthProvider>
           <OnboardingProvider>
             <CheckInStreakWithBadges>
-              <View style={styles.container}>
-                <Stack
-                  screenOptions={{
-                    headerShown: false,
-                    contentStyle: { backgroundColor: theme.COLORS.ui.background },
-                  }}
-                >
-                  <Stack.Screen
-                    name="(auth)"
-                    options={{
-                      animation: 'fade',
-                    }}
-                  />
-                  <Stack.Screen
-                    name="(app)"
-                    options={{
-                      animation: 'fade',
-                    }}
-                  />
-                  <Stack.Screen
-                    name="(onboarding)"
-                    options={{
-                      animation: 'fade',
-                    }}
-                  />
-                </Stack>
-                <ProtectedRoute />
-              </View>
+              <JournalProvider>
+                <MoodProvider>
+                  <NotificationsProvider>
+                    <AchievementsProvider>
+                      <View style={styles.container}>
+                        <Stack
+                          screenOptions={{
+                            headerShown: false,
+                            contentStyle: { backgroundColor: theme.COLORS.ui.background },
+                          }}
+                        >
+                          <Stack.Screen
+                            name="(auth)"
+                            options={{
+                              animation: 'fade',
+                            }}
+                          />
+                          <Stack.Screen
+                            name="(app)"
+                            options={{
+                              animation: 'fade',
+                            }}
+                          />
+                          <Stack.Screen
+                            name="(onboarding)"
+                            options={{
+                              animation: 'fade',
+                            }}
+                          />
+                        </Stack>
+                        <ProtectedRoute />
+                      </View>
+                    </AchievementsProvider>
+                  </NotificationsProvider>
+                </MoodProvider>
+              </JournalProvider>
             </CheckInStreakWithBadges>
           </OnboardingProvider>
         </AuthProvider>

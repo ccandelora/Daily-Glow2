@@ -19,4 +19,5 @@ export { VideoBackground } from './VideoBackground';
 export { Logo } from './Logo';
 export { EmailVerificationBanner } from './EmailVerificationBanner';
 export { DeepLinkHandler } from './DeepLinkHandler';
-export { ManualVerification } from './ManualVerification'; 
+export { ManualVerification } from './ManualVerification';
+export { default as Icon } from './Icon'; 
