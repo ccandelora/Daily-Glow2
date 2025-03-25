@@ -13,6 +13,15 @@ interface EmotionalGrowthChartProps {
 
 export const EmotionalGrowthChart: React.FC<EmotionalGrowthChartProps> = ({ entries, timeFilter }) => {
   const chartData = useMemo(() => {
+    console.log('EmotionalGrowthChart - Number of entries:', entries.length);
+    
+    // Process entries to ensure proper date and emotional_shift values
+    const processedEntries = entries.map(entry => ({
+      ...entry,
+      date: entry.date instanceof Date ? entry.date : new Date(entry.date),
+      emotional_shift: typeof entry.emotional_shift === 'number' ? entry.emotional_shift : 0
+    }));
+    
     // Get the date range based on the time filter
     const now = new Date();
     let startDate: Date;
@@ -31,9 +40,37 @@ export const EmotionalGrowthChart: React.FC<EmotionalGrowthChartProps> = ({ entr
     }
     
     // Filter entries by date
-    const filteredEntries = entries
+    const filteredEntries = processedEntries
       .filter(entry => entry.date >= startDate)
       .sort((a, b) => a.date.getTime() - b.date.getTime());
+    
+    console.log('EmotionalGrowthChart - Filtered entries count:', filteredEntries.length);
+    
+    // If not enough entries, return explanation message rather than sample data
+    if (filteredEntries.length < 2) {
+      console.log('EmotionalGrowthChart - Insufficient data for analysis');
+      
+      let message = "";
+      if (processedEntries.length === 0) {
+        message = "Start your emotional journey by logging your first check-in.";
+      } else if (processedEntries.length === 1) {
+        message = "You need at least one more check-in to track your emotional growth. Growth is measured by comparing changes over time.";
+      } else if (timeFilter === 'week') {
+        message = "Not enough check-ins this week. Try the 'Month' or 'All Time' filter, or add more entries this week.";
+      } else if (timeFilter === 'month') {
+        message = "Not enough check-ins this month. Try the 'All Time' filter, or add more entries this month.";
+      } else {
+        message = "You need at least 2 check-ins to track emotional growth. Log your emotions regularly for meaningful insights.";
+      }
+      
+      return {
+        dataPoints: [],
+        minValue: 0,
+        maxValue: 0,
+        trend: 0,
+        message
+      };
+    }
     
     // Group entries by day
     const entriesByDay: Record<string, JournalEntry[]> = {};
@@ -146,7 +183,7 @@ export const EmotionalGrowthChart: React.FC<EmotionalGrowthChartProps> = ({ entr
     <View style={styles.container}>
       {chartData.dataPoints.length === 0 ? (
         <Typography style={styles.noDataText} color={theme.COLORS.ui.textSecondary}>
-          Not enough data to display chart
+          {chartData.message || "Not enough data to display chart. Complete more check-ins to see your emotional growth over time."}
         </Typography>
       ) : (
         <>

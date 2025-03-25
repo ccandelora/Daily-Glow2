@@ -21,7 +21,7 @@ export const AchievementsScreen: React.FC = () => {
   const router = useRouter();
   const { userBadges, refreshBadges, isLoading: badgesLoading, badges } = useBadges();
   const { userStats, refreshDailyChallenge } = useChallenges();
-  const { userProfile, refreshProfile, isLoading: profileLoading } = useProfile();
+  const { userProfile, refreshProfile, isLoading: profileLoading, updateProfile } = useProfile();
   const { streaks, refreshStreaks, overallStreak, isLoading: streaksLoading } = useCheckInStreak();
   const { userAchievements, refreshAchievements, isLoading: achievementsLoading, achievements } = useAchievements();
   const { user } = useAuth();
@@ -108,6 +108,24 @@ export const AchievementsScreen: React.FC = () => {
       console.log('- Profile points:', profilePoints);
       console.log('- Total points (calculated):', calculatedTotalPoints);
       console.log('- Current streak:', overallStreak);
+      
+      // Sync calculated points to profile if different
+      if (userProfile && userProfile.points !== calculatedTotalPoints) {
+        console.log(`Syncing total points to profile: ${userProfile.points} → ${calculatedTotalPoints}`);
+        updateProfile({ points: calculatedTotalPoints }).catch(err => 
+          console.error('Error updating profile points:', err)
+        );
+        
+        // Also update in user_stats if needed
+        try {
+          await supabase
+            .from('user_stats')
+            .update({ total_points: calculatedTotalPoints })
+            .eq('user_id', user.id);
+        } catch (statsError) {
+          console.error('Error updating user_stats points:', statsError);
+        }
+      }
     } catch (error) {
       console.error('Error fetching latest data:', error);
     } finally {

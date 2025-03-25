@@ -43,6 +43,7 @@ interface UserProfileContextType {
   refreshProfile: () => Promise<void>;
   saveUserGoals: (goals: string[]) => Promise<void>;
   saveNotificationPreferences: (preferences: string[]) => Promise<void>;
+  syncUserPoints: () => Promise<void>;
 }
 
 const UserProfileContext = createContext<UserProfileContextType | undefined>(undefined);
@@ -60,6 +61,32 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [isLoading, setIsLoading] = useState(true);
   const { user } = useAuth();
   const { showError } = useAppState();
+
+  // Special function to force load the name from AsyncStorage
+  const forceLoadNameFromStorage = async () => {
+    if (userProfile) {
+      const storedName = await AsyncStorage.getItem('userName');
+      if (storedName && storedName.trim() && storedName !== userProfile.display_name) {
+        console.log('Forcing profile name update from AsyncStorage:', storedName);
+        
+        // Update profile in memory
+        setUserProfile({
+          ...userProfile,
+          display_name: storedName
+        });
+        
+        // Try to update in database too
+        try {
+          await supabase
+            .from('profiles')
+            .update({ display_name: storedName })
+            .eq('user_id', user?.id);
+        } catch (error) {
+          console.error('Error updating display name in database:', error);
+        }
+      }
+    }
+  };
 
   const fetchProfile = async () => {
     if (!user) {
@@ -82,11 +109,12 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ c
         // Get locally stored preferences
         const storedGoals = await AsyncStorage.getItem('userGoals');
         const storedNotifications = await AsyncStorage.getItem('notificationPreferences');
+        const storedName = await AsyncStorage.getItem('userName');
         
         const tempProfile: UserProfile = {
           id: 'temp-id',
           user_id: user.id,
-          display_name: user.email || 'User',
+          display_name: storedName || user.email || 'User',
           avatar_url: null,
           streak: 0,
           last_check_in: null,
@@ -113,15 +141,26 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ c
         if (error.code === 'PGRST116') {
           console.log('No profile found for user, creating a new one');
           
+          // Load data from AsyncStorage
+          const storedGoals = await AsyncStorage.getItem('userGoals');
+          const storedNotifications = await AsyncStorage.getItem('notificationPreferences');
+          const storedName = await AsyncStorage.getItem('userName');
+          
+          console.log('UserProfileContext - creating profile with name:', {
+            storedName,
+            userEmail: user.email,
+            finalName: storedName || user.email || 'User'
+          });
+          
           const newProfile: Omit<UserProfile, 'id' | 'created_at' | 'updated_at'> = {
             user_id: user.id,
-            display_name: user.email || 'User',
+            display_name: storedName || user.email || 'User',
             avatar_url: null,
             streak: 0,
             last_check_in: null,
             points: 0,
-            user_goals: [],
-            notification_preferences: []
+            user_goals: storedGoals ? JSON.parse(storedGoals) : [],
+            notification_preferences: storedNotifications ? JSON.parse(storedNotifications) : []
           };
           
           const { data: createdProfile, error: createError } = await supabase
@@ -152,7 +191,66 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ c
           throw error;
         }
       } else {
-        setUserProfile(data);
+        // We got data from the database, but check if we have any local data that should be synced
+        // This handles the case where onboarding data was saved locally but not yet in the database
+        try {
+          let shouldUpdate = false;
+          const updates: Partial<UserProfile> = {};
+          
+          // Check for stored name in AsyncStorage
+          const storedName = await AsyncStorage.getItem('userName');
+          
+          console.log('UserProfileContext - checking stored name:', {
+            storedName,
+            dbDisplayName: data.display_name,
+            userEmail: user.email
+          });
+          
+          // Always prioritize stored name from onboarding over any database value
+          if (storedName && storedName.trim()) {
+            // Only update if it's different than what's already in the database
+            if (storedName !== data.display_name) {
+              updates.display_name = storedName;
+              shouldUpdate = true;
+            }
+          }
+          
+          // Check if goals should be updated from local storage
+          if (!data.user_goals || data.user_goals.length === 0) {
+            const storedGoals = await AsyncStorage.getItem('userGoals');
+            if (storedGoals) {
+              updates.user_goals = JSON.parse(storedGoals);
+              shouldUpdate = true;
+            }
+          }
+          
+          // Check if notification preferences should be updated from local storage
+          if (!data.notification_preferences || data.notification_preferences.length === 0) {
+            const storedNotifications = await AsyncStorage.getItem('notificationPreferences');
+            if (storedNotifications) {
+              updates.notification_preferences = JSON.parse(storedNotifications);
+              shouldUpdate = true;
+            }
+          }
+          
+          if (shouldUpdate) {
+            console.log('Syncing local data to database profile');
+            // Update the profile with local data
+            await supabase
+              .from('profiles')
+              .update(updates)
+              .eq('user_id', user.id);
+              
+            // Merge the updates with the data
+            setUserProfile({...data, ...updates});
+          } else {
+            setUserProfile(data);
+          }
+        } catch (syncError) {
+          console.error('Error syncing local data to profile:', syncError);
+          // Continue with the database data if sync fails
+          setUserProfile(data);
+        }
       }
     } catch (error: any) {
       console.error('Error fetching profile:', error.message);
@@ -166,6 +264,12 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ c
     if (!user) return;
 
     try {
+      // If we're updating display_name, also save to AsyncStorage
+      if (updates.display_name) {
+        await AsyncStorage.setItem('userName', updates.display_name);
+        console.log('Saved display_name to AsyncStorage:', updates.display_name);
+      }
+      
       // First check if the profiles table exists
       const { error: tableCheckError } = await supabase
         .from('profiles')
@@ -205,6 +309,36 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const refreshProfile = async () => {
     await fetchProfile();
+  };
+
+  // New function to sync points from user_stats to profile
+  const syncUserPoints = async () => {
+    if (!user || !userProfile) return;
+    
+    try {
+      console.log('Syncing user points from user_stats to profile');
+      
+      // Get the latest points from user_stats
+      const { data: userStatsData, error: userStatsError } = await supabase
+        .from('user_stats')
+        .select('total_points')
+        .eq('user_id', user.id)
+        .single();
+        
+      if (userStatsError) {
+        console.error('Error fetching user stats for points sync:', userStatsError);
+        return;
+      }
+      
+      if (userStatsData && userStatsData.total_points !== userProfile.points) {
+        console.log(`Updating profile points from ${userProfile.points} to ${userStatsData.total_points}`);
+        
+        // Update the user's profile with the points from user_stats
+        await updateProfile({ points: userStatsData.total_points });
+      }
+    } catch (error) {
+      console.error('Error syncing user points:', error);
+    }
   };
 
   // Add function to save user goals
@@ -290,8 +424,20 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ c
   };
 
   useEffect(() => {
-    fetchProfile();
-  }, [user?.id]);
+    if (user) {
+      fetchProfile();
+    } else {
+      setUserProfile(null);
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  // Force load the name from AsyncStorage once the profile is loaded
+  useEffect(() => {
+    if (userProfile && !isLoading) {
+      forceLoadNameFromStorage();
+    }
+  }, [userProfile?.id, isLoading, user?.id]);
 
   return (
     <UserProfileContext.Provider value={{
@@ -300,7 +446,8 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ c
       updateProfile,
       refreshProfile,
       saveUserGoals,
-      saveNotificationPreferences
+      saveNotificationPreferences,
+      syncUserPoints
     }}>
       {children}
     </UserProfileContext.Provider>

@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { VideoBackground } from '@/components/common';
+import { useProfile } from '@/contexts/UserProfileContext';
 
 type NotificationPreference = {
   id: string;
@@ -20,6 +21,7 @@ type NotificationPreference = {
 const OnboardingNotificationsScreen = () => {
   const router = useRouter();
   const { dbError, errorType, completeOnboarding } = useOnboarding();
+  const { saveNotificationPreferences } = useProfile();
   const [isCompleting, setIsCompleting] = useState(false);
   const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreference[]>([
     {
@@ -54,11 +56,21 @@ const OnboardingNotificationsScreen = () => {
     return { granted: status === 'granted' };
   };
 
-  const saveNotificationPreferences = async () => {
+  const saveNotificationPreferencesLocal = async () => {
     try {
-      await AsyncStorage.setItem('notificationPreferences', JSON.stringify(
-        notificationPrefs.filter(pref => pref.enabled).map(pref => pref.id)
-      ));
+      const enabledPrefIds = notificationPrefs
+        .filter(pref => pref.enabled)
+        .map(pref => pref.id);
+        
+      await AsyncStorage.setItem('notificationPreferences', JSON.stringify(enabledPrefIds));
+      
+      // Also save to database via context
+      try {
+        await saveNotificationPreferences(enabledPrefIds);
+      } catch (dbErr) {
+        console.error('Error saving notification preferences to database:', dbErr);
+        // Continue with onboarding even if database save fails
+      }
       
       return true;
     } catch (error) {
@@ -89,7 +101,7 @@ const OnboardingNotificationsScreen = () => {
       }
       
       // 2. Save user preferences
-      await saveNotificationPreferences();
+      await saveNotificationPreferencesLocal();
       
       // 3. Complete onboarding
       await completeOnboarding();

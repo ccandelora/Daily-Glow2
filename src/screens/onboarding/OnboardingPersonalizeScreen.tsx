@@ -7,6 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useOnboarding } from '@/contexts/OnboardingContext';
 import { VideoBackground } from '@/components/common';
+import { useProfile } from '@/contexts/UserProfileContext';
 
 // Define a type for our goal items that includes the icon type
 type Goal = {
@@ -18,6 +19,7 @@ type Goal = {
 const OnboardingPersonalizeScreen = () => {
   const router = useRouter();
   const { dbError, errorType } = useOnboarding();
+  const { updateProfile, saveUserGoals } = useProfile();
   const [name, setName] = useState('');
   const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -44,13 +46,27 @@ const OnboardingPersonalizeScreen = () => {
     setIsSaving(true);
     
     try {
-      // Save user preferences
+      // Save user preferences to AsyncStorage for local access
       if (name.trim()) {
         await AsyncStorage.setItem('userName', name.trim());
       }
       
       if (selectedGoals.length > 0) {
         await AsyncStorage.setItem('userGoals', JSON.stringify(selectedGoals));
+      }
+      
+      // Save to database via UserProfileContext
+      try {
+        if (name.trim()) {
+          await updateProfile({ display_name: name.trim() });
+        }
+        
+        if (selectedGoals.length > 0) {
+          await saveUserGoals(selectedGoals);
+        }
+      } catch (dbErr) {
+        console.error('Error saving to database:', dbErr);
+        // Continue with onboarding even if database save fails
       }
       
       // Navigate to notifications screen

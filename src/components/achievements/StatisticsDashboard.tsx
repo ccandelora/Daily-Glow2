@@ -6,6 +6,7 @@ import { useBadges } from '@/contexts/BadgeContext';
 import { useCheckInStreak } from '@/contexts/CheckInStreakContext';
 import { useJournal } from '@/contexts/JournalContext';
 import { useMood, Mood } from '@/contexts/MoodContext';
+import { useProfile } from '@/contexts/UserProfileContext';
 import { FontAwesome6 } from '@expo/vector-icons';
 import theme from '@/constants/theme';
 import { PieChart } from 'react-native-svg-charts';
@@ -33,13 +34,56 @@ interface ChartDataPoint {
  * StatisticsDashboard component displays statistics about achievements and badges
  */
 export const StatisticsDashboard: React.FC = () => {
-  const { achievements, userAchievements } = useAchievements();
-  const { badges, userBadges } = useBadges();
-  const { overallStreak } = useCheckInStreak();
-  const { entries: journalEntries } = useJournal();
+  console.log('StatisticsDashboard: Component rendering started');
   
-  // Get moods safely, handling case where context might not be available
+  // Access contexts with try/catch to prevent crashes
+  let achievements = [];
+  let userAchievements = [];
+  let badges = [];
+  let userBadges = [];
+  let overallStreak = 0;
+  let journalEntries: any[] = [];
+  let userProfile = null;
   let moods: any[] = [];
+  
+  try {
+    const achievementsContext = useAchievements();
+    achievements = achievementsContext.achievements || [];
+    userAchievements = achievementsContext.userAchievements || [];
+  } catch (error) {
+    console.error('Error accessing achievements context:', error);
+  }
+  
+  try {
+    const badgesContext = useBadges();
+    badges = badgesContext.badges || [];
+    userBadges = badgesContext.userBadges || [];
+  } catch (error) {
+    console.error('Error accessing badges context:', error);
+  }
+  
+  try {
+    const streakContext = useCheckInStreak();
+    overallStreak = streakContext.overallStreak || 0;
+  } catch (error) {
+    console.error('Error accessing streak context:', error);
+  }
+  
+  try {
+    const journalContext = useJournal();
+    journalEntries = journalContext.entries || [];
+  } catch (error) {
+    console.error('Error accessing journal context:', error);
+  }
+  
+  try {
+    const profileContext = useProfile();
+    userProfile = profileContext.userProfile;
+  } catch (error) {
+    console.error('Error accessing profile context:', error);
+  }
+  
+  // Get moods safely
   try {
     const { moods: moodsData } = useMood();
     if (moodsData && Array.isArray(moodsData)) {
@@ -49,213 +93,200 @@ export const StatisticsDashboard: React.FC = () => {
     console.log('MoodContext not available in StatisticsDashboard');
   }
   
-  // Animation values
-  const fadeInAnim = React.useRef(new Animated.Value(0)).current;
-  const scaleAnim = React.useRef(new Animated.Value(0.9)).current;
+  // Calculate total points from user achievements
+  const totalPoints = calculateTotalPoints(userAchievements, achievements, userProfile);
+  console.log('Calculated total points:', totalPoints);
   
-  // Progress state
-  const [achievementProgress, setAchievementProgress] = useState(0);
-  const [badgeProgress, setBadgeProgress] = useState(0);
+  // Calculate mood statistics
+  const moodStats = calculateMoodStats(moods);
   
-  // Stats state
-  const [stats, setStats] = useState({
-    totalPoints: 0,
-    achievementsEarned: 0,
-    achievementsTotal: 0,
-    badgesEarned: 0,
-    badgesTotal: 0,
-    highestStreak: 0,
-    currentStreak: 0,
-    journalCount: 0,
-    positiveMoodCount: 0,
-    neutralMoodCount: 0,
-    negativeMoodCount: 0,
-    journalsLastWeek: 0,
-    journalsLastMonth: 0,
-    moodTrend: 'stable' as 'improving' | 'declining' | 'stable',
-  });
+  // Simple stats for display
+  const stats = {
+    totalPoints,
+    achievementsEarned: userAchievements.length,
+    achievementsTotal: achievements.length || 16, // Fallback to 16 if no achievements available
+    badgesEarned: userBadges.length,
+    badgesTotal: badges.length || 27, // Fallback to 27 if no badges available
+    currentStreak: overallStreak,
+    highestStreak: overallStreak,
+    journalCount: journalEntries.length,
+    positiveMoodCount: moodStats.positive,
+    neutralMoodCount: moodStats.neutral,
+    negativeMoodCount: moodStats.negative,
+    journalsLastWeek: calculateRecentEntries(journalEntries, 7),
+    journalsLastMonth: calculateRecentEntries(journalEntries, 30),
+    moodTrend: moodStats.trend,
+  };
   
-  // Memoize mood trend calculation to prevent unnecessary recalculations
-  const moodTrendData = useMemo(() => {
-    // Default values
-    let positiveMoodCount = 0;
-    let neutralMoodCount = 0;
-    let negativeMoodCount = 0;
-    let moodTrend: 'improving' | 'declining' | 'stable' = 'stable';
+  // Helper function to calculate total points
+  function calculateTotalPoints(userAchievements: any[], achievements: any[], userProfile: any): number {
+    // First check if we can get points from user profile
+    if (userProfile && typeof userProfile.points === 'number' && userProfile.points > 0) {
+      console.log('Using points from user profile:', userProfile.points);
+      return userProfile.points;
+    }
     
-    // Process moods
-    if (moods && moods.length > 0) {
-      moods.forEach((mood: Mood) => {
-        const moodValue = mood.value;
+    // If not, calculate from achievements
+    if (userAchievements && Array.isArray(userAchievements) && userAchievements.length > 0 && 
+        achievements && Array.isArray(achievements)) {
+      
+      try {
+        // Calculate by summing up points from each achievement
+        const points = userAchievements.reduce((total, ua) => {
+          // Find the achievement by ID
+          const achievement = achievements.find(a => a.id === ua.achievement_id);
+          // Add points if achievement exists and has points
+          return total + (achievement?.points || 0);
+        }, 0);
+        
+        console.log('Calculated points from achievements:', points);
+        return points;
+      } catch (error) {
+        console.error('Error calculating points from achievements:', error);
+      }
+    }
+    
+    // Fallback: check if first user achievement has an embedded achievement with points
+    if (userAchievements && userAchievements.length > 0 && 
+        userAchievements[0].achievement && 
+        typeof userAchievements[0].achievement.points === 'number') {
+      
+      try {
+        const points = userAchievements.reduce((total, ua) => {
+          return total + (ua.achievement?.points || 0);
+        }, 0);
+        
+        console.log('Calculated points from embedded achievements:', points);
+        return points;
+      } catch (error) {
+        console.error('Error calculating points from embedded achievements:', error);
+      }
+    }
+    
+    // If user has at least one achievement, assume they have some points
+    // but we couldn't calculate exactly, so return a sensible default
+    if (userAchievements && userAchievements.length > 0) {
+      return userAchievements.length * 25; // Estimate 25 points per achievement
+    }
+    
+    // No way to calculate points, return 0
+    return 0;
+  }
+  
+  // Helper function to calculate recent entries
+  function calculateRecentEntries(entries: any[], days: number): number {
+    if (!entries || !Array.isArray(entries) || entries.length === 0) return 0;
+    
+    try {
+      const now = new Date();
+      const cutoffDate = new Date(now);
+      cutoffDate.setDate(now.getDate() - days);
+      
+      // Filter entries after the cutoff date
+      return entries.filter(entry => {
+        try {
+          // Try to get the date from created_at or date field
+          const entryDate = entry.created_at 
+            ? new Date(entry.created_at)
+            : (entry.date ? new Date(entry.date) : null);
+            
+          // Skip entries with invalid dates
+          if (!entryDate || isNaN(entryDate.getTime())) return false;
+          
+          return entryDate >= cutoffDate;
+        } catch (error) {
+          console.error('Error parsing entry date:', error);
+          return false;
+        }
+      }).length;
+    } catch (error) {
+      console.error(`Error calculating entries for last ${days} days:`, error);
+      return 0;
+    }
+  }
+  
+  // Helper function to calculate mood statistics
+  function calculateMoodStats(moodData: any[]): { 
+    positive: number; 
+    neutral: number; 
+    negative: number; 
+    trend: 'improving' | 'declining' | 'stable' 
+  } {
+    // Default values if no mood data available
+    if (!moodData || !Array.isArray(moodData) || moodData.length === 0) {
+      return {
+        positive: 0,
+        neutral: 0,
+        negative: 0,
+        trend: 'stable'
+      };
+    }
+    
+    try {
+      // Count different mood types
+      let positive = 0;
+      let neutral = 0;
+      let negative = 0;
+      
+      moodData.forEach(mood => {
+        const moodValue = typeof mood.value === 'number' ? mood.value : 0;
+        
         if (moodValue >= 4) {
-          positiveMoodCount++;
+          positive++;
         } else if (moodValue >= 2) {
-          neutralMoodCount++;
+          neutral++;
         } else {
-          negativeMoodCount++;
+          negative++;
         }
       });
       
-      // Determine mood trend
-      if (moods.length >= 5) {
-        // Get the 5 most recent moods
-        const recentMoods = [...moods]
-          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-          .slice(0, 5);
+      // Determine mood trend based on recent entries
+      let trend: 'improving' | 'declining' | 'stable' = 'stable';
+      
+      if (moodData.length >= 5) {
+        // Sort moods by date (newest first)
+        const sortedMoods = [...moodData].sort((a, b) => {
+          const dateA = new Date(a.created_at || 0);
+          const dateB = new Date(b.created_at || 0);
+          return dateB.getTime() - dateA.getTime();
+        });
         
-        // Calculate the average of first 2 moods vs last 3 moods
+        // Get 5 most recent moods
+        const recentMoods = sortedMoods.slice(0, 5);
+        
+        // Compare early vs late moods to determine trend
         const earlyAvg = (recentMoods[3]?.value || 0) + (recentMoods[4]?.value || 0);
         const lateAvg = (recentMoods[0]?.value || 0) + (recentMoods[1]?.value || 0) + (recentMoods[2]?.value || 0);
         
         if (lateAvg/3 > earlyAvg/2 + 0.5) {
-          moodTrend = 'improving';
+          trend = 'improving';
         } else if (lateAvg/3 < earlyAvg/2 - 0.5) {
-          moodTrend = 'declining';
+          trend = 'declining';
         }
       }
+      
+      return { positive, neutral, negative, trend };
+    } catch (error) {
+      console.error('Error calculating mood stats:', error);
+      return { positive: 0, neutral: 0, negative: 0, trend: 'stable' };
     }
-    
-    return {
-      positiveMoodCount,
-      neutralMoodCount,
-      negativeMoodCount,
-      moodTrend
-    };
-  }, [moods]);
+  }
   
-  // Stabilize animation start function
-  const startAnimations = useCallback(() => {
-    Animated.parallel([
-      Animated.timing(fadeInAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [fadeInAnim, scaleAnim]);
-
-  // Add a check to prevent re-renders when data hasn't actually changed
-  const prevOverallStreakRef = useRef(overallStreak);
-  const prevMoodTrendDataRef = useRef(moodTrendData);
-  const prevAchievementsRef = useRef(achievements.length);
-  const prevUserAchievementsRef = useRef(userAchievements.length);
-  const prevBadgesRef = useRef(badges.length);
-  const prevUserBadgesRef = useRef(userBadges.length);
-  const prevJournalEntriesRef = useRef(journalEntries.length);
+  console.log('StatisticsDashboard: Using stats:', stats);
   
-  // Calculate and update statistics only when data actually changes
-  useEffect(() => {
-    // Skip if nothing important has changed to avoid unnecessary re-renders
-    if (
-      prevOverallStreakRef.current === overallStreak &&
-      prevMoodTrendDataRef.current === moodTrendData &&
-      prevAchievementsRef.current === achievements.length &&
-      prevUserAchievementsRef.current === userAchievements.length &&
-      prevBadgesRef.current === badges.length &&
-      prevUserBadgesRef.current === userBadges.length &&
-      prevJournalEntriesRef.current === journalEntries.length
-    ) {
-      return;
-    }
+  // Calculate percentages
+  const achievementProgress = stats.achievementsTotal > 0 
+    ? (stats.achievementsEarned / stats.achievementsTotal) 
+    : 0;
     
-    // Update refs
-    prevOverallStreakRef.current = overallStreak;
-    prevMoodTrendDataRef.current = moodTrendData;
-    prevAchievementsRef.current = achievements.length;
-    prevUserAchievementsRef.current = userAchievements.length; 
-    prevBadgesRef.current = badges.length;
-    prevUserBadgesRef.current = userBadges.length;
-    prevJournalEntriesRef.current = journalEntries.length;
-    
-    console.log('StatisticsDashboard: Recalculating stats');
-    
-    // Calculate total points from earned achievements
-    const totalPoints = userAchievements.reduce((sum, ua) => {
-      return sum + (ua.achievement?.points || 0);
-    }, 0);
-    
-    // Set achievements progress
-    const achievementsEarned = userAchievements.length;
-    const achievementsTotal = achievements.length;
-    const achievementPercentage = achievementsTotal > 0 
-      ? (achievementsEarned / achievementsTotal) 
-      : 0;
-    
-    // Set badges progress
-    const badgesEarned = userBadges.length;
-    const badgesTotal = badges.length;
-    const badgePercentage = badgesTotal > 0 
-      ? (badgesEarned / badgesTotal) 
-      : 0;
-    
-    // Calculate journal statistics
-    const journalCount = journalEntries.length;
-    
-    // Calculate journals in the last week and month
-    const now = new Date();
-    const oneWeekAgo = new Date(now);
-    oneWeekAgo.setDate(now.getDate() - 7);
-    
-    const oneMonthAgo = new Date(now);
-    oneMonthAgo.setMonth(now.getMonth() - 1);
-    
-    const journalsLastWeek = journalEntries.filter(entry => {
-      const entryDate = new Date(entry.created_at);
-      return entryDate >= oneWeekAgo;
-    }).length;
-    
-    const journalsLastMonth = journalEntries.filter(entry => {
-      const entryDate = new Date(entry.created_at);
-      return entryDate >= oneMonthAgo;
-    }).length;
-    
-    // Use current values from props, don't depend on previous state
-    const currentStreak = overallStreak || 0;
-    const highestStreak = currentStreak; // Just use current streak as highest
-    
-    // Update state atomically with all values
-    setAchievementProgress(achievementPercentage);
-    setBadgeProgress(badgePercentage);
-    
-    setStats({
-      totalPoints,
-      achievementsEarned,
-      achievementsTotal,
-      badgesEarned,
-      badgesTotal,
-      highestStreak,
-      currentStreak,
-      journalCount,
-      positiveMoodCount: moodTrendData.positiveMoodCount,
-      neutralMoodCount: moodTrendData.neutralMoodCount,
-      negativeMoodCount: moodTrendData.negativeMoodCount,
-      journalsLastWeek,
-      journalsLastMonth,
-      moodTrend: moodTrendData.moodTrend,
-    });
-    
-    // Start animations with the stabilized function
-    startAnimations();
-  }, [
-    achievements, 
-    userAchievements, 
-    badges, 
-    userBadges, 
-    overallStreak, 
-    journalEntries, 
-    moodTrendData,
-    startAnimations
-  ]);
+  const badgeProgress = stats.badgesTotal > 0 
+    ? (stats.badgesEarned / stats.badgesTotal) 
+    : 0;
   
-  // Prepare chart data for achievements
-  const achievementChartData: ChartDataPoint[] = [
+  // Simple fixed chart data
+  const achievementChartData = [
     { 
-      value: stats.achievementsEarned, 
+      value: Math.max(0.01, stats.achievementsEarned), 
       key: 'earned',
       svg: { fill: theme.COLORS.primary.teal },
       arc: { innerRadius: CHART_SIZE / 6, padAngle: 0.02 }
@@ -266,12 +297,11 @@ export const StatisticsDashboard: React.FC = () => {
       svg: { fill: 'rgba(255, 255, 255, 0.1)' },
       arc: { innerRadius: CHART_SIZE / 6, padAngle: 0.02 }
     }
-  ].filter(item => item.value > 0);
+  ];
   
-  // Prepare chart data for badges
-  const badgeChartData: ChartDataPoint[] = [
+  const badgeChartData = [
     { 
-      value: stats.badgesEarned, 
+      value: Math.max(0.01, stats.badgesEarned), 
       key: 'earned',
       svg: { fill: theme.COLORS.primary.green },
       arc: { innerRadius: CHART_SIZE / 6, padAngle: 0.02 }
@@ -282,10 +312,9 @@ export const StatisticsDashboard: React.FC = () => {
       svg: { fill: 'rgba(255, 255, 255, 0.1)' },
       arc: { innerRadius: CHART_SIZE / 6, padAngle: 0.02 }
     }
-  ].filter(item => item.value > 0);
+  ];
   
-  // Prepare chart data for moods
-  const moodChartData: ChartDataPoint[] = [
+  const moodChartData = [
     { 
       value: stats.positiveMoodCount, 
       key: 'positive',
@@ -304,277 +333,227 @@ export const StatisticsDashboard: React.FC = () => {
       svg: { fill: theme.COLORS.primary.red },
       arc: { innerRadius: CHART_SIZE / 6, padAngle: 0.02 }
     }
-  ].filter(item => item.value > 0);
+  ];
   
-  // Calculate percentage values
+  // Format percentages for display
   const achievementPercentText = `${Math.round(achievementProgress * 100)}%`;
   const badgePercentText = `${Math.round(badgeProgress * 100)}%`;
   
-  // Get mood trend icon and color
-  const getMoodTrendIcon = () => {
-    switch (stats.moodTrend) {
-      case 'improving':
-        return { name: getCompatibleIconName('arrow-trend-up'), color: theme.COLORS.primary.green };
-      case 'declining':
-        return { name: getCompatibleIconName('arrow-trend-down'), color: theme.COLORS.primary.red };
-      default:
-        return { name: getCompatibleIconName('minus'), color: theme.COLORS.primary.yellow };
-    }
-  };
+  // Animation to fade in the component
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
   
-  const moodTrendIcon = getMoodTrendIcon();
+  React.useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+  
+  // Helper function to get mood trend icon name
+  function getMoodTrendIcon(trend: 'improving' | 'declining' | 'stable'): string {
+    switch (trend) {
+      case 'improving': return "arrow-trend-up";
+      case 'declining': return "arrow-trend-down";
+      default: return "minus";
+    }
+  }
+  
+  // Helper function to get mood trend color
+  function getMoodTrendColor(trend: 'improving' | 'declining' | 'stable'): string {
+    switch (trend) {
+      case 'improving': return theme.COLORS.primary.green;
+      case 'declining': return theme.COLORS.primary.red;
+      default: return theme.COLORS.primary.yellow;
+    }
+  }
+  
+  // Helper function to format trend text for display
+  function getTrendDisplayText(trend: 'improving' | 'declining' | 'stable'): string {
+    return trend.charAt(0).toUpperCase() + trend.slice(1);
+  }
   
   return (
-    <View>
-      <Animated.View 
-        style={[
-          styles.container,
-          {
-            opacity: fadeInAnim,
-            transform: [{ scale: scaleAnim }]
-          }
-        ]}
-      >
-        <Card style={styles.totalStatsCard} variant="glow">
-          <View style={styles.statsRow}>
-            <View style={styles.stat}>
-              <FontAwesome6 name={getCompatibleIconName("trophy")} size={20} color={theme.COLORS.primary.teal} style={styles.statIcon} />
+    <Animated.View style={[styles.container, { opacity: fadeAnim }]}>
+      <Card style={styles.totalStatsCard} variant="glow">
+        <View style={styles.statsRow}>
+          <View style={styles.stat}>
+            <FontAwesome6 name={getCompatibleIconName("trophy")} size={20} color={theme.COLORS.primary.teal} style={styles.statIcon} />
+            <Typography variant="h2" color={theme.COLORS.primary.teal} glow="medium">
+              {stats.totalPoints}
+            </Typography>
+            <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
+              Total Points
+            </Typography>
+          </View>
+          
+          <View style={styles.divider} />
+          
+          <View style={styles.stat}>
+            <FontAwesome6 name={getCompatibleIconName("fire")} size={20} color={theme.COLORS.primary.orange} style={styles.statIcon} />
+            <Typography variant="h2" color={theme.COLORS.primary.orange} glow="medium">
+              {stats.currentStreak}
+            </Typography>
+            <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
+              Current Streak
+            </Typography>
+          </View>
+          
+          <View style={styles.divider} />
+          
+          <View style={styles.stat}>
+            <FontAwesome6 name={getCompatibleIconName("award")} size={20} color={theme.COLORS.primary.yellow} style={styles.statIcon} />
+            <Typography variant="h2" color={theme.COLORS.primary.yellow} glow="medium">
+              {stats.highestStreak}
+            </Typography>
+            <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
+              Highest Streak
+            </Typography>
+          </View>
+        </View>
+      </Card>
+      
+      <View style={styles.chartsRow}>
+        <Card style={styles.chartCard} variant="default">
+          <Typography variant="h3" style={styles.chartTitle} glow="soft">
+            Achievements
+          </Typography>
+          
+          <View style={styles.chartContainer}>
+            <PieChart
+              style={{ height: CHART_SIZE, width: CHART_SIZE }}
+              data={achievementChartData}
+              innerRadius={CHART_SIZE / 6}
+              padAngle={0.02}
+              animate={true}
+            />
+            
+            <View style={styles.chartCenterLabel}>
               <Typography variant="h2" color={theme.COLORS.primary.teal} glow="medium">
-                {stats.totalPoints}
+                {achievementPercentText}
               </Typography>
               <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
-                Total Points
-              </Typography>
-            </View>
-            
-            <View style={styles.divider} />
-            
-            <View style={styles.stat}>
-              <FontAwesome6 name={getCompatibleIconName("fire")} size={20} color={theme.COLORS.primary.orange} style={styles.statIcon} />
-              <Typography variant="h2" color={theme.COLORS.primary.orange} glow="medium">
-                {stats.currentStreak}
-              </Typography>
-              <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
-                Current Streak
-              </Typography>
-            </View>
-            
-            <View style={styles.divider} />
-            
-            <View style={styles.stat}>
-              <FontAwesome6 name={getCompatibleIconName("award")} size={20} color={theme.COLORS.primary.yellow} style={styles.statIcon} />
-              <Typography variant="h2" color={theme.COLORS.primary.yellow} glow="medium">
-                {stats.highestStreak}
-              </Typography>
-              <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
-                Highest Streak
+                {stats.achievementsEarned} of {stats.achievementsTotal}
               </Typography>
             </View>
           </View>
         </Card>
         
-        <View style={styles.chartsRow}>
-          <Card style={styles.chartCard} variant="default">
-            <Typography variant="h3" style={styles.chartTitle} glow="soft">
-              Achievements
-            </Typography>
-            
-            <View style={styles.chartContainer}>
-              <PieChart
-                style={{ height: CHART_SIZE, width: CHART_SIZE }}
-                data={achievementChartData}
-                innerRadius={CHART_SIZE / 6}
-                padAngle={0.02}
-                animate={true}
-              />
-              
-              <View style={styles.chartCenterLabel}>
-                <Typography variant="h2" color={theme.COLORS.primary.teal} glow="medium">
-                  {achievementPercentText}
-                </Typography>
-                <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
-                  {stats.achievementsEarned} of {stats.achievementsTotal}
-                </Typography>
-              </View>
-            </View>
-          </Card>
+        <Card style={styles.chartCard} variant="default">
+          <Typography variant="h3" style={styles.chartTitle} glow="soft">
+            Badges
+          </Typography>
           
-          <Card style={styles.chartCard} variant="default">
-            <Typography variant="h3" style={styles.chartTitle} glow="soft">
-              Badges
-            </Typography>
+          <View style={styles.chartContainer}>
+            <PieChart
+              style={{ height: CHART_SIZE, width: CHART_SIZE }}
+              data={badgeChartData}
+              innerRadius={CHART_SIZE / 6}
+              padAngle={0.02}
+              animate={true}
+            />
             
-            <View style={styles.chartContainer}>
-              <PieChart
-                style={{ height: CHART_SIZE, width: CHART_SIZE }}
-                data={badgeChartData}
-                innerRadius={CHART_SIZE / 6}
-                padAngle={0.02}
-                animate={true}
-              />
-              
-              <View style={styles.chartCenterLabel}>
-                <Typography variant="h2" color={theme.COLORS.primary.green} glow="medium">
-                  {badgePercentText}
+            <View style={styles.chartCenterLabel}>
+              <Typography variant="h2" color={theme.COLORS.primary.green} glow="medium">
+                {badgePercentText}
+              </Typography>
+              <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
+                {stats.badgesEarned} of {stats.badgesTotal}
+              </Typography>
+            </View>
+          </View>
+        </Card>
+      </View>
+      
+      <Card style={styles.moodCard} variant="default">
+        <Typography variant="h3" style={styles.moodTitle} glow="soft">
+          Mood Patterns
+        </Typography>
+        
+        <View style={styles.moodDataContainer}>
+          <View>
+            <View style={styles.moodStats}>
+              <View style={styles.moodStatItem}>
+                <Typography variant="body" color={theme.COLORS.primary.green}>
+                  Positive: {stats.positiveMoodCount}
                 </Typography>
-                <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
-                  {stats.badgesEarned} of {stats.badgesTotal}
+              </View>
+              <View style={styles.moodStatItem}>
+                <Typography variant="body" color={theme.COLORS.primary.yellow}>
+                  Neutral: {stats.neutralMoodCount}
+                </Typography>
+              </View>
+              <View style={styles.moodStatItem}>
+                <Typography variant="body" color={theme.COLORS.primary.red}>
+                  Negative: {stats.negativeMoodCount}
                 </Typography>
               </View>
             </View>
-          </Card>
+            
+            <View style={styles.moodTrend}>
+              <Typography variant="body" style={styles.moodTrendLabel}>
+                Recent Trend:
+              </Typography>
+              <FontAwesome6 
+                name={getMoodTrendIcon(stats.moodTrend)}
+                size={16} 
+                color={getMoodTrendColor(stats.moodTrend)}
+                style={styles.moodTrendIcon}
+              />
+              <Typography 
+                variant="body" 
+                color={getMoodTrendColor(stats.moodTrend)}
+                style={styles.moodTrendText}
+              >
+                {getTrendDisplayText(stats.moodTrend)}
+              </Typography>
+            </View>
+          </View>
+          
+          <View style={styles.moodChartContainer}>
+            <PieChart
+              style={styles.moodChart}
+              data={moodChartData}
+              innerRadius={CHART_SIZE / 4}
+              outerRadius={CHART_SIZE / 2.5}
+              padAngle={0.02}
+            />
+          </View>
         </View>
         
-        <Card style={styles.moodCard} variant="default">
-          <Typography variant="h3" style={styles.moodTitle} glow="soft">
-            Mood Patterns
-          </Typography>
-          
-          <View style={styles.moodDataContainer}>
-            <View>
-              <View style={styles.moodStats}>
-                <View style={styles.moodStatItem}>
-                  <Typography variant="body" color={theme.COLORS.primary.green}>
-                    Positive: {stats.positiveMoodCount}
-                  </Typography>
-                </View>
-                <View style={styles.moodStatItem}>
-                  <Typography variant="body" color={theme.COLORS.primary.yellow}>
-                    Neutral: {stats.neutralMoodCount}
-                  </Typography>
-                </View>
-                <View style={styles.moodStatItem}>
-                  <Typography variant="body" color={theme.COLORS.primary.red}>
-                    Negative: {stats.negativeMoodCount}
-                  </Typography>
-                </View>
-              </View>
-              
-              <View style={styles.moodTrend}>
-                <Typography variant="body" style={styles.moodTrendLabel}>
-                  Recent Trend:
-                </Typography>
-                <FontAwesome6 
-                  name={getCompatibleIconName(moodTrendIcon.name)}
-                  size={16} 
-                  color={moodTrendIcon.color}
-                  style={styles.moodTrendIcon}
-                />
-                <Typography 
-                  variant="body" 
-                  color={moodTrendIcon.color}
-                  style={styles.moodTrendText}
-                >
-                  {stats.moodTrend.charAt(0).toUpperCase() + stats.moodTrend.slice(1)}
-                </Typography>
-              </View>
-            </View>
-            
-            <View style={styles.moodChartContainer}>
-              {moodChartData.length > 0 ? (
-                <PieChart
-                  style={{ height: CHART_SIZE * 0.9, width: CHART_SIZE * 0.9 }}
-                  data={moodChartData}
-                  innerRadius={CHART_SIZE / 8}
-                  padAngle={0.02}
-                  animate={true}
-                />
-              ) : (
-                <View style={styles.noDataContainer}>
-                  <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
-                    No mood data yet
-                  </Typography>
-                </View>
-              )}
-            </View>
-          </View>
-        </Card>
-        
-        <Card style={styles.journalCard} variant="default">
-          <Typography variant="h3" style={styles.journalTitle} glow="soft">
-            Journal Activity
-          </Typography>
-          
-          <View style={styles.journalStats}>
-            <View style={styles.journalStatItem}>
-              <FontAwesome6 name={getCompatibleIconName("book")} size={18} color={theme.COLORS.primary.purple} style={styles.journalIcon} />
-              <Typography variant="h3" color={theme.COLORS.primary.purple} glow="medium">
-                {stats.journalCount}
-              </Typography>
-              <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
-                Total Entries
-              </Typography>
-            </View>
-            
-            <View style={styles.journalStatItem}>
-              <FontAwesome6 name={getCompatibleIconName("calendar-week")} size={18} color={theme.COLORS.primary.blue} style={styles.journalIcon} />
-              <Typography variant="h3" color={theme.COLORS.primary.blue} glow="medium">
-                {stats.journalsLastWeek}
-              </Typography>
-              <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
-                Last 7 Days
-              </Typography>
-            </View>
-            
-            <View style={styles.journalStatItem}>
-              <FontAwesome6 name={getCompatibleIconName("calendar")} size={18} color={theme.COLORS.primary.teal} style={styles.journalIcon} />
-              <Typography variant="h3" color={theme.COLORS.primary.teal} glow="medium">
-                {stats.journalsLastMonth}
-              </Typography>
-              <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
-                Last 30 Days
-              </Typography>
-            </View>
-          </View>
-        </Card>
-        
-        <Card style={styles.milestoneCard} variant="default">
-          <Typography variant="h3" style={styles.milestoneTitle} glow="soft">
-            Next Milestones
-          </Typography>
-          
-          <View style={styles.milestoneRow}>
-            <FontAwesome6 name={getCompatibleIconName("trophy")} size={16} color={theme.COLORS.primary.teal} />
-            <Typography variant="body" style={styles.milestoneText}>
-              Earn {stats.achievementsEarned + 1} of {stats.achievementsTotal} achievements
+        <View style={styles.journalStats}>
+          <View style={styles.journalStatItem}>
+            <FontAwesome6 name={getCompatibleIconName("book")} size={18} color={theme.COLORS.primary.purple} style={styles.journalIcon} />
+            <Typography variant="h3" color={theme.COLORS.primary.purple} glow="medium">
+              {stats.journalCount}
             </Typography>
-            <Typography variant="caption" color={theme.COLORS.primary.teal}>
-              {Math.round(achievementProgress * 100)}%
+            <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
+              Total Entries
             </Typography>
           </View>
           
-          <View style={styles.milestoneRow}>
-            <FontAwesome6 name={getCompatibleIconName("award")} size={16} color={theme.COLORS.primary.green} />
-            <Typography variant="body" style={styles.milestoneText}>
-              Earn {stats.badgesEarned + 1} of {stats.badgesTotal} badges
+          <View style={styles.journalStatItem}>
+            <FontAwesome6 name={getCompatibleIconName("calendar-week")} size={18} color={theme.COLORS.primary.blue} style={styles.journalIcon} />
+            <Typography variant="h3" color={theme.COLORS.primary.blue} glow="medium">
+              {stats.journalsLastWeek}
             </Typography>
-            <Typography variant="caption" color={theme.COLORS.primary.green}>
-              {Math.round(badgeProgress * 100)}%
-            </Typography>
-          </View>
-          
-          <View style={styles.milestoneRow}>
-            <FontAwesome6 name={getCompatibleIconName("fire")} size={16} color={theme.COLORS.primary.orange} />
-            <Typography variant="body" style={styles.milestoneText}>
-              Reach a {stats.currentStreak + 1} day streak
-            </Typography>
-            <Typography variant="caption" color={theme.COLORS.primary.orange}>
-              {stats.currentStreak > 0 ? `Current: ${stats.currentStreak}` : 'Not started'}
+            <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
+              Last 7 Days
             </Typography>
           </View>
           
-          <View style={styles.milestoneRow}>
-            <FontAwesome6 name={getCompatibleIconName("book")} size={16} color={theme.COLORS.primary.purple} />
-            <Typography variant="body" style={styles.milestoneText}>
-              Complete {stats.journalCount + (5 - (stats.journalCount % 5))} journal entries
+          <View style={styles.journalStatItem}>
+            <FontAwesome6 name={getCompatibleIconName("calendar")} size={18} color={theme.COLORS.primary.teal} style={styles.journalIcon} />
+            <Typography variant="h3" color={theme.COLORS.primary.teal} glow="medium">
+              {stats.journalsLastMonth}
             </Typography>
-            <Typography variant="caption" color={theme.COLORS.primary.purple}>
-              {stats.journalCount > 0 ? `Current: ${stats.journalCount}` : 'Not started'}
+            <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
+              Last 30 Days
             </Typography>
           </View>
-        </Card>
-      </Animated.View>
-    </View>
+        </View>
+      </Card>
+    </Animated.View>
   );
 };
 
@@ -585,7 +564,7 @@ const styles = StyleSheet.create({
   totalStatsCard: {
     marginBottom: 16,
     padding: 16,
-    backgroundColor: 'rgba(38, 20, 60, 0.8)',
+    backgroundColor: theme.COLORS.ui.card,
   },
   statsRow: {
     flexDirection: 'row',
@@ -662,10 +641,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   moodChartContainer: {
-    alignItems: 'center',
+    flex: 1,
     justifyContent: 'center',
-    height: 120,
-    width: 120,
+    alignItems: 'center',
+  },
+  moodChart: {
+    height: CHART_SIZE * 0.9, 
+    width: CHART_SIZE * 0.9
   },
   noDataContainer: {
     alignItems: 'center',
@@ -713,5 +695,11 @@ const styles = StyleSheet.create({
   milestoneText: {
     flex: 1,
     marginLeft: 12,
+  },
+  fallbackCard: {
+    padding: 16,
+  },
+  fallbackText: {
+    marginBottom: 8,
   },
 }); 

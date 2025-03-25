@@ -2,6 +2,7 @@ import React from 'react';
 import { TouchableOpacity, StyleSheet, ViewStyle, TextStyle, ActivityIndicator, StyleProp } from 'react-native';
 import { Typography } from './Typography';
 import theme from '@/constants/theme';
+import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
 
 interface ButtonProps {
   title: string;
@@ -10,6 +11,8 @@ interface ButtonProps {
   size?: 'small' | 'medium' | 'large' | 'compact';
   disabled?: boolean;
   loading?: boolean;
+  leftIcon?: string;
+  rightIcon?: string;
   style?: ViewStyle;
   textStyle?: TextStyle;
 }
@@ -21,9 +24,21 @@ export const Button: React.FC<ButtonProps> = ({
   size = 'medium',
   disabled = false,
   loading = false,
+  leftIcon,
+  rightIcon,
   style,
   textStyle,
 }) => {
+  const getIconColor = () => {
+    if (disabled) return theme.COLORS.ui.textSecondary;
+    if (variant === 'outline') return theme.COLORS.ui.text;
+    if (variant === 'primary') return theme.COLORS.ui.text;
+    return theme.COLORS.ui.text;
+  };
+
+  const iconSize = size === 'large' ? 20 : size === 'small' || size === 'compact' ? 14 : 16;
+  const iconColor = getIconColor();
+
   return (
     <TouchableOpacity
       style={[
@@ -42,22 +57,40 @@ export const Button: React.FC<ButtonProps> = ({
           size="small"
         />
       ) : (
-        <Typography
-          variant={size === 'large' ? 'h3' : 'button'}
-          style={[
-            styles.text,
-            styles[`${variant}Text` as keyof typeof styles] as TextStyle,
-            size === 'compact' && styles.compactText,
-            size === 'large' && styles.largeText,
-            disabled && styles.disabledText,
-            textStyle,
-          ].filter(Boolean) as unknown as TextStyle}
-          numberOfLines={1}
-          adjustsFontSizeToFit={true}
-          glow={variant === 'primary' ? 'strong' : undefined}
-        >
-          {title}
-        </Typography>
+        <>
+          {leftIcon && (
+            <FontAwesome6
+              name={leftIcon}
+              size={iconSize}
+              color={iconColor}
+              style={styles.leftIcon}
+            />
+          )}
+          <Typography
+            variant={size === 'large' ? 'h3' : 'button'}
+            style={[
+              styles.text,
+              styles[`${variant}Text` as keyof typeof styles] as TextStyle,
+              size === 'compact' && styles.compactText,
+              size === 'large' && styles.largeText,
+              disabled && styles.disabledText,
+              textStyle,
+            ].filter(Boolean) as unknown as TextStyle}
+            numberOfLines={1}
+            adjustsFontSizeToFit={true}
+            glow={variant === 'primary' ? 'strong' : undefined}
+          >
+            {title}
+          </Typography>
+          {rightIcon && (
+            <FontAwesome6
+              name={rightIcon}
+              size={iconSize}
+              color={iconColor}
+              style={styles.rightIcon}
+            />
+          )}
+        </>
       )}
     </TouchableOpacity>
   );
@@ -152,5 +185,11 @@ const styles = StyleSheet.create({
   },
   disabledText: {
     color: theme.COLORS.ui.textSecondary,
+  },
+  leftIcon: {
+    marginRight: theme.SPACING.sm,
+  },
+  rightIcon: {
+    marginLeft: theme.SPACING.sm,
   },
 }); 

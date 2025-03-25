@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Image, TouchableOpacity, TextInput, Alert, TextStyle, ViewStyle, StyleProp, Dimensions, Switch } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, TextStyle, ViewStyle, StyleProp, Dimensions, Switch, Image, ActivityIndicator } from 'react-native';
 import { Typography, Card, Button, Header, VideoBackground, EmailVerificationBanner } from '@/components/common';
 import theme from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppState } from '@/contexts/AppStateContext';
 import { useProfile } from '@/contexts/UserProfileContext';
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from 'expo-router';
+import { Avatar } from '@kolking/react-native-avatar';
+import * as ImagePicker from 'expo-image-picker';
 
 // Define the goal item data
 type Goal = {
@@ -23,10 +26,11 @@ type NotificationPreference = {
 
 const ProfileScreen = () => {
   const { user, signOut, isEmailVerified, resendVerificationEmail } = useAuth();
-  const { userProfile, isLoading, updateProfile } = useProfile();
-  const { showError } = useAppState();
+  const { userProfile, isLoading, updateProfile, syncUserPoints } = useProfile();
+  const { showError, showSuccess } = useAppState();
   const [isEditing, setIsEditing] = useState(false);
   const [displayName, setDisplayName] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   // Map of goal IDs to display text and icons
   const goalMapping: Record<string, Goal> = {
@@ -48,9 +52,26 @@ const ProfileScreen = () => {
   // Set initial values from profile
   useEffect(() => {
     if (userProfile) {
+      console.log('ProfileScreen - userProfile data:', {
+        display_name: userProfile.display_name,
+        user_goals: userProfile.user_goals,
+        notification_preferences: userProfile.notification_preferences
+      });
       setDisplayName(userProfile.display_name || '');
     }
   }, [userProfile]);
+
+  // Sync points from user_stats when the screen gets focus
+  useFocusEffect(
+    React.useCallback(() => {
+      console.log('ProfileScreen focused - syncing points from user_stats');
+      syncUserPoints();
+      
+      return () => {
+        // Cleanup if needed
+      };
+    }, [syncUserPoints])
+  );
 
   const handleLogout = async () => {
     try {
@@ -76,6 +97,41 @@ const ProfileScreen = () => {
       setIsEditing(false);
     } catch (error) {
       showError('Failed to update profile');
+    }
+  };
+
+  // Function to handle picking an image for the profile
+  const pickImage = async () => {
+    try {
+      setUploadingImage(true);
+      
+      // Request permission to access the media library
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert('Permission Denied', 'We need permission to access your photos to set a profile picture.');
+        setUploadingImage(false);
+        return;
+      }
+      
+      // Launch the image picker
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.7,
+      });
+      
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        // Update profile with new avatar URL
+        await updateProfile({ avatar_url: result.assets[0].uri });
+        showSuccess('Profile picture updated!');
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      showError('Failed to update profile picture');
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -122,10 +178,30 @@ const ProfileScreen = () => {
           {/* Profile Header */}
           <Card style={styles.profileCard}>
             <View style={styles.profileHeader}>
-              <Image 
-                source={{ uri: 'https://via.placeholder.com/150' }} 
-                style={styles.profileImage} 
-              />
+              <TouchableOpacity 
+                style={styles.avatarContainer}
+                onPress={pickImage}
+                activeOpacity={0.8}
+                disabled={uploadingImage}
+              >
+                <Avatar 
+                  size={100}
+                  name={userProfile?.display_name || ''}
+                  email={user?.email || ''}
+                  source={userProfile?.avatar_url ? { uri: userProfile.avatar_url } : undefined}
+                  colorize={true}
+                  style={styles.avatar}
+                />
+                {uploadingImage ? (
+                  <View style={styles.avatarOverlay}>
+                    <ActivityIndicator color="white" size="small" />
+                  </View>
+                ) : (
+                  <View style={styles.avatarEditIcon}>
+                    <Ionicons name="camera" size={20} color="white" />
+                  </View>
+                )}
+              </TouchableOpacity>
               <View style={styles.profileInfo}>
                 {isEditing ? (
                   <TextInput
@@ -305,11 +381,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: theme.SPACING.md,
   },
-  profileImage: {
+  avatarContainer: {
     width: 100,
     height: 100,
     borderRadius: 50,
     marginRight: theme.SPACING.md,
+    overflow: 'hidden',
+  },
+  avatar: {
+    borderRadius: 50,
   },
   profileInfo: {
     flex: 1,
@@ -432,6 +512,28 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     textAlign: 'center',
     padding: theme.SPACING.md,
+  },
+  avatarOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarEditIcon: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 18,
+    width: 28,
+    height: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
