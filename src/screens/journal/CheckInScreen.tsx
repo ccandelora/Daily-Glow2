@@ -120,17 +120,17 @@ export const CheckInScreen = () => {
       <View style={styles.container}>
         <VideoBackground />
         
-        {/* Dark overlay gradient */}
+        {/* Dark overlay gradient with reduced opacity */}
         <LinearGradient
           colors={[
-            'rgba(28, 14, 45, 0.8)',
-            'rgba(28, 14, 45, 0.6)',
-            'rgba(28, 14, 45, 0.8)',
+            'rgba(28, 14, 45, 0.5)',
+            'rgba(28, 14, 45, 0.3)',
+            'rgba(28, 14, 45, 0.5)',
           ]}
           style={StyleSheet.absoluteFill}
         />
 
-        <Header />
+        <Header showBranding={true} />
         <ScrollView style={styles.scrollView}>
           <Animated.View
             style={[
@@ -184,18 +184,22 @@ export const CheckInScreen = () => {
     <View style={styles.container}>
       <VideoBackground />
       
-      {/* Dark overlay gradient */}
+      {/* Dark overlay gradient with reduced opacity */}
       <LinearGradient
         colors={[
-          'rgba(28, 14, 45, 0.8)',
-          'rgba(28, 14, 45, 0.6)',
-          'rgba(28, 14, 45, 0.8)',
+          'rgba(28, 14, 45, 0.5)',
+          'rgba(28, 14, 45, 0.3)',
+          'rgba(28, 14, 45, 0.5)',
         ]}
         style={StyleSheet.absoluteFill}
       />
 
-      <Header />
-      <ScrollView style={styles.scrollView}>
+      <Header showBranding={true} />
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollViewContent}
+        showsVerticalScrollIndicator={false}
+      >
         <Animated.View
           style={[
             styles.content,
@@ -270,16 +274,18 @@ export const CheckInScreen = () => {
                 />
                 <View style={styles.buttonContainer}>
                   <Button
-                    title="Back"
-                    onPress={handleBack}
-                    variant="secondary"
-                    style={styles.button}
-                  />
-                  <Button
                     title="Complete Check-in"
                     onPress={handleSubmit}
                     variant="primary"
-                    style={styles.button}
+                    size="large"
+                    style={styles.completeButton}
+                  />
+                  <Button
+                    title="Back"
+                    onPress={handleBack}
+                    variant="secondary"
+                    size="medium"
+                    style={styles.backButton}
                   />
                 </View>
               </>
@@ -299,11 +305,15 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
+  scrollViewContent: {
+    paddingBottom: theme.SPACING.xxl,
+  },
   content: {
     padding: theme.SPACING.lg,
   },
   card: {
     padding: theme.SPACING.xl,
+    marginVertical: theme.SPACING.md,
   },
   title: {
     marginBottom: theme.SPACING.md,
@@ -323,17 +333,15 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   buttonContainer: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: theme.SPACING.md,
     marginTop: theme.SPACING.xl,
     marginBottom: theme.SPACING.lg,
-    paddingHorizontal: theme.SPACING.xl,
+    width: '100%',
   },
   button: {
-    flex: 1,
-    maxWidth: 160,
+    width: '100%',
     shadowColor: theme.COLORS.ui.accent,
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.3,
@@ -341,9 +349,23 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   backButton: {
-    backgroundColor: 'rgba(65, 105, 225, 0.1)',
-    borderColor: theme.COLORS.ui.accent,
+    width: '80%',
+    marginTop: theme.SPACING.md,
+    backgroundColor: 'rgba(65, 105, 225, 0.05)',
+    borderColor: 'rgba(255, 255, 255, 0.2)',
     borderWidth: 1,
+  },
+  completeButton: {
+    width: '100%',
+    backgroundColor: theme.COLORS.primary.purple,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
+    borderWidth: 1,
+    shadowColor: theme.COLORS.primary.purple,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 12,
+    elevation: 6,
+    paddingVertical: theme.SPACING.md,
   },
   submitButton: {
     backgroundColor: theme.COLORS.ui.accent,

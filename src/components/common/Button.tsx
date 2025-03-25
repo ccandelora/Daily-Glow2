@@ -43,16 +43,18 @@ export const Button: React.FC<ButtonProps> = ({
         />
       ) : (
         <Typography
-          variant="button"
+          variant={size === 'large' ? 'h3' : 'button'}
           style={[
             styles.text,
             styles[`${variant}Text` as keyof typeof styles] as TextStyle,
             size === 'compact' && styles.compactText,
+            size === 'large' && styles.largeText,
             disabled && styles.disabledText,
             textStyle,
           ].filter(Boolean) as unknown as TextStyle}
           numberOfLines={1}
           adjustsFontSizeToFit={true}
+          glow={variant === 'primary' ? 'strong' : undefined}
         >
           {title}
         </Typography>
@@ -75,10 +77,13 @@ const styles = StyleSheet.create({
   },
   primary: {
     backgroundColor: theme.COLORS.ui.accent,
-    borderWidth: 0,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.4)',
     shadowColor: theme.COLORS.ui.accent,
-    shadowOpacity: 0.5,
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
     shadowRadius: 12,
+    elevation: 6,
   },
   secondary: {
     backgroundColor: 'rgba(65, 105, 225, 0.1)',
@@ -109,6 +114,7 @@ const styles = StyleSheet.create({
     paddingVertical: theme.SPACING.lg,
     paddingHorizontal: theme.SPACING.xl * 1.5,
     minWidth: 200,
+    minHeight: 56,
   },
   disabled: {
     backgroundColor: theme.COLORS.ui.disabled,
@@ -117,21 +123,29 @@ const styles = StyleSheet.create({
   },
   text: {
     textAlign: 'center',
+    fontWeight: '600',
+  },
+  largeText: {
+    fontSize: 18,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   compactText: {
     fontSize: theme.FONTS.sizes.sm,
   },
   primaryText: {
     color: theme.COLORS.ui.text,
+    textShadowColor: 'rgba(0, 0, 0, 0.5)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
+    fontWeight: '700',
+  },
+  secondaryText: {
+    color: theme.COLORS.ui.text,
+    fontWeight: '600',
     textShadowColor: 'rgba(0, 0, 0, 0.2)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
-  },
-  secondaryText: {
-    color: theme.COLORS.ui.accent,
-    textShadowColor: theme.COLORS.ui.accent,
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 4,
   },
   outlineText: {
     color: theme.COLORS.ui.text,
