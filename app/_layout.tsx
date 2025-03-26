@@ -15,6 +15,7 @@ import { MoodProvider } from '@/contexts/MoodContext';
 import { LoadingOverlay, DeepLinkHandler } from '@/components/common';
 import { logAppStartupInfo } from '@/utils/debugUtils';
 import NotificationProvider from '@/components/achievements/AchievementNotificationManager';
+import { UserProfileProvider } from '@/contexts/UserProfileContext';
 
 // Error Boundary Component
 interface ErrorBoundaryProps {
@@ -68,11 +69,29 @@ function RootLayoutNav() {
   return (
     <>
       <DeepLinkHandler />
-      <Stack screenOptions={{ headerShown: false }}>
+      <Stack 
+        screenOptions={{ headerShown: false }}
+        initialRouteName="index"
+      >
         <Stack.Screen name="index" />
-        <Stack.Screen name="(auth)" />
-        <Stack.Screen name="(onboarding)" />
-        <Stack.Screen name="(app)" />
+        <Stack.Screen 
+          name="(auth)"
+          options={{
+            headerShown: false
+          }}
+        />
+        <Stack.Screen 
+          name="(onboarding)"
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen 
+          name="(app)"
+          options={{
+            headerShown: false
+          }}
+        />
       </Stack>
     </>
   );
@@ -99,30 +118,32 @@ export default function RootLayout() {
       <ErrorBoundary>
         <AppStateProvider>
           <AuthProvider>
-            <BadgeProvider>
-              <JournalProvider>
-                <MoodProvider>
-                  <OnboardingProvider>
-                    <ChallengesProvider>
-                      <CheckInStreakProvider>
-                        <AchievementsProvider>
-                          <ErrorBoundary>
-                            <NotificationsProvider>
-                              <NotificationProvider>
-                                <View style={styles.container}>
-                                  <RootLayoutNav />
-                                  <LoadingOverlay />
-                                </View>
-                              </NotificationProvider>
-                            </NotificationsProvider>
-                          </ErrorBoundary>
-                        </AchievementsProvider>
-                      </CheckInStreakProvider>
-                    </ChallengesProvider>
-                  </OnboardingProvider>
-                </MoodProvider>
-              </JournalProvider>
-            </BadgeProvider>
+            <UserProfileProvider>
+              <BadgeProvider>
+                <JournalProvider>
+                  <MoodProvider>
+                    <OnboardingProvider>
+                      <ChallengesProvider>
+                        <CheckInStreakProvider>
+                          <AchievementsProvider>
+                            <ErrorBoundary>
+                              <NotificationsProvider>
+                                <NotificationProvider>
+                                  <View style={styles.container}>
+                                    <RootLayoutNav />
+                                    <LoadingOverlay />
+                                  </View>
+                                </NotificationProvider>
+                              </NotificationsProvider>
+                            </ErrorBoundary>
+                          </AchievementsProvider>
+                        </CheckInStreakProvider>
+                      </ChallengesProvider>
+                    </OnboardingProvider>
+                  </MoodProvider>
+                </JournalProvider>
+              </BadgeProvider>
+            </UserProfileProvider>
           </AuthProvider>
         </AppStateProvider>
       </ErrorBoundary>

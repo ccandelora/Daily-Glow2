@@ -78,7 +78,7 @@ export default function Index() {
   // If onboarding not completed, go to onboarding flow
   if (!hasCompletedOnboarding) {
     console.log('Root index: Onboarding not completed, redirecting to onboarding');
-    return <Redirect href="/(onboarding)" />;
+    return <Redirect href="/(onboarding)/welcome" />;
   }
   
   // Otherwise, go to main app

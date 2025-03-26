@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Stack, useRouter } from 'expo-router';
 import { useAuth } from '@/contexts/AuthContext';
 import { useOnboarding } from '@/contexts/OnboardingContext';
+import { UserProfileProvider } from '@/contexts/UserProfileContext';
 import theme from '@/constants/theme';
 
 export default function OnboardingLayout() {
@@ -35,42 +36,45 @@ export default function OnboardingLayout() {
 
   return (
     <View style={styles.container}>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: theme.COLORS.ui.background },
-          animation: 'fade',
-        }}
-      >
-        <Stack.Screen 
-          name="index" 
-          options={{ 
-            gestureEnabled: false,
-            headerShown: false
-          }} 
-        />
-        <Stack.Screen 
-          name="welcome" 
-          options={{ 
-            gestureEnabled: false,
-            headerShown: false 
-          }} 
-        />
-        <Stack.Screen 
-          name="personalize" 
-          options={{ 
-            gestureEnabled: false,
-            headerShown: false 
-          }} 
-        />
-        <Stack.Screen 
-          name="notifications" 
-          options={{ 
-            gestureEnabled: false,
-            headerShown: false 
-          }} 
-        />
-      </Stack>
+      <UserProfileProvider>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle: { backgroundColor: theme.COLORS.ui.background },
+            animation: 'fade',
+          }}
+          initialRouteName="welcome"
+        >
+          <Stack.Screen 
+            name="index" 
+            options={{ 
+              gestureEnabled: false,
+              headerShown: false
+            }} 
+          />
+          <Stack.Screen 
+            name="welcome" 
+            options={{ 
+              gestureEnabled: false,
+              headerShown: false 
+            }} 
+          />
+          <Stack.Screen 
+            name="personalize" 
+            options={{ 
+              gestureEnabled: false,
+              headerShown: false 
+            }} 
+          />
+          <Stack.Screen 
+            name="notifications" 
+            options={{ 
+              gestureEnabled: false,
+              headerShown: false 
+            }} 
+          />
+        </Stack>
+      </UserProfileProvider>
     </View>
   );
 }

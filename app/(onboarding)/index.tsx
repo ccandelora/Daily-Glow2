@@ -1,27 +1,11 @@
-import React, { useEffect } from 'react';
+import React from 'react';
+import { Redirect } from 'expo-router';
 import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
-import { Redirect, useRouter } from 'expo-router';
 import theme from '@/constants/theme';
 
 export default function OnboardingIndex() {
-  const router = useRouter();
-  
-  useEffect(() => {
-    console.log('📱 Onboarding index loaded, redirecting to welcome screen');
-    
-    // Add a small timeout to ensure navigation is ready
-    setTimeout(() => {
-      router.replace('/(onboarding)/welcome');
-    }, 100);
-  }, [router]);
-
-  // Show loading while redirecting
-  return (
-    <View style={styles.container}>
-      <ActivityIndicator size="large" color={theme.COLORS.primary.green} />
-      <Text style={styles.text}>Loading onboarding...</Text>
-    </View>
-  );
+  // Immediately redirect to welcome screen
+  return <Redirect href="/(onboarding)/welcome" />;
 }
 
 const styles = StyleSheet.create({

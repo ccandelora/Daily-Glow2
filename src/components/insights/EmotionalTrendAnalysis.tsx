@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { View, StyleSheet, Text, Dimensions } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
+import { VictoryLine, VictoryChart, VictoryScatter, VictoryAxis, VictoryTheme } from 'victory-native';
 import theme from '@/constants/theme';
 import { getEmotionById } from '@/constants/emotions';
 import { Typography } from '@/components/common';
@@ -247,31 +247,62 @@ const EmotionalTrendAnalysis: React.FC<EmotionalTrendAnalysisProps> = ({
       <Typography variant="h3" style={styles.title}>Emotional Trend</Typography>
       
       <View style={styles.chartContainer}>
-        <LineChart
-          data={chartData}
+        <VictoryChart
           width={screenWidth}
           height={220}
-          yAxisSuffix=""
-          yAxisLabel=""
-          chartConfig={{
-            backgroundColor: 'rgba(37, 19, 59, 0.8)',
-            backgroundGradientFrom: 'rgba(37, 19, 59, 0.8)',
-            backgroundGradientTo: 'rgba(37, 19, 59, 0.8)',
-            decimalPlaces: 0,
-            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            style: {
-              borderRadius: 16,
-            },
-            propsForDots: {
-              r: '6',
-              strokeWidth: '2',
-              stroke: theme.COLORS.primary.green,
-            },
+          theme={VictoryTheme.material}
+          domainPadding={{ y: 20 }}
+          style={{
+            background: { fill: 'rgba(37, 19, 59, 0.8)' }
           }}
-          bezier
-          style={styles.chart}
-        />
+        >
+          <VictoryAxis
+            tickFormat={(t) => chartData.labels[t]}
+            style={{
+              axis: { stroke: 'rgba(255, 255, 255, 0.3)' },
+              tickLabels: { 
+                fill: 'rgba(255, 255, 255, 0.7)',
+                fontSize: 10
+              }
+            }}
+          />
+          <VictoryAxis
+            dependentAxis
+            domain={[0, 10]}
+            style={{
+              axis: { stroke: 'rgba(255, 255, 255, 0.3)' },
+              tickLabels: { 
+                fill: 'rgba(255, 255, 255, 0.7)',
+                fontSize: 10
+              }
+            }}
+          />
+          <VictoryLine
+            data={chartData.datasets[0].data.map((y, x) => ({ x, y }))}
+            style={{
+              data: { 
+                stroke: theme.COLORS.primary.blue,
+                strokeWidth: 3
+              }
+            }}
+            animate={{
+              duration: 1000,
+              onLoad: { duration: 500 }
+            }}
+            interpolation="monotoneX"
+          />
+          <VictoryScatter
+            data={chartData.datasets[0].data.map((y, x) => ({ x, y }))}
+            size={6}
+            style={{
+              data: {
+                fill: theme.COLORS.primary.green,
+                stroke: 'white',
+                strokeWidth: 2
+              }
+            }}
+          />
+        </VictoryChart>
       </View>
       
       <View style={styles.legendContainer}>

@@ -8,7 +8,6 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { VideoBackground } from '@/components/common';
-import { useProfile } from '@/contexts/UserProfileContext';
 
 type NotificationPreference = {
   id: string;
@@ -21,8 +20,8 @@ type NotificationPreference = {
 const OnboardingNotificationsScreen = () => {
   const router = useRouter();
   const { dbError, errorType, completeOnboarding } = useOnboarding();
-  const { saveNotificationPreferences } = useProfile();
   const [isCompleting, setIsCompleting] = useState(false);
+  
   const [notificationPrefs, setNotificationPrefs] = useState<NotificationPreference[]>([
     {
       id: 'dailyReminder',
@@ -63,14 +62,6 @@ const OnboardingNotificationsScreen = () => {
         .map(pref => pref.id);
         
       await AsyncStorage.setItem('notificationPreferences', JSON.stringify(enabledPrefIds));
-      
-      // Also save to database via context
-      try {
-        await saveNotificationPreferences(enabledPrefIds);
-      } catch (dbErr) {
-        console.error('Error saving notification preferences to database:', dbErr);
-        // Continue with onboarding even if database save fails
-      }
       
       return true;
     } catch (error) {
