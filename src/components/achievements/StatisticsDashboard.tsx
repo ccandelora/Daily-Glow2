@@ -9,25 +9,34 @@ import { useMood, Mood } from '@/contexts/MoodContext';
 import { useProfile } from '@/contexts/UserProfileContext';
 import { FontAwesome6 } from '@expo/vector-icons';
 import theme from '@/constants/theme';
-import { PieChart } from 'react-native-svg-charts';
 import { getCompatibleIconName } from '@/utils/iconUtils';
+import SimplePieChart from './SimplePieChart';
+import MoodPieChart from './MoodPieChart';
 
 // Define chart dimensions
 const { width } = Dimensions.get('window');
-const CHART_SIZE = width * 0.4;
+const CHART_SIZE = width * 0.25; // Smaller chart size for better containment
 const CHART_PADDING = 30;
+
+// Define custom chart configuration
+const chartConfig = {
+  backgroundGradientFrom: 'rgba(0, 0, 0, 0)',
+  backgroundGradientTo: 'rgba(0, 0, 0, 0)',
+  color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+  strokeWidth: 2,
+  decimalPlaces: 0,
+  style: {
+    borderRadius: 16,
+  },
+  propsForLabels: {
+    fontSize: 0, // Hide labels
+  },
+};
 
 // Define data point type for charts
 interface ChartDataPoint {
-  value: number;
-  key: string;
-  svg: {
-    fill: string;
-  };
-  arc?: {
-    innerRadius?: number;
-    padAngle?: number;
-  };
+  x: string;
+  y: number;
 }
 
 /**
@@ -37,10 +46,10 @@ export const StatisticsDashboard: React.FC = () => {
   console.log('StatisticsDashboard: Component rendering started');
   
   // Access contexts with try/catch to prevent crashes
-  let achievements = [];
-  let userAchievements = [];
-  let badges = [];
-  let userBadges = [];
+  let achievements: any[] = [];
+  let userAchievements: any[] = [];
+  let badges: any[] = [];
+  let userBadges: any[] = [];
   let overallStreak = 0;
   let journalEntries: any[] = [];
   let userProfile = null;
@@ -286,52 +295,38 @@ export const StatisticsDashboard: React.FC = () => {
   // Simple fixed chart data
   const achievementChartData = [
     { 
-      value: Math.max(0.01, stats.achievementsEarned), 
-      key: 'earned',
-      svg: { fill: theme.COLORS.primary.teal },
-      arc: { innerRadius: CHART_SIZE / 6, padAngle: 0.02 }
+      x: 'Earned',
+      y: Math.max(0.01, stats.achievementsEarned)
     },
     { 
-      value: Math.max(0.01, stats.achievementsTotal - stats.achievementsEarned), 
-      key: 'remaining',
-      svg: { fill: 'rgba(255, 255, 255, 0.1)' },
-      arc: { innerRadius: CHART_SIZE / 6, padAngle: 0.02 }
+      x: 'Remaining',
+      y: Math.max(0.01, stats.achievementsTotal - stats.achievementsEarned)
     }
   ];
   
   const badgeChartData = [
     { 
-      value: Math.max(0.01, stats.badgesEarned), 
-      key: 'earned',
-      svg: { fill: theme.COLORS.primary.green },
-      arc: { innerRadius: CHART_SIZE / 6, padAngle: 0.02 }
+      x: 'Earned',
+      y: Math.max(0.01, stats.badgesEarned)
     },
     { 
-      value: Math.max(0.01, stats.badgesTotal - stats.badgesEarned), 
-      key: 'remaining',
-      svg: { fill: 'rgba(255, 255, 255, 0.1)' },
-      arc: { innerRadius: CHART_SIZE / 6, padAngle: 0.02 }
+      x: 'Remaining',
+      y: Math.max(0.01, stats.badgesTotal - stats.badgesEarned)
     }
   ];
   
   const moodChartData = [
     { 
-      value: stats.positiveMoodCount, 
-      key: 'positive',
-      svg: { fill: theme.COLORS.primary.green },
-      arc: { innerRadius: CHART_SIZE / 6, padAngle: 0.02 }
+      x: 'Positive',
+      y: Math.max(0.01, stats.positiveMoodCount)
     },
     { 
-      value: stats.neutralMoodCount, 
-      key: 'neutral',
-      svg: { fill: theme.COLORS.primary.yellow },
-      arc: { innerRadius: CHART_SIZE / 6, padAngle: 0.02 }
+      x: 'Neutral',
+      y: Math.max(0.01, stats.neutralMoodCount)
     },
     { 
-      value: stats.negativeMoodCount, 
-      key: 'negative',
-      svg: { fill: theme.COLORS.primary.red },
-      arc: { innerRadius: CHART_SIZE / 6, padAngle: 0.02 }
+      x: 'Negative',
+      y: Math.max(0.01, stats.negativeMoodCount)
     }
   ];
   
@@ -420,22 +415,13 @@ export const StatisticsDashboard: React.FC = () => {
           </Typography>
           
           <View style={styles.chartContainer}>
-            <PieChart
-              style={{ height: CHART_SIZE, width: CHART_SIZE }}
-              data={achievementChartData}
-              innerRadius={CHART_SIZE / 6}
-              padAngle={0.02}
-              animate={true}
+            <SimplePieChart 
+              percentage={achievementProgress * 100}
+              color={theme.COLORS.primary.teal}
+              centerText={achievementPercentText}
+              subtitle={`${stats.achievementsEarned} of ${stats.achievementsTotal}`}
+              size={CHART_SIZE * 1.2}
             />
-            
-            <View style={styles.chartCenterLabel}>
-              <Typography variant="h2" color={theme.COLORS.primary.teal} glow="medium">
-                {achievementPercentText}
-              </Typography>
-              <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
-                {stats.achievementsEarned} of {stats.achievementsTotal}
-              </Typography>
-            </View>
           </View>
         </Card>
         
@@ -445,22 +431,13 @@ export const StatisticsDashboard: React.FC = () => {
           </Typography>
           
           <View style={styles.chartContainer}>
-            <PieChart
-              style={{ height: CHART_SIZE, width: CHART_SIZE }}
-              data={badgeChartData}
-              innerRadius={CHART_SIZE / 6}
-              padAngle={0.02}
-              animate={true}
+            <SimplePieChart 
+              percentage={badgeProgress * 100}
+              color={theme.COLORS.primary.green}
+              centerText={badgePercentText}
+              subtitle={`${stats.badgesEarned} of ${stats.badgesTotal}`}
+              size={CHART_SIZE * 1.2}
             />
-            
-            <View style={styles.chartCenterLabel}>
-              <Typography variant="h2" color={theme.COLORS.primary.green} glow="medium">
-                {badgePercentText}
-              </Typography>
-              <Typography variant="caption" color={theme.COLORS.ui.textSecondary}>
-                {stats.badgesEarned} of {stats.badgesTotal}
-              </Typography>
-            </View>
           </View>
         </Card>
       </View>
@@ -471,7 +448,7 @@ export const StatisticsDashboard: React.FC = () => {
         </Typography>
         
         <View style={styles.moodDataContainer}>
-          <View>
+          <View style={styles.moodInfoContainer}>
             <View style={styles.moodStats}>
               <View style={styles.moodStatItem}>
                 <Typography variant="body" color={theme.COLORS.primary.green}>
@@ -494,29 +471,30 @@ export const StatisticsDashboard: React.FC = () => {
               <Typography variant="body" style={styles.moodTrendLabel}>
                 Recent Trend:
               </Typography>
-              <FontAwesome6 
-                name={getMoodTrendIcon(stats.moodTrend)}
-                size={16} 
-                color={getMoodTrendColor(stats.moodTrend)}
-                style={styles.moodTrendIcon}
-              />
-              <Typography 
-                variant="body" 
-                color={getMoodTrendColor(stats.moodTrend)}
-                style={styles.moodTrendText}
-              >
-                {getTrendDisplayText(stats.moodTrend)}
-              </Typography>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <FontAwesome6 
+                  name={getMoodTrendIcon(stats.moodTrend)}
+                  size={16} 
+                  color={getMoodTrendColor(stats.moodTrend)}
+                  style={styles.moodTrendIcon}
+                />
+                <Typography 
+                  variant="body" 
+                  color={getMoodTrendColor(stats.moodTrend)}
+                  style={styles.moodTrendText}
+                >
+                  {getTrendDisplayText(stats.moodTrend)}
+                </Typography>
+              </View>
             </View>
           </View>
           
           <View style={styles.moodChartContainer}>
-            <PieChart
-              style={styles.moodChart}
-              data={moodChartData}
-              innerRadius={CHART_SIZE / 4}
-              outerRadius={CHART_SIZE / 2.5}
-              padAngle={0.02}
+            <MoodPieChart
+              positive={stats.positiveMoodCount}
+              neutral={stats.neutralMoodCount}
+              negative={stats.negativeMoodCount}
+              size={CHART_SIZE * 1.2}
             />
           </View>
         </View>
@@ -592,6 +570,12 @@ const styles = StyleSheet.create({
     width: '48%',
     backgroundColor: 'rgba(38, 20, 60, 0.5)',
     padding: 12,
+    paddingBottom: 24,
+    paddingTop: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'visible',
+    height: 180,
   },
   chartTitle: {
     textAlign: 'center',
@@ -599,18 +583,44 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   chartContainer: {
+    position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative',
+    height: CHART_SIZE * 1.5,
+    width: '100%',
+    alignSelf: 'center',
+    margin: 0,
   },
-  chartCenterLabel: {
+  pieChartWrapper: {
     position: 'absolute',
     alignItems: 'center',
     justifyContent: 'center',
+    width: '100%',
+    height: '100%',
+    overflow: 'visible',
+  },
+  pieContainer: {
+    position: 'relative',
+    width: CHART_SIZE * 1.2,
+    height: CHART_SIZE * 1.2,
+    borderRadius: CHART_SIZE * 0.6,
+    overflow: 'hidden',
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  chartCenterLabel: {
+    position: 'absolute',
+    top: '40%',
+    left: 0,
+    right: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 2,
   },
   moodCard: {
     backgroundColor: 'rgba(38, 20, 60, 0.5)',
     padding: 16,
+    paddingBottom: 24,
     marginBottom: 16,
   },
   moodTitle: {
@@ -620,6 +630,12 @@ const styles = StyleSheet.create({
   moodDataContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+    paddingRight: 8,
+  },
+  moodInfoContainer: {
+    width: '50%',
   },
   moodStats: {
     marginBottom: 16,
@@ -630,6 +646,7 @@ const styles = StyleSheet.create({
   moodTrend: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'wrap',
   },
   moodTrendLabel: {
     marginRight: 8,
@@ -641,13 +658,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   moodChartContainer: {
-    flex: 1,
+    width: '50%',
+    height: CHART_SIZE * 1.5,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  moodChart: {
-    height: CHART_SIZE * 0.9, 
-    width: CHART_SIZE * 0.9
+    overflow: 'visible',
+    padding: 0,
+    margin: 0,
   },
   noDataContainer: {
     alignItems: 'center',
@@ -701,5 +718,29 @@ const styles = StyleSheet.create({
   },
   fallbackText: {
     marginBottom: 8,
+  },
+  simplePieChart: {
+    width: '100%',
+    height: '100%',
+    borderRadius: CHART_SIZE * 0.6,
+    opacity: 0.8,
+  },
+  simplePieOverlay: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    height: '100%',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+  },
+  moodPieSegments: {
+    width: CHART_SIZE * 1.2,
+    height: CHART_SIZE * 1.2,
+    borderRadius: CHART_SIZE * 0.6,
+    overflow: 'hidden',
+    flexDirection: 'row',
+  },
+  moodPieSegment: {
+    height: '100%',
+    minWidth: 1, // Ensure segments are always visible even with small values
   },
 }); 

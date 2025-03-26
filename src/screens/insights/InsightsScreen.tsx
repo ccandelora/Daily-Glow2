@@ -2372,5 +2372,5 @@ const styles = StyleSheet.create({
   },
   checkInButton: {
     marginTop: theme.SPACING.md,
-  },
+  }
 }); 
