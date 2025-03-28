@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Typography, Input, Button, Card, VideoBackground, Logo } from '@/components/common';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,36 +7,34 @@ import { useAppState } from '@/contexts/AppStateContext';
 import theme from '@/constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 
-export const SignUpScreen = () => {
+export default function ResetPasswordScreen() {
   const router = useRouter();
-  const { signUp } = useAuth();
-  const { setLoading, showError } = useAppState();
-  const [email, setEmail] = useState('');
+  const { resetPassword } = useAuth();
+  const { setLoading, showSuccess } = useAppState();
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleSignUp = async () => {
-    if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
-      showError('Please fill in all fields');
+  const handleResetPassword = async () => {
+    if (!password.trim() || !confirmPassword.trim()) {
       return;
     }
 
     if (password !== confirmPassword) {
-      showError('Passwords do not match');
+      showSuccess('Passwords do not match');
       return;
     }
 
     if (password.length < 6) {
-      showError('Password must be at least 6 characters');
+      showSuccess('Password must be at least 6 characters');
       return;
     }
 
     try {
       setLoading(true);
-      await signUp(email.trim(), password);
-      
-      // Navigate to verification instructions after signup
-      router.replace('/(auth)/verification-instructions');
+      await resetPassword(password.trim());
+      setIsSubmitted(true);
+      showSuccess('Password has been reset successfully!');
     } catch (error) {
       // Error is already handled in AuthContext
     } finally {
@@ -62,71 +60,62 @@ export const SignUpScreen = () => {
         <View style={styles.header}>
           <Logo size="large" style={styles.logo} />
           <Typography variant="h1" style={styles.title} glow="strong">
-            Create Account
+            {isSubmitted ? 'Password Reset' : 'Create New Password'}
           </Typography>
           <Typography variant="body" style={styles.subtitle} glow="medium">
-            Start your journey to emotional wellness
+            {isSubmitted 
+              ? "Your password has been updated successfully"
+              : "Please create a new password for your account"}
           </Typography>
         </View>
 
         <Card style={styles.card} variant="glow">
-          <Input
-            label="Email"
-            value={email}
-            onChangeText={setEmail}
-            placeholder="Enter your email"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            style={styles.input}
-          />
+          {!isSubmitted ? (
+            <>
+              <Input
+                label="New Password"
+                value={password}
+                onChangeText={setPassword}
+                placeholder="Enter new password"
+                secureTextEntry
+                style={styles.input}
+              />
 
-          <Input
-            label="Password"
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Create a password"
-            secureTextEntry
-            style={styles.input}
-          />
+              <Input
+                label="Confirm Password"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                placeholder="Confirm new password"
+                secureTextEntry
+                style={styles.input}
+              />
 
-          <Input
-            label="Confirm Password"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            placeholder="Confirm your password"
-            secureTextEntry
-            style={styles.input}
-          />
-
-          <Typography variant="caption" style={styles.verificationNote}>
-            You'll need to verify your email address before accessing all features.
-          </Typography>
-
-          <Button
-            title="Sign Up"
-            onPress={handleSignUp}
-            style={styles.button}
-            variant="primary"
-          />
+              <Button
+                title="Reset Password"
+                onPress={handleResetPassword}
+                style={styles.button}
+                variant="primary"
+              />
+            </>
+          ) : (
+            <View style={styles.successMessage}>
+              <Typography variant="body" style={styles.successText}>
+                Your password has been successfully reset. You can now sign in with your new password.
+              </Typography>
+              
+              <Button
+                title="Sign In"
+                onPress={() => router.push('/(auth)/sign-in')}
+                style={styles.button}
+                variant="primary"
+              />
+            </View>
+          )}
         </Card>
-
-        <View style={styles.footer}>
-          <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
-            Already have an account?{' '}
-          </Typography>
-          <TouchableOpacity onPress={() => router.push('/(auth)/sign-in')}>
-            <Typography 
-              color={theme.COLORS.primary.green}
-              glow="medium"
-            >
-              Sign In
-            </Typography>
-          </TouchableOpacity>
-        </View>
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -154,7 +143,7 @@ const styles = StyleSheet.create({
   subtitle: {
     textAlign: 'center',
     color: theme.COLORS.ui.textSecondary,
-    maxWidth: '80%',
+    maxWidth: '90%',
   },
   card: {
     padding: theme.SPACING.lg,
@@ -162,12 +151,6 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: theme.SPACING.md,
-  },
-  verificationNote: {
-    color: theme.COLORS.ui.textSecondary,
-    marginBottom: theme.SPACING.md,
-    textAlign: 'center',
-    fontStyle: 'italic',
   },
   button: {
     marginTop: theme.SPACING.md,
@@ -183,5 +166,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: theme.SPACING.xl,
+  },
+  successMessage: {
+    padding: theme.SPACING.md,
+  },
+  successText: {
+    textAlign: 'center',
+    marginBottom: theme.SPACING.lg,
+    color: theme.COLORS.ui.text,
   },
 }); 

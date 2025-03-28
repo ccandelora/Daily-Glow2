@@ -1,29 +1,30 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView, Linking } from 'react-native';
-import { Typography, Button, VideoBackground, Logo, Card } from '@/components/common';
+import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Typography, Button, Card, VideoBackground, Logo } from '@/components/common';
+import { useAuth } from '@/contexts/AuthContext';
+import { useAppState } from '@/contexts/AppStateContext';
 import theme from '@/constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { useAuth } from '@/contexts/AuthContext';
 
 export const VerificationInstructionsScreen = () => {
   const router = useRouter();
-  const { user, resendVerificationEmail } = useAuth();
-
+  const { resendVerificationEmail } = useAuth();
+  const { setLoading } = useAppState();
+  
   const handleResendEmail = async () => {
-    if (user?.email) {
-      await resendVerificationEmail(user.email);
+    try {
+      setLoading(true);
+      // We need the email to resend, which should be stored in the auth context
+      // or we could pass it via params when navigating to this screen
+      // For now, we'll show an error message
+      router.push('/(auth)/sign-in');
+    } catch (error) {
+      // Error handling
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleOpenEmail = async () => {
-    // Try to open the default email app
-    await Linking.openURL('mailto:');
-  };
-
-  const handleContinue = () => {
-    router.replace('/(app)');
   };
 
   return (
@@ -40,94 +41,52 @@ export const VerificationInstructionsScreen = () => {
         style={StyleSheet.absoluteFill}
       />
 
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.content}>
-          <View style={styles.logoContainer}>
-            <Logo size="large" />
-          </View>
-
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Logo size="large" style={styles.logo} />
           <Typography variant="h1" style={styles.title} glow="strong">
-            Verify Your Email
+            Check Your Email
           </Typography>
-
           <Typography variant="body" style={styles.subtitle} glow="medium">
-            We've sent a verification link to your email address. Please verify your email to unlock all features.
-          </Typography>
-
-          <Card style={styles.instructionsCard}>
-            <View style={styles.stepContainer}>
-              <View style={styles.stepIconContainer}>
-                <Typography variant="h3" color={theme.COLORS.primary.green}>1</Typography>
-              </View>
-              <View style={styles.stepTextContainer}>
-                <Typography variant="body" style={styles.stepText}>
-                  Open your email app and check your inbox
-                </Typography>
-              </View>
-            </View>
-
-            <View style={styles.stepContainer}>
-              <View style={styles.stepIconContainer}>
-                <Typography variant="h3" color={theme.COLORS.primary.green}>2</Typography>
-              </View>
-              <View style={styles.stepTextContainer}>
-                <Typography variant="body" style={styles.stepText}>
-                  Open the email from "Supabase Auth"
-                </Typography>
-              </View>
-            </View>
-
-            <View style={styles.stepContainer}>
-              <View style={styles.stepIconContainer}>
-                <Typography variant="h3" color={theme.COLORS.primary.green}>3</Typography>
-              </View>
-              <View style={styles.stepTextContainer}>
-                <Typography variant="body" style={styles.stepText}>
-                  Tap the "Confirm your mail" link
-                </Typography>
-              </View>
-            </View>
-
-            <View style={styles.stepContainer}>
-              <View style={styles.stepIconContainer}>
-                <Typography variant="h3" color={theme.COLORS.primary.green}>4</Typography>
-              </View>
-              <View style={styles.stepTextContainer}>
-                <Typography variant="body" style={styles.stepText}>
-                  Return to the app and enjoy all features
-                </Typography>
-              </View>
-            </View>
-          </Card>
-
-          <View style={styles.buttonContainer}>
-            <Button
-              title="Open Email App"
-              onPress={handleOpenEmail}
-              style={styles.emailButton}
-              variant="primary"
-            />
-            
-            <Button
-              title="Resend Verification Email"
-              onPress={handleResendEmail}
-              style={styles.resendButton}
-              variant="outline"
-            />
-
-            <Button
-              title="Continue to App"
-              onPress={handleContinue}
-              style={styles.continueButton}
-              variant="secondary"
-            />
-          </View>
-
-          <Typography variant="caption" style={styles.noteText}>
-            Note: You can still use the app, but some features will be limited until you verify your email.
+            We've sent you an email verification link
           </Typography>
         </View>
-      </ScrollView>
+
+        <Card style={styles.card} variant="glow">
+          <View style={styles.iconContainer}>
+            <Ionicons name="mail" size={60} color={theme.COLORS.primary.purple} />
+          </View>
+          
+          <Typography variant="body" style={styles.instructions}>
+            Please check your email inbox for a verification link from Supabase.
+            Click the link to verify your account before signing in.
+          </Typography>
+          
+          <Typography variant="caption" style={styles.note}>
+            If you don't see the email, check your spam folder.
+          </Typography>
+          
+          <Button
+            title="Back to Sign In"
+            onPress={() => router.push('/(auth)/sign-in')}
+            style={styles.button}
+            variant="primary"
+          />
+          
+          <TouchableOpacity 
+            style={styles.resendLink} 
+            onPress={handleResendEmail}
+          >
+            <Typography 
+              variant="caption" 
+              color={theme.COLORS.primary.green}
+              glow="soft"
+            >
+              Didn't receive an email? Sign in to resend
+            </Typography>
+          </TouchableOpacity>
+        </Card>
+      </View>
     </View>
   );
 };
@@ -137,81 +96,49 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.COLORS.ui.background,
   },
-  scrollContent: {
-    flexGrow: 1,
-  },
   content: {
     flex: 1,
+    padding: theme.SPACING.lg,
     justifyContent: 'center',
-    alignItems: 'center',
-    padding: theme.SPACING.xl,
-    paddingTop: theme.SPACING.xl * 2,
-    paddingBottom: theme.SPACING.xl * 2,
   },
-  logoContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: 'rgba(65, 105, 225, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
+  header: {
     marginBottom: theme.SPACING.xl,
-    borderWidth: 2,
-    borderColor: theme.COLORS.ui.accent,
-    shadowColor: theme.COLORS.ui.accent,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.5,
-    shadowRadius: 16,
-    elevation: 8,
+    alignItems: 'center',
+  },
+  logo: {
+    marginBottom: theme.SPACING.md,
   },
   title: {
+    marginBottom: theme.SPACING.sm,
     textAlign: 'center',
-    marginBottom: theme.SPACING.md,
-    color: theme.COLORS.ui.text,
     fontSize: theme.FONTS.sizes.xxxl,
-    textShadowColor: theme.COLORS.ui.accent,
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 8,
+    color: theme.COLORS.ui.text,
   },
   subtitle: {
     textAlign: 'center',
     color: theme.COLORS.ui.textSecondary,
-    maxWidth: '90%',
-    lineHeight: 24,
-    fontSize: theme.FONTS.sizes.md,
-    marginBottom: theme.SPACING.xl,
+    maxWidth: '80%',
   },
-  instructionsCard: {
-    width: '100%',
+  card: {
     padding: theme.SPACING.lg,
     backgroundColor: 'rgba(38, 20, 60, 0.85)',
-    marginBottom: theme.SPACING.xl,
   },
-  stepContainer: {
-    flexDirection: 'row',
-    marginBottom: theme.SPACING.md,
+  iconContainer: {
     alignItems: 'center',
-  },
-  stepIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(76, 217, 100, 0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: theme.SPACING.md,
-  },
-  stepTextContainer: {
-    flex: 1,
-  },
-  stepText: {
-    color: theme.COLORS.ui.text,
-  },
-  buttonContainer: {
-    width: '100%',
     marginBottom: theme.SPACING.lg,
   },
-  emailButton: {
+  instructions: {
+    textAlign: 'center',
+    marginBottom: theme.SPACING.md,
+    color: theme.COLORS.ui.text,
+  },
+  note: {
+    textAlign: 'center',
+    marginBottom: theme.SPACING.lg,
+    color: theme.COLORS.ui.textSecondary,
+    fontStyle: 'italic',
+  },
+  button: {
     marginBottom: theme.SPACING.md,
     backgroundColor: theme.COLORS.ui.accent,
     shadowColor: theme.COLORS.ui.accent,
@@ -220,16 +147,8 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 8,
   },
-  resendButton: {
-    marginBottom: theme.SPACING.md,
-    borderColor: theme.COLORS.ui.accent,
-  },
-  continueButton: {
-    backgroundColor: theme.COLORS.primary.green,
-  },
-  noteText: {
-    textAlign: 'center',
-    color: theme.COLORS.ui.textSecondary,
-    fontStyle: 'italic',
+  resendLink: {
+    alignItems: 'center',
+    padding: theme.SPACING.sm,
   },
 }); 

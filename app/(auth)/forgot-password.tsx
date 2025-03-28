@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Typography, Input, Button, Card, VideoBackground, Logo } from '@/components/common';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,36 +7,22 @@ import { useAppState } from '@/contexts/AppStateContext';
 import theme from '@/constants/theme';
 import { LinearGradient } from 'expo-linear-gradient';
 
-export const SignUpScreen = () => {
+export default function ForgotPasswordScreen() {
   const router = useRouter();
-  const { signUp } = useAuth();
-  const { setLoading, showError } = useAppState();
+  const { forgotPassword } = useAuth();
+  const { setLoading, showSuccess } = useAppState();
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const handleSignUp = async () => {
-    if (!email.trim() || !password.trim() || !confirmPassword.trim()) {
-      showError('Please fill in all fields');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      showError('Passwords do not match');
-      return;
-    }
-
-    if (password.length < 6) {
-      showError('Password must be at least 6 characters');
+  const handleResetPassword = async () => {
+    if (!email.trim()) {
       return;
     }
 
     try {
       setLoading(true);
-      await signUp(email.trim(), password);
-      
-      // Navigate to verification instructions after signup
-      router.replace('/(auth)/verification-instructions');
+      await forgotPassword(email.trim());
+      setIsSubmitted(true);
     } catch (error) {
       // Error is already handled in AuthContext
     } finally {
@@ -62,57 +48,55 @@ export const SignUpScreen = () => {
         <View style={styles.header}>
           <Logo size="large" style={styles.logo} />
           <Typography variant="h1" style={styles.title} glow="strong">
-            Create Account
+            Reset Password
           </Typography>
           <Typography variant="body" style={styles.subtitle} glow="medium">
-            Start your journey to emotional wellness
+            {isSubmitted 
+              ? "Check your email for reset instructions"
+              : "Enter your email to receive password reset instructions"}
           </Typography>
         </View>
 
         <Card style={styles.card} variant="glow">
-          <Input
-            label="Email"
-            value={email}
-            onChangeText={setEmail}
-            placeholder="Enter your email"
-            autoCapitalize="none"
-            keyboardType="email-address"
-            style={styles.input}
-          />
+          {!isSubmitted ? (
+            <>
+              <Input
+                label="Email"
+                value={email}
+                onChangeText={setEmail}
+                placeholder="Enter your email"
+                autoCapitalize="none"
+                keyboardType="email-address"
+                style={styles.input}
+              />
 
-          <Input
-            label="Password"
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Create a password"
-            secureTextEntry
-            style={styles.input}
-          />
-
-          <Input
-            label="Confirm Password"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            placeholder="Confirm your password"
-            secureTextEntry
-            style={styles.input}
-          />
-
-          <Typography variant="caption" style={styles.verificationNote}>
-            You'll need to verify your email address before accessing all features.
-          </Typography>
-
-          <Button
-            title="Sign Up"
-            onPress={handleSignUp}
-            style={styles.button}
-            variant="primary"
-          />
+              <Button
+                title="Reset Password"
+                onPress={handleResetPassword}
+                style={styles.button}
+                variant="primary"
+              />
+            </>
+          ) : (
+            <View style={styles.successMessage}>
+              <Typography variant="body" style={styles.successText}>
+                If an account exists with that email, you'll receive instructions 
+                to reset your password shortly.
+              </Typography>
+              
+              <Button
+                title="Back to Sign In"
+                onPress={() => router.push('/(auth)/sign-in')}
+                style={styles.backButton}
+                variant="secondary"
+              />
+            </View>
+          )}
         </Card>
 
         <View style={styles.footer}>
           <Typography variant="body" color={theme.COLORS.ui.textSecondary}>
-            Already have an account?{' '}
+            Remember your password?{' '}
           </Typography>
           <TouchableOpacity onPress={() => router.push('/(auth)/sign-in')}>
             <Typography 
@@ -126,7 +110,7 @@ export const SignUpScreen = () => {
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -154,7 +138,7 @@ const styles = StyleSheet.create({
   subtitle: {
     textAlign: 'center',
     color: theme.COLORS.ui.textSecondary,
-    maxWidth: '80%',
+    maxWidth: '90%',
   },
   card: {
     padding: theme.SPACING.lg,
@@ -162,12 +146,6 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: theme.SPACING.md,
-  },
-  verificationNote: {
-    color: theme.COLORS.ui.textSecondary,
-    marginBottom: theme.SPACING.md,
-    textAlign: 'center',
-    fontStyle: 'italic',
   },
   button: {
     marginTop: theme.SPACING.md,
@@ -178,10 +156,21 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 8,
   },
+  backButton: {
+    backgroundColor: theme.COLORS.primary.purple,
+  },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: theme.SPACING.xl,
+  },
+  successMessage: {
+    padding: theme.SPACING.md,
+  },
+  successText: {
+    textAlign: 'center',
+    marginBottom: theme.SPACING.lg,
+    color: theme.COLORS.ui.text,
   },
 }); 
