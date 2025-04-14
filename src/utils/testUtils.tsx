@@ -240,7 +240,7 @@ export const mockData = {
       id: '1',
       name: 'Meditation Challenge',
       description: 'Meditate for 10 minutes daily for a week',
-      icon: 'meditation',
+      icon: 'leaf',
       duration_days: 7,
       points: 100,
     },

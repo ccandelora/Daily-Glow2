@@ -91,7 +91,79 @@ export const EmotionalCalendarView: React.FC<EmotionalCalendarViewProps> = ({ en
       };
     });
     
-    // Group by weeks for calendar display
+    // For week view, ensure we display complete weeks for proper calendar layout
+    if (timeFilter === 'week') {
+      // Find first day of the week containing startDate (Sunday)
+      const firstDayOfWeek = new Date(startDate);
+      const startDayOfWeek = startDate.getDay(); // 0 = Sunday, 1 = Monday, etc.
+      
+      // If start date is not Sunday, adjust to previous Sunday
+      if (startDayOfWeek !== 0) {
+        firstDayOfWeek.setDate(startDate.getDate() - startDayOfWeek);
+      }
+      
+      // Check if we need to add days before startDate 
+      if (firstDayOfWeek < startDate) {
+        // Add days before the start date to complete the week
+        const daysToAdd = [];
+        const tempDate = new Date(firstDayOfWeek);
+        
+        while (tempDate < startDate) {
+          const dateStr = tempDate.toISOString().split('T')[0];
+          
+          daysToAdd.push({
+            date: new Date(tempDate),
+            dayOfMonth: tempDate.getDate(),
+            dayOfWeek: tempDate.getDay(),
+            hasEntries: false,
+            dominantEmotion: null,
+            totalEntries: 0,
+          });
+          
+          tempDate.setDate(tempDate.getDate() + 1);
+        }
+        
+        // Add to beginning of calendarCells
+        calendarCells.unshift(...daysToAdd);
+      }
+      
+      // Find the last day of the week containing endDate (Saturday)
+      const lastDayOfWeek = new Date(endDate);
+      const endDayOfWeek = endDate.getDay();
+      
+      // If end date is not Saturday, adjust to next Saturday
+      if (endDayOfWeek !== 6) {
+        lastDayOfWeek.setDate(endDate.getDate() + (6 - endDayOfWeek));
+      }
+      
+      // Check if we need to add days after endDate
+      if (lastDayOfWeek > endDate) {
+        // Add days after the end date to complete the week
+        const daysToAdd = [];
+        const tempDate = new Date(endDate);
+        tempDate.setDate(tempDate.getDate() + 1);
+        
+        while (tempDate <= lastDayOfWeek) {
+          const dateStr = tempDate.toISOString().split('T')[0];
+          
+          daysToAdd.push({
+            date: new Date(tempDate),
+            dayOfMonth: tempDate.getDate(),
+            dayOfWeek: tempDate.getDay(),
+            hasEntries: false,
+            dominantEmotion: null,
+            totalEntries: 0,
+          });
+          
+          tempDate.setDate(tempDate.getDate() + 1);
+        }
+        
+        // Add to end of calendarCells
+        calendarCells.push(...daysToAdd);
+      }
+    }
+    
+    // Group by weeks for calendar display - now every week should start with Sunday
     const weeks: typeof calendarCells[] = [];
     let currentWeek: typeof calendarCells = [];
     
@@ -171,7 +243,10 @@ export const EmotionalCalendarView: React.FC<EmotionalCalendarViewProps> = ({ en
       ))}
       
       <Typography variant="caption" style={styles.dateRange}>
-        {calendarData.startDate.toLocaleDateString()} - {calendarData.endDate.toLocaleDateString()}
+        {timeFilter === 'week' && calendarData.weeks.length > 0 && calendarData.weeks[0].length > 0 ? 
+          `${calendarData.weeks[0][0].date.toLocaleDateString()} - ${calendarData.weeks[calendarData.weeks.length-1][calendarData.weeks[calendarData.weeks.length-1].length-1].date.toLocaleDateString()}` : 
+          `${calendarData.startDate.toLocaleDateString()} - ${calendarData.endDate.toLocaleDateString()}`
+        }
       </Typography>
     </View>
   );

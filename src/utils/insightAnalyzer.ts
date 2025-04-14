@@ -632,7 +632,7 @@ export const generateAIRecommendations = async (userData: UserAnalysisData): Pro
     allRecommendations.push({
       title: 'Happiness Spotlight',
       description: 'You\'ve been feeling happy often. Take note of the activities, people, or situations that contribute to this positive emotion.',
-      icon: 'emoticon-happy'
+      icon: 'face-smile'
     });
   }
   
@@ -641,7 +641,7 @@ export const generateAIRecommendations = async (userData: UserAnalysisData): Pro
     allRecommendations.push({
       title: 'Managing Sadness',
       description: 'Sadness has been prominent in your entries. Consider reaching out to someone you trust or engaging in activities that have lifted your mood in the past.',
-      icon: 'emoticon-sad'
+      icon: 'face-frown'
     });
   }
   
@@ -650,7 +650,7 @@ export const generateAIRecommendations = async (userData: UserAnalysisData): Pro
     allRecommendations.push({
       title: 'Anxiety Reduction',
       description: 'Your entries show patterns of anxiety. Try incorporating mindfulness or breathing exercises into your daily routine.',
-      icon: 'meditation'
+      icon: 'wind'
     });
   }
   
@@ -659,7 +659,7 @@ export const generateAIRecommendations = async (userData: UserAnalysisData): Pro
     allRecommendations.push({
       title: 'Stress Management',
       description: 'Stress has been a recurring emotion for you. Consider scheduling short breaks throughout your day or prioritizing relaxation techniques.',
-      icon: 'yoga'
+      icon: 'heart-pulse'
     });
   }
   
@@ -668,7 +668,7 @@ export const generateAIRecommendations = async (userData: UserAnalysisData): Pro
     allRecommendations.push({
       title: 'Nurture Your Peace',
       description: 'You\'ve frequently reported feeling peaceful. Continue prioritizing activities that foster this sense of calm and balance.',
-      icon: 'weather-sunny'
+      icon: 'sun'
     });
   }
   
@@ -679,7 +679,7 @@ export const generateAIRecommendations = async (userData: UserAnalysisData): Pro
     allRecommendations.push({
       title: 'Consistent Reflection',
       description: 'You\'ve been journaling consistently, which is great for emotional awareness. Keep up this positive habit!',
-      icon: 'calendar-check'
+      icon: 'calendar'
     });
   }
   
@@ -713,7 +713,7 @@ export const generateAIRecommendations = async (userData: UserAnalysisData): Pro
       allRecommendations.push({
         title: `${bestTimeFriendly} Positivity`,
         description: `Your ${bestTimeFriendly.toLowerCase()} entries show the most positive emotions. Consider scheduling important activities during this time of day.`,
-        icon: 'weather-sunny'
+        icon: 'sun'
       });
       
       const worstTimeFriendly = worstTime.toLowerCase().charAt(0) + worstTime.toLowerCase().slice(1);
@@ -733,22 +733,22 @@ export const generateAIRecommendations = async (userData: UserAnalysisData): Pro
     {
       title: 'Consistent Sleep Schedule',
       description: 'Maintaining a regular sleep schedule can help stabilize your mood and energy levels throughout the day.',
-      icon: 'sleep'
+      icon: 'moon'
     },
     {
       title: 'Physical Activity',
       description: 'Regular exercise is linked to improved mood and decreased stress and anxiety.',
-      icon: 'run'
+      icon: 'dumbbell'
     },
     {
       title: 'Mindful Moments',
       description: 'Taking brief mindfulness breaks throughout your day can help manage stress and improve emotional awareness.',
-      icon: 'meditation'
+      icon: 'leaf'
     },
     {
       title: 'Connect with Others',
       description: 'Social connections are vital for emotional well-being. Reach out to someone you care about today.',
-      icon: 'account-group'
+      icon: 'user'
     },
     {
       title: 'Gratitude Practice',

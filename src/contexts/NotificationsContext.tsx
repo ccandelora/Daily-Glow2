@@ -73,7 +73,9 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
   let achievements: any[] = [];
   let badges: any[] = [];
   
+  // Try to use AchievementsContext, but gracefully handle if not available
   try {
+    // Only access achievements context if we're within its provider
     const achievementsContext = useAchievements();
     if (achievementsContext) {
       achievements = achievementsContext.achievements;
@@ -82,6 +84,7 @@ export function NotificationsProvider({ children }: { children: React.ReactNode 
     console.log('AchievementsContext not available in NotificationsProvider');
   }
   
+  // Try to use BadgesContext, but gracefully handle if not available  
   try {
     const badgesContext = useBadges();
     if (badgesContext) {
