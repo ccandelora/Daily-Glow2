@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 5.9.1"
+    "version": ">=3.13.3",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -13,19 +14,47 @@
     "preview": {
       "distribution": "internal",
       "ios": {
-        "resourceClass": "m-medium"
+        "resourceClass": "m-medium",
+        "simulator": true
+      },
+      "android": {
+        "buildType": "apk"
       },
       "env": {
         "EXPO_NPM_FLAGS": "--legacy-peer-deps"
       }
     },
     "production": {
+      "autoIncrement": true,
       "ios": {
         "resourceClass": "m-medium"
+      }
+    },
+    "testflight": {
+      "autoIncrement": true,
+      "distribution": "store",
+      "releaseChannel": "testflight",
+      "ios": {
+        "enterpriseProvisioning": "adhoc",
+        "buildConfiguration": "Release",
+        "credentialsSource": "remote"
       }
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "appleId": "chris.candelora@gmail.com",
+        "ascAppId": "6490121428",
+        "appleTeamId": "994A76T72B"
+      }
+    },
+    "testflight": {
+      "ios": {
+        "appleId": "chris.candelora@gmail.com",
+        "ascAppId": "6490121428",
+        "appleTeamId": "994A76T72B"
+      }
+    }
   }
-} 
+}

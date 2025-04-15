@@ -18,12 +18,19 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.dailyglow.app",
+      "buildNumber": "1",
       "associatedDomains": [
         "applinks:daily-glow.app",
         "applinks:*.supabase.co"
       ],
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
+      },
+      "config": {
+        "usesNonExemptEncryption": false
       }
     },
     "android": {
@@ -32,6 +39,7 @@
         "backgroundColor": "#000000"
       },
       "package": "com.dailyglow.app",
+      "versionCode": 1,
       "intentFilters": [
         {
           "action": "VIEW",
