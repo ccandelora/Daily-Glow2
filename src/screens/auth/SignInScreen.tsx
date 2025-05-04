@@ -29,9 +29,9 @@ export const SignInScreen = () => {
       if (user && !isEmailVerified) {
         setShowVerificationPrompt(true);
       } else {
-        // TEMPORARY: Force navigation to onboarding
-        console.log('🔀 REDIRECTING to onboarding after login');
-        router.replace('/(onboarding)/index');
+        // Direct navigation to welcome screen instead of index to avoid routing issues
+        console.log('🔀 REDIRECTING to welcome screen after login');
+        router.replace('/(onboarding)/welcome');
       }
     } catch (error) {
       // Error is already handled in AuthContext

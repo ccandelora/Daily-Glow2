@@ -1,10 +1,24 @@
-import React from 'react';
-import { Redirect } from 'expo-router';
+import React, { useEffect } from 'react';
+import { Redirect, useRouter } from 'expo-router';
 import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 import theme from '@/constants/theme';
 
 export default function OnboardingIndex() {
-  // Immediately redirect to welcome screen
+  const router = useRouter();
+  
+  // Log the navigation attempt
+  useEffect(() => {
+    console.log('OnboardingIndex: Redirecting to welcome screen');
+    // Add a timeout as a fallback for immediate router.replace
+    const timer = setTimeout(() => {
+      console.log('OnboardingIndex: Fallback redirect triggered');
+      router.replace('/(onboarding)/welcome');
+    }, 500);
+    
+    return () => clearTimeout(timer);
+  }, [router]);
+  
+  // Immediate redirect to welcome screen
   return <Redirect href="/(onboarding)/welcome" />;
 }
 
