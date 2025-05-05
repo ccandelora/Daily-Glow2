@@ -21,6 +21,7 @@ interface AuthContextType extends AuthState {
   resetPassword: (newPassword: string) => Promise<void>;
   resendVerificationEmail: (email: string) => Promise<void>;
   refreshSession: () => Promise<{ isVerified: boolean; user: User | null }>;
+  deleteAccount: () => Promise<void>;
   // Development only method
   devManuallyVerifyEmail: (email: string) => Promise<boolean>;
 }
@@ -311,6 +312,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const deleteAccount = async () => {
+    try {
+      if (!state.user) {
+        throw new Error('User not authenticated');
+      }
+      
+      // Delete user data from various tables
+      // Delete from profiles
+      await supabase
+        .from('profiles')
+        .delete()
+        .eq('user_id', state.user.id);
+        
+      // Delete from user_badges
+      await supabase
+        .from('user_badges')
+        .delete()
+        .eq('user_id', state.user.id);
+        
+      // Delete from user_stats
+      await supabase
+        .from('user_stats')
+        .delete()
+        .eq('user_id', state.user.id);
+        
+      // Delete from check_ins
+      await supabase
+        .from('check_ins')
+        .delete()
+        .eq('user_id', state.user.id);
+        
+      // Delete user account
+      // We'll use session.user.delete() - this is supported on the client side
+      const { error } = await supabase.auth.updateUser({
+        data: { deleted: true }
+      });
+      
+      if (error) throw error;
+      
+      // Sign out after successful deletion
+      await signOut();
+      
+      showSuccess('Your account has been deleted successfully');
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      showError(error instanceof Error ? error.message : 'Failed to delete account');
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -322,6 +373,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         resetPassword,
         resendVerificationEmail,
         refreshSession,
+        deleteAccount,
         devManuallyVerifyEmail,
       }}
     >

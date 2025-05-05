@@ -18,7 +18,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.dailyglow.app",
-      "buildNumber": "1",
+      "buildNumber": "2",
       "associatedDomains": [
         "applinks:daily-glow.app",
         "applinks:*.supabase.co"
@@ -27,11 +27,15 @@
         "ITSAppUsesNonExemptEncryption": false,
         "UIBackgroundModes": [
           "remote-notification"
-        ]
+        ],
+        "NSPhotoLibraryUsageDescription": "This app uses the photo library to allow you to set a profile picture.",
+        "NSCameraUsageDescription": "This app uses the camera to allow you to take photos for your profile.",
+        "NSMicrophoneUsageDescription": "This app requires microphone access for video recording features."
       },
       "config": {
         "usesNonExemptEncryption": false
-      }
+      },
+      "icon": "./assets/icon-square.png"
     },
     "android": {
       "adaptiveIcon": {

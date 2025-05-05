@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, TextStyle, ViewStyle, StyleProp, Dimensions, Switch, Image, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity, TextInput, Alert, TextStyle, ViewStyle, StyleProp, Dimensions, Switch, Image, ActivityIndicator, Modal } from 'react-native';
 import { Typography, Card, Button, Header, VideoBackground, EmailVerificationBanner } from '@/components/common';
 import theme from '@/constants/theme';
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,12 +25,14 @@ type NotificationPreference = {
 };
 
 const ProfileScreen = () => {
-  const { user, signOut, isEmailVerified, resendVerificationEmail } = useAuth();
+  const { user, signOut, isEmailVerified, resendVerificationEmail, deleteAccount } = useAuth();
   const { userProfile, isLoading, updateProfile, syncUserPoints } = useProfile();
   const { showError, showSuccess } = useAppState();
   const [isEditing, setIsEditing] = useState(false);
   const [displayName, setDisplayName] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Map of goal IDs to display text and icons
   const goalMapping: Record<string, Goal> = {
@@ -155,6 +157,17 @@ const ProfileScreen = () => {
     return userProfile.notification_preferences
       .map(prefId => notificationMapping[prefId])
       .filter(pref => !!pref);
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      setIsDeleting(true);
+      await deleteAccount();
+      // The user will be signed out automatically in the deleteAccount function
+    } catch (error) {
+      setIsDeleting(false);
+      setShowDeleteConfirmation(false);
+    }
   };
 
   return (
@@ -313,6 +326,25 @@ const ProfileScreen = () => {
             </View>
           </Card>
 
+          {/* Account Settings Card */}
+          <Card style={styles.preferencesCard}>
+            <Typography variant="h3" style={styles.preferencesTitle}>
+              Account Settings
+            </Typography>
+            
+            <View style={styles.accountSettings}>
+              <TouchableOpacity 
+                style={styles.preferenceItem} 
+                onPress={() => setShowDeleteConfirmation(true)}
+              >
+                <View style={styles.prefIconContainer}>
+                  <Ionicons name="trash-outline" size={22} color="#FF5252" />
+                </View>
+                <Typography style={{color: '#FF5252', fontSize: 16}}>Delete Account</Typography>
+              </TouchableOpacity>
+            </View>
+          </Card>
+
           {/* About Card */}
           <Card style={styles.aboutCard}>
             <View style={styles.aboutHeader}>
@@ -348,6 +380,42 @@ const ProfileScreen = () => {
           </Card>
         </View>
       </ScrollView>
+      
+      {/* Delete Account Confirmation Modal */}
+      <Modal
+        visible={showDeleteConfirmation}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setShowDeleteConfirmation(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Typography variant="h3" style={styles.modalTitle}>Delete Account</Typography>
+            
+            <Typography style={styles.modalText}>
+              Are you sure you want to delete your account? This action cannot be undone and all your data will be permanently deleted.
+            </Typography>
+            
+            <View style={styles.modalActions}>
+              <Button 
+                title="Cancel" 
+                variant="outline" 
+                onPress={() => setShowDeleteConfirmation(false)} 
+                style={styles.cancelButton}
+                disabled={isDeleting}
+              />
+              <View style={{width: 10}} />
+              <Button 
+                title={isDeleting ? "Deleting..." : "Delete"} 
+                onPress={handleDeleteAccount} 
+                style={styles.deleteButton}
+                disabled={isDeleting}
+                loading={isDeleting}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -534,6 +602,42 @@ const styles = StyleSheet.create({
     height: 28,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  accountSettings: {
+    marginTop: theme.SPACING.xs,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: theme.SPACING.lg,
+  },
+  modalContent: {
+    backgroundColor: theme.COLORS.ui.card,
+    borderRadius: 8,
+    padding: theme.SPACING.lg,
+    width: '90%',
+    maxWidth: 400,
+  },
+  modalTitle: {
+    marginBottom: theme.SPACING.md,
+    textAlign: 'center',
+  },
+  modalText: {
+    marginBottom: theme.SPACING.lg,
+    textAlign: 'center',
+    color: theme.COLORS.ui.textSecondary,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+  },
+  cancelButton: {
+    flex: 1,
+  },
+  deleteButton: {
+    flex: 1,
   },
 });
 
